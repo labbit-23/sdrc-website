@@ -11,6 +11,7 @@ export const siteConfig = {
   whatsappNumber: env.whatsappNumber || "919849110001",
   internalNotifyNumber: env.internalNotifyNumber || env.whatsappNumber || "919849110001",
   bookingUrl: "/tests",
+  quickBookingUrl: "/quick-book",
   reportsUrl: env.reportsUrl || "http://120.138.8.37:9999/shivam/onlinereporting/index.jsp",
   feedbackUrl: "https://sdrc.in/feedback",
   social: {

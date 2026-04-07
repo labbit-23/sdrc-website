@@ -15,11 +15,12 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
-import { FiHome, FiShoppingCart } from "react-icons/fi";
+import { FiFilter, FiHome, FiShoppingCart, FiTrash2 } from "react-icons/fi";
 import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
 import healthPackagesData from "@/data/health-packages.json";
 import CartRequestPanel from "@/components/cart/CartRequestPanel";
 import { readCartItems, saveCartItems } from "@/lib/cart";
+import { sortPackages, sortPackageVariants } from "@/lib/packageOrdering";
 
 const PAGE_SIZE = 20;
 const QUERY_DEBOUNCE_MS = 350;
@@ -28,16 +29,16 @@ const clientCache = new Map();
 const defaultPagination = { page: 1, limit: PAGE_SIZE, total: 0, has_next: false };
 
 function formatInr(amount) {
-  if (amount == null || Number.isNaN(Number(amount))) return "INR 0";
-  return `INR ${Number(amount).toLocaleString("en-IN")}`;
+  if (amount == null || Number.isNaN(Number(amount))) return "INR 0.00";
+  return `INR ${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function flattenPackageVariants(data) {
   const out = [];
-  const packages = data?.packages || [];
+  const packages = sortPackages(data?.packages || []);
 
   packages.forEach((pkg, pIdx) => {
-    (pkg.variants || []).forEach((variant, vIdx) => {
+    sortPackageVariants(pkg.variants || []).forEach((variant, vIdx) => {
       out.push({
         id: `pkg_${pIdx}_${vIdx}`,
         item_type: "package",
@@ -59,7 +60,6 @@ function flattenPackageVariants(data) {
 export default function TestsPage() {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [sort, setSort] = useState("name_asc");
   const [page, setPage] = useState(1);
   const [mostCommonOnly, setMostCommonOnly] = useState(false);
   const [mostPopularOnly, setMostPopularOnly] = useState(true);
@@ -75,6 +75,8 @@ export default function TestsPage() {
   const [cartItems, setCartItems] = useState([]);
 
   const [openPackageIncludesId, setOpenPackageIncludesId] = useState(null);
+  const [showDepartmentFilters, setShowDepartmentFilters] = useState(false);
+  const [showFullTestsMobile, setShowFullTestsMobile] = useState(false);
 
   const packageVariants = useMemo(() => flattenPackageVariants(healthPackagesData), []);
   const filteredPackageVariants = useMemo(
@@ -92,6 +94,22 @@ export default function TestsPage() {
       variants
     }));
   }, [filteredPackageVariants]);
+  const mobileFeaturedPackages = useMemo(() => {
+    const byName = new Map();
+    filteredPackageVariants.forEach((pkg) => {
+      if (!byName.has(pkg.package_name)) byName.set(pkg.package_name, []);
+      byName.get(pkg.package_name).push(pkg);
+    });
+
+    return Array.from(byName.values())
+      .map((variants) => variants.find((v) => v.home_collection) || variants[0])
+      .filter(Boolean)
+      .slice(0, 8);
+  }, [filteredPackageVariants]);
+  const mobilePopularTests = useMemo(() => {
+    const source = items.filter((test) => test.is_most_popular);
+    return (source.length > 0 ? source : items).slice(0, 16);
+  }, [items]);
   const categoryFilters = useMemo(() => ["All", ...categories], [categories]);
 
   const subtotal = useMemo(
@@ -148,7 +166,6 @@ export default function TestsPage() {
         const params = new URLSearchParams({
           page: String(page),
           limit: String(PAGE_SIZE),
-          sort,
           most_common: String(mostCommonOnly),
           most_popular: String(mostPopularOnly),
           home_collection: String(homeCollectionFilter)
@@ -195,7 +212,7 @@ export default function TestsPage() {
       cancelled = true;
       if (controller) controller.abort();
     };
-  }, [page, debouncedQuery, activeCategory, sort, mostCommonOnly, mostPopularOnly, homeCollectionFilter]);
+  }, [page, debouncedQuery, activeCategory, mostCommonOnly, mostPopularOnly, homeCollectionFilter]);
 
   function isInCart(id) {
     return cartItems.some((item) => item.id === id);
@@ -337,7 +354,183 @@ export default function TestsPage() {
       ) : null}
 
       <Container maxW="1200px" py={10}>
-        <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} alignItems="start">
+        <VStack display={{ base: "flex", lg: "none" }} align="stretch" gap={4} mb={6}>
+          <Box className="soft-card no-hover-lift" p={4}>
+            <Heading size="sm" mb={3}>Search Tests or Packages</Heading>
+            <HStack>
+              <Input
+                bg="white"
+                placeholder="Search tests (TSH, HbA1c, Lipid...)"
+                value={query}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setPage(1);
+                  setQuery(value);
+                  if (value.trim().length > 0) {
+                    setActiveCategory("All");
+                    setMostCommonOnly(false);
+                    setMostPopularOnly(false);
+                    setHomeCollectionFilter(false);
+                  }
+                }}
+              />
+              <Button size="sm" variant="outline" onClick={clearSearchAndFilters}>Clear</Button>
+            </HStack>
+            <HStack mt={3} spacing={3} flexWrap="wrap">
+              <HStack spacing={2}>
+                <Box
+                  as="input"
+                  type="checkbox"
+                  checked={mostPopularOnly}
+                  onChange={(e) => {
+                    setPage(1);
+                    setMostPopularOnly(e.target.checked);
+                  }}
+                  style={{ accentColor: "#008f82" }}
+                />
+                <Text fontSize="xs" fontWeight="600">Most popular</Text>
+              </HStack>
+              <HStack spacing={2}>
+                <Box
+                  as="input"
+                  type="checkbox"
+                  checked={homeCollectionFilter}
+                  onChange={(e) => {
+                    setPage(1);
+                    setHomeCollectionFilter(e.target.checked);
+                  }}
+                  style={{ accentColor: "#008f82" }}
+                />
+                <Text fontSize="xs" fontWeight="600">Home collection</Text>
+              </HStack>
+            </HStack>
+          </Box>
+
+          <Box className="soft-card no-hover-lift" p={4}>
+            <HStack justify="space-between" mb={3}>
+              <Heading size="sm">Popular Checkups</Heading>
+              <Button as="a" href="/packages" size="xs" variant="outline">View all</Button>
+            </HStack>
+            <HStack gap={3} overflowX="auto" pb={1} align="stretch">
+              {mobileFeaturedPackages.map((pkg) => {
+                const added = isInCart(pkg.id);
+                return (
+                  <Box key={pkg.id} minW="220px" borderWidth="1px" borderColor="gray.100" borderRadius="xl" p={3} bg="white">
+                    <Text fontSize="xs" color="gray.500">{pkg.package_name}</Text>
+                    <Text fontWeight="800" color="gray.800" lineHeight="1.2" mt={0.5} noOfLines={2}>{pkg.name}</Text>
+                    <Text fontSize="xs" color="gray.600" mt={1} noOfLines={2}>{pkg.short_description}</Text>
+                    <HStack justify="space-between" mt={3}>
+                      <Text fontSize="sm" fontWeight="800" color="orange.500">{formatInr(pkg.price)}</Text>
+                      <IconButton
+                        size="sm"
+                        variant={added ? "solid" : "outline"}
+                        bg={added ? "teal.600" : "white"}
+                        color={added ? "white" : "teal.700"}
+                        borderColor={added ? "teal.600" : "teal.300"}
+                        aria-label={added ? "Added to cart" : "Add package to cart"}
+                        onClick={() => addPackageToCart(pkg)}
+                        isDisabled={added}
+                      >
+                        {added ? <BsCartCheck /> : <BsCartPlus />}
+                      </IconButton>
+                    </HStack>
+                  </Box>
+                );
+              })}
+            </HStack>
+          </Box>
+
+          <Box className="soft-card no-hover-lift" p={4}>
+            <Heading size="sm" mb={3}>Most Booked Tests</Heading>
+            {loading ? (
+              <HStack py={6} justify="center">
+                <Spinner color="teal.500" />
+                <Text fontSize="sm" color="gray.600">Loading tests...</Text>
+              </HStack>
+            ) : (
+              <HStack gap={3} overflowX="auto" pb={1} align="stretch">
+                {mobilePopularTests.map((test) => {
+                  const added = isInCart(test.id);
+                  return (
+                    <Box key={test.id} minW="230px" borderWidth="1px" borderColor="gray.100" borderRadius="xl" p={3} bg="white">
+                      <Text fontSize="xs" color="gray.500">
+                        {test.internal_code || "No code"} {test.department ? `• ${test.department}` : ""}
+                      </Text>
+                      <Text fontWeight="800" color="gray.800" lineHeight="1.2" mt={0.5} noOfLines={2}>{test.name}</Text>
+                      <HStack justify="space-between" mt={3}>
+                        <Text fontSize="sm" fontWeight="800" color="orange.500">{test.price == null ? "Price N/A" : formatInr(test.price)}</Text>
+                        <IconButton
+                          size="sm"
+                          variant={added ? "solid" : "outline"}
+                          bg={added ? "teal.600" : "white"}
+                          color={added ? "white" : "teal.700"}
+                          borderColor={added ? "teal.600" : "teal.300"}
+                          aria-label={added ? "Added to cart" : "Add test to cart"}
+                          onClick={() => addTestToCart(test)}
+                          isDisabled={added}
+                        >
+                          {added ? <BsCartCheck /> : <BsCartPlus />}
+                        </IconButton>
+                      </HStack>
+                    </Box>
+                  );
+                })}
+              </HStack>
+            )}
+            <Button mt={3} size="sm" variant="outline" onClick={() => setShowFullTestsMobile((v) => !v)}>
+              {showFullTestsMobile ? "Hide full list" : "See full test list"}
+            </Button>
+          </Box>
+
+          {showFullTestsMobile ? (
+            <Box className="soft-card no-hover-lift" p={4}>
+              <Heading size="sm" mb={3}>All Matching Tests</Heading>
+              <VStack align="stretch" gap={2}>
+                {items.map((test) => {
+                  const added = isInCart(test.id);
+                  return (
+                    <Box key={test.id} p={2.5} borderWidth="1px" borderColor="gray.100" borderRadius="md">
+                      <HStack justify="space-between" gap={2} align="start">
+                        <Box>
+                          <Text fontSize="xs" color="gray.500">{test.internal_code || "No code"} {test.department ? `• ${test.department}` : ""}</Text>
+                          <Text fontSize="sm" fontWeight="700" color="gray.800">{test.name}</Text>
+                        </Box>
+                        <VStack align="end" gap={1}>
+                          <Text fontSize="xs" fontWeight="700" color="orange.500">{test.price == null ? "Price N/A" : formatInr(test.price)}</Text>
+                          <IconButton
+                            size="xs"
+                            variant={added ? "solid" : "outline"}
+                            bg={added ? "teal.600" : "white"}
+                            color={added ? "white" : "teal.700"}
+                            borderColor={added ? "teal.600" : "teal.300"}
+                            aria-label={added ? "Added to cart" : "Add test to cart"}
+                            onClick={() => addTestToCart(test)}
+                            isDisabled={added}
+                          >
+                            {added ? <BsCartCheck /> : <BsCartPlus />}
+                          </IconButton>
+                        </VStack>
+                      </HStack>
+                    </Box>
+                  );
+                })}
+              </VStack>
+              <HStack justify="space-between" mt={4}>
+                <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.max(1, p - 1))} isDisabled={loading || page <= 1}>
+                  Previous
+                </Button>
+                <Text fontSize="xs" color="gray.600">
+                  Page {page} of {Math.max(1, Math.ceil((pagination.total || 0) / (pagination.limit || PAGE_SIZE)))}
+                </Text>
+                <Button size="sm" variant="outline" onClick={() => setPage((p) => p + 1)} isDisabled={loading || !pagination.has_next}>
+                  Next
+                </Button>
+              </HStack>
+            </Box>
+          ) : null}
+        </VStack>
+
+        <Grid display={{ base: "none", lg: "grid" }} templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} alignItems="start">
           <Box className="soft-card no-hover-lift" p={5}>
             <Heading size="md" mb={2}>
               Find Your Tests
@@ -369,26 +562,9 @@ export default function TestsPage() {
                 </Button>
               </HStack>
 
-              <Box
-                as="select"
-                borderWidth="1px"
-                borderColor="gray.200"
-                borderRadius="md"
-                px={3}
-                py={2}
-                fontSize="sm"
-                bg="white"
-                width={{ base: "100%", md: "220px" }}
-                value={sort}
-                onChange={(e) => {
-                  setPage(1);
-                  setSort(e.target.value);
-                }}
-              >
-                <option value="name_asc">Name (A-Z)</option>
-                <option value="price_asc">Price (Low to High)</option>
-                <option value="price_desc">Price (High to Low)</option>
-              </Box>
+              <Button size="sm" variant="outline" onClick={() => setShowDepartmentFilters((v) => !v)} leftIcon={<FiFilter />}>
+                {showDepartmentFilters ? "Hide Departments" : "Show Departments"}
+              </Button>
             </Grid>
 
             <HStack mt={3} spacing={2} flexWrap="wrap">
@@ -440,20 +616,22 @@ export default function TestsPage() {
                 </Text>
               </HStack>
 
-              {categoryFilters.map((cat) => (
-                <Button
-                  key={cat}
-                  size="xs"
-                  variant={activeCategory === cat ? "solid" : "outline"}
-                  onClick={() => {
-                    setPage(1);
-                    setQuery("");
-                    setActiveCategory(cat);
-                  }}
-                >
-                  {cat}
-                </Button>
-              ))}
+              {showDepartmentFilters ? (
+                categoryFilters.map((cat) => (
+                  <Button
+                    key={cat}
+                    size="xs"
+                    variant={activeCategory === cat ? "solid" : "outline"}
+                    onClick={() => {
+                      setPage(1);
+                      setQuery("");
+                      setActiveCategory(cat);
+                    }}
+                  >
+                    {cat}
+                  </Button>
+                ))
+              ) : null}
             </HStack>
 
             <Box mt={4}>
@@ -496,7 +674,7 @@ export default function TestsPage() {
                                 </Text>
                               ) : null}
                               {test.is_most_popular ? (
-                                <Text fontSize="10px" px={2} py={0.5} borderRadius="full" bg="orange.50" color="orange.600" fontWeight="700">
+                                <Text fontSize="10px" px={2} py={0.5} borderRadius="full" bg="teal.100" color="teal.700" fontWeight="700">
                                   Most Popular
                                 </Text>
                               ) : null}
@@ -671,7 +849,7 @@ export default function TestsPage() {
             <VStack align="stretch" gap={2}>
               {cartItems.map((item) => (
                 <Box key={item.id} borderWidth="1px" borderColor="gray.100" borderRadius="md" p={3}>
-                  <HStack justify="space-between" align="start" gap={2}>
+                  <HStack justify="space-between" align="start" gap={2} flexWrap="wrap">
                     <Box>
                       <HStack spacing={2} mb={1}>
                         <Badge colorPalette={item.item_type === "package" ? "orange" : "teal"} variant="subtle">
@@ -693,13 +871,18 @@ export default function TestsPage() {
                       <Text fontSize="sm" fontWeight="700" color="gray.800">{item.name}</Text>
                       {item.internal_code ? <Text fontSize="xs" color="gray.500">{item.internal_code}</Text> : null}
                       {item.tests_count ? <Text fontSize="xs" color="gray.500">Includes {item.tests_count} tests</Text> : null}
-                      <Text fontSize="sm" fontWeight="700" color="orange.500" mt={1}>{formatInr(item.price)}</Text>
                     </Box>
-                    <Button size="xs" variant="ghost" color="red.600" onClick={() => removeFromCart(item.id)}>Remove</Button>
+                    <VStack align={{ base: "start", md: "end" }} gap={0.5} minW="80px" ml={{ base: "0", md: "auto" }}>
+                      <Text fontSize="10px" color="gray.500" fontWeight="700">INR</Text>
+                      <Text fontSize="sm" fontWeight="700" color="orange.500">{Number(item.price || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+                      <IconButton size="xs" variant="ghost" color="gray.500" aria-label="Remove item" onClick={() => removeFromCart(item.id)}>
+                        <FiTrash2 />
+                      </IconButton>
+                    </VStack>
                   </HStack>
                 </Box>
               ))}
-              <Button size="xs" variant="outline" alignSelf="flex-end" onClick={clearCart}>Clear cart</Button>
+              <Button size="xs" variant="outline" color="gray.700" borderColor="gray.300" alignSelf="flex-end" onClick={clearCart}>Clear cart</Button>
             </VStack>
           )}
 

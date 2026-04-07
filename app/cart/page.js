@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Badge, Box, Button, Container, Heading, HStack, Text, VStack } from "@chakra-ui/react";
+import { Badge, Box, Button, Container, Heading, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
+import { FiTrash2 } from "react-icons/fi";
 import CartRequestPanel from "@/components/cart/CartRequestPanel";
 import { readCartItems, saveCartItems } from "@/lib/cart";
 
 function formatInr(amount) {
-  if (amount == null || Number.isNaN(Number(amount))) return "INR 0";
-  return `INR ${Number(amount).toLocaleString("en-IN")}`;
+  if (amount == null || Number.isNaN(Number(amount))) return "INR 0.00";
+  return `INR ${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export default function CartPage() {
@@ -65,7 +66,7 @@ export default function CartPage() {
               <VStack align="stretch" gap={2}>
                 {items.map((item) => (
                   <Box key={item.id} borderWidth="1px" borderColor="gray.100" borderRadius="md" p={3}>
-                    <HStack justify="space-between" align="start" gap={2}>
+                    <HStack justify="space-between" align="start" gap={2} flexWrap="wrap">
                       <Box>
                         <HStack spacing={2} mb={1}>
                           <Badge colorPalette={item.item_type === "package" ? "orange" : "teal"} variant="subtle">
@@ -77,21 +78,21 @@ export default function CartPage() {
                         {item.internal_code ? <Text fontSize="xs" color="gray.500">{item.internal_code}</Text> : null}
                         {item.tests_count ? <Text fontSize="xs" color="gray.500">Includes {item.tests_count} tests</Text> : null}
                       </Box>
-                      <VStack align="end" gap={1}>
+                      <VStack align={{ base: "start", md: "end" }} gap={1} minW="96px" ml={{ base: "0", md: "auto" }}>
                         <Text fontWeight="700" color="orange.500">{formatInr(item.price)}</Text>
-                        <Button size="xs" variant="ghost" color="red.600" onClick={() => removeItem(item.id)}>
-                          Remove
-                        </Button>
+                        <IconButton size="xs" variant="ghost" color="gray.500" aria-label="Remove item" onClick={() => removeItem(item.id)}>
+                          <FiTrash2 />
+                        </IconButton>
                       </VStack>
                     </HStack>
                   </Box>
                 ))}
               </VStack>
 
-              <HStack mt={5} spacing={2}>
-                <Button as={Link} href="/tests">Continue Adding</Button>
-                <Button as={Link} href="/packages" variant="outline">Browse Packages</Button>
-                <Button variant="ghost" color="red.600" onClick={() => setItems([])}>Clear Cart</Button>
+              <HStack mt={5} spacing={2} flexWrap="wrap">
+                <Button as={Link} href="/tests" size="sm">Continue Adding</Button>
+                <Button as={Link} href="/packages" variant="outline" size="sm">Browse Packages</Button>
+                <Button variant="outline" color="gray.700" borderColor="gray.300" size="sm" onClick={() => setItems([])}>Clear Cart</Button>
               </HStack>
 
               <CartRequestPanel

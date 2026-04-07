@@ -22,6 +22,7 @@ import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
 import packagesData from "@/data/health-packages.json";
 import { siteConfig } from "@/data/siteConfig";
 import { readCartItems, saveCartItems } from "@/lib/cart";
+import { sortPackages, sortPackageVariants } from "@/lib/packageOrdering";
 
 function getVariantKey(pkgName, variantName) {
   return String(pkgName) + "::" + String(variantName);
@@ -97,9 +98,13 @@ export default function PackagesExplorer() {
 
   const filteredPackages = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (q.length === 0) return packagesData.packages;
+    const orderedPackages = sortPackages(packagesData.packages || []).map((pkg) => ({
+      ...pkg,
+      variants: sortPackageVariants(pkg.variants || [])
+    }));
+    if (q.length === 0) return orderedPackages;
 
-    return packagesData.packages
+    return orderedPackages
       .map((pkg) => {
         const variants = (pkg.variants || []).filter((v) => {
           const blob = [pkg.name, pkg.description, v.name, v.description, ...(v.tests || [])]
@@ -223,7 +228,7 @@ export default function PackagesExplorer() {
     if (typeof window === "undefined" || !window.html2canvas || !node) return null;
     return window.html2canvas(node, {
       backgroundColor: "#ffffff",
-      scale: 2.2,
+      scale: 2.8,
       useCORS: true,
       width: node.scrollWidth,
       height: node.scrollHeight,
@@ -270,7 +275,7 @@ export default function PackagesExplorer() {
     const pageLink = `${window.location.origin}${variantShareUrl(pkgName)}`;
     const shareText = `${pkgName} - ${variant.name}\n${pageLink}`;
     const captureId = getVariantCaptureId(pkgName, variant.name);
-    const node = document.getElementById(captureId) || document.getElementById("package-detail-capture");
+    const node = document.getElementById("package-detail-capture") || document.getElementById(captureId);
 
     try {
       const canvas = await nodeToCanvas(node);
@@ -297,7 +302,7 @@ export default function PackagesExplorer() {
 
   const handleDownload = async (pkgName, variant) => {
     const captureId = getVariantCaptureId(pkgName, variant.name);
-    const node = document.getElementById(captureId) || document.getElementById("package-detail-capture");
+    const node = document.getElementById("package-detail-capture") || document.getElementById(captureId);
     const canvas = await nodeToCanvas(node);
     if (!canvas) {
       showToast("Image export unavailable");
@@ -320,8 +325,8 @@ export default function PackagesExplorer() {
     wrapper.style.left = "-100000px";
     wrapper.style.top = "0";
     wrapper.style.background = "#ffffff";
-    wrapper.style.padding = "24px";
-    wrapper.style.width = `${Math.max(source.scrollWidth, 1120)}px`;
+    wrapper.style.padding = "28px";
+    wrapper.style.width = `${Math.max(source.scrollWidth, 1400)}px`;
 
     const clone = source.cloneNode(true);
     clone.style.overflow = "visible";
@@ -329,7 +334,7 @@ export default function PackagesExplorer() {
     clone.style.width = "100%";
     clone.querySelectorAll("th, td, div, span, p").forEach((el) => {
       const current = Number.parseFloat(window.getComputedStyle(el).fontSize || "0");
-      if (!Number.isNaN(current) && current < 16) el.style.fontSize = "16px";
+      if (!Number.isNaN(current) && current < 18) el.style.fontSize = "18px";
     });
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
@@ -338,7 +343,7 @@ export default function PackagesExplorer() {
       const width = wrapper.scrollWidth;
       const height = wrapper.scrollHeight;
       const maxDim = 14000;
-      const scale = Math.min(2.4, maxDim / Math.max(width, height));
+      const scale = Math.min(3, maxDim / Math.max(width, height));
 
       const canvas = await window.html2canvas(wrapper, {
         backgroundColor: "#ffffff",
@@ -588,6 +593,7 @@ export default function PackagesExplorer() {
           onClick={() => setActiveVariant(null)}
         >
           <Box
+            id="package-detail-capture"
             className="soft-card"
             maxW={{ base: "100%", md: "680px" }}
             w="full"
@@ -744,7 +750,7 @@ export default function PackagesExplorer() {
 
             <Box id="compare-capture">
               <HStack spacing={3} mb={3}>
-                <Image src="/assets/sdrc-logo.png" alt="SDRC" width={94} height={28} />
+                <img src="/assets/sdrc-logo.png" alt="SDRC" width="110" height="32" />
                 <Text fontWeight="700" color="gray.700">Package Comparison</Text>
               </HStack>
               <Box overflowX="auto">

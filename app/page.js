@@ -165,9 +165,9 @@ export default function HomePage() {
                     Download Reports
                   </Text>
                 </Box>
-                <Box as={Link} href="/tests" className="soft-card no-hover-lift" p={3}>
-                  <Text fontSize="xs" color="gray.500">Ready to place request?</Text>
-                  <Text fontSize="sm" color="teal.700" fontWeight="700">Book A Test</Text>
+                <Box as={Link} href={siteConfig.quickBookingUrl} className="soft-card no-hover-lift" p={3}>
+                  <Text fontSize="xs" color="gray.500">Need only date and time slot booking?</Text>
+                  <Text fontSize="sm" color="teal.700" fontWeight="700">Home Visit Request</Text>
                 </Box>
               </SimpleGrid>
 

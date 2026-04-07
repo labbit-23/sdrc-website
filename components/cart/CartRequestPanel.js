@@ -12,8 +12,8 @@ function normalizePhone(rawPhone) {
 }
 
 function formatInr(amount) {
-  if (amount == null || Number.isNaN(Number(amount))) return "INR 0";
-  return `INR ${Number(amount).toLocaleString("en-IN")}`;
+  if (amount == null || Number.isNaN(Number(amount))) return "INR 0.00";
+  return `INR ${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyItems, source = "cart" }) {
