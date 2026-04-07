@@ -1,5 +1,4 @@
 const env = {
-  bookingUrl: process.env.NEXT_PUBLIC_BOOKING_URL,
   reportsUrl: process.env.NEXT_PUBLIC_REPORTS_URL,
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER,
   internalNotifyNumber: process.env.NEXT_PUBLIC_INTERNAL_NOTIFY_WHATSAPP
@@ -11,7 +10,7 @@ export const siteConfig = {
   phoneTel: "+914066004200",
   whatsappNumber: env.whatsappNumber || "919849110001",
   internalNotifyNumber: env.internalNotifyNumber || env.whatsappNumber || "919849110001",
-  bookingUrl: env.bookingUrl || "https://lab.sdrc.in/?quickbook=true",
+  bookingUrl: "/tests",
   reportsUrl: env.reportsUrl || "http://120.138.8.37:9999/shivam/onlinereporting/index.jsp",
   feedbackUrl: "https://sdrc.in/feedback",
   social: {
@@ -46,7 +45,7 @@ export const navItems = [
   { href: "/services", label: "Services" },
   { href: "/packages", label: "Packages" },
   { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
   { href: "/accreditation", label: "Accreditation" },
-  { href: "/physiotherapy", label: "Physiotherapy", flag: "physiotherapyEnabled" }
+  { href: "/physiotherapy", label: "Physiotherapy", flag: "physiotherapyEnabled" },
+  { href: "/contact", label: "Contact" }
 ];

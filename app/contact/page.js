@@ -215,6 +215,39 @@ export default function ContactPage() {
               Centre timings and available tests may vary by location. Please call or WhatsApp before visiting.
             </Text>
           </Box>
+
+          <Box>
+            <Heading size="xl" mb={4}>
+              WhatsApp and Reports Guide
+            </Heading>
+            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
+              <Box className="soft-card" p={6}>
+                <Text fontWeight="700" mb={2}>Test booking help (human support)</Text>
+                <Text fontSize="sm" color="gray.700">
+                  For package or test selection help, chat with our team on WhatsApp.
+                </Text>
+                <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} target="_blank" mt={3}>
+                  Chat on WhatsApp
+                </Button>
+              </Box>
+              <Box className="soft-card" p={6}>
+                <Text fontWeight="700" mb={2}>Download reports (bot-assisted)</Text>
+                <Text fontSize="sm" color="gray.700">
+                  Use your registered mobile number to retrieve reports through our report flow.
+                </Text>
+                <Button
+                  as={Link}
+                  href={siteConfig.reportsUrl}
+                  target="_blank"
+                  variant="outline"
+                  mt={3}
+                  title="Get our bot to send your reports. Chat using your registered mobile number."
+                >
+                  Download Reports
+                </Button>
+              </Box>
+            </Grid>
+          </Box>
         </VStack>
       </Container>
     </>

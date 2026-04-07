@@ -17,8 +17,8 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
-import { FiDownload, FiHome, FiShare2, FiShoppingCart, FiX } from "react-icons/fi";
-import { BsBuilding } from "react-icons/bs";
+import { FiDownload, FiHome, FiShare2, FiX } from "react-icons/fi";
+import { BsBuilding, BsCartPlus } from "react-icons/bs";
 import packagesData from "@/data/health-packages.json";
 import { siteConfig } from "@/data/siteConfig";
 import { readCartItems, saveCartItems } from "@/lib/cart";
@@ -36,6 +36,19 @@ function slugify(value) {
 
 function variantShareUrl(pkgName) {
   return "/packages#" + slugify(pkgName);
+}
+
+function buildPackageEnquiryUrl(pkgName, variantName, price) {
+  const message = [
+    "New package enquiry from website",
+    `Package: ${pkgName}`,
+    `Variant: ${variantName}`,
+    price != null ? `Price: INR ${Number(price).toLocaleString("en-IN")}` : null,
+    "Source: /packages"
+  ]
+    .filter(Boolean)
+    .join("\n");
+  return `https://wa.me/${siteConfig.internalNotifyNumber}?text=${encodeURIComponent(message)}`;
 }
 
 function downloadTextFile(filename, content) {
@@ -70,7 +83,6 @@ export default function PackagesExplorer() {
   const [showCompare, setShowCompare] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isMobile, setIsMobile] = useState(false);
-  const [openIncludesKey, setOpenIncludesKey] = useState(null);
 
   useEffect(() => {
     const update = () => setIsMobile(window.innerWidth < 768);
@@ -79,15 +91,6 @@ export default function PackagesExplorer() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  useEffect(() => {
-    const onDocClick = (event) => {
-      const target = event.target;
-      if (target?.closest?.("[data-includes-trigger]") || target?.closest?.("[data-includes-popup]")) return;
-      setOpenIncludesKey(null);
-    };
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, []);
 
   const filteredPackages = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -343,7 +346,9 @@ export default function PackagesExplorer() {
                 const key = getVariantKey(pkg.name, variant.name);
                 const checked = Boolean(selected[key]);
                 const description = variant.description || pkg.description;
-                const includesOpen = openIncludesKey === key;
+                const keyInclusions = Array.isArray(variant.key_inclusions) && variant.key_inclusions.length > 0
+                  ? variant.key_inclusions
+                  : (variant.tests || []).slice(0, 4);
 
                 return (
                   <Box key={key} className="soft-card no-hover-lift" p={4} position="relative" overflow="hidden" display="flex" flexDirection="column">
@@ -384,90 +389,71 @@ export default function PackagesExplorer() {
                       </HStack>
                     </HStack>
 
-                    <HStack mt={3} justify="space-between" align="center">
-                      <Box
-                        as="button"
-                        type="button"
-                        data-includes-trigger
-                        onClick={() => setOpenIncludesKey((v) => (v === key ? null : key))}
-                        fontSize="xs"
-                        fontWeight="700"
-                        color="teal.700"
-                        textDecoration="underline"
-                      >
-                        Includes {(variant.tests || []).length} tests
-                      </Box>
-                    </HStack>
+                    <Box mt={3} bg="gray.50" borderRadius="md" p={2}>
+                      <Text fontSize="xs" color="gray.500" mb={1}>
+                        Key inclusions
+                      </Text>
+                      {keyInclusions.map((test) => (
+                        <Text key={test} fontSize="xs" color="gray.600">
+                          • {test}
+                        </Text>
+                      ))}
+                      {(variant.tests || []).length > 4 ? (
+                        <Text fontSize="xs" color="gray.500" mt={1}>
+                          + {(variant.tests || []).length - 4} more tests
+                        </Text>
+                      ) : null}
+                    </Box>
 
-                    <HStack mt={4} justify="space-between" align="center">
-                      <HStack spacing={2}>
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => toggleCompare(pkg.name, variant)}
-                          style={{ accentColor: "#008f82" }}
-                        />
-                        <Text fontSize="xs" color="gray.600">Compare</Text>
+                    <Box mt="auto">
+                      <HStack mt={4} justify="space-between" align="center">
+                        <HStack spacing={2}>
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleCompare(pkg.name, variant)}
+                            style={{ accentColor: "#008f82" }}
+                          />
+                          <Text fontSize="xs" color="gray.600">Compare</Text>
+                        </HStack>
+                        <Box
+                          as="button"
+                          type="button"
+                          onClick={() => setActiveVariant({ pkgName: pkg.name, variant, description })}
+                          fontSize="xs"
+                          fontWeight="700"
+                          color="teal.700"
+                          textDecoration="underline"
+                        >
+                          View included tests
+                        </Box>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          bg="white"
+                          color="teal.700"
+                          borderColor="teal.300"
+                          onClick={() => addVariantToCart(pkg, variant)}
+                          px={0}
+                          minW="38px"
+                        >
+                          <BsCartPlus />
+                        </Button>
                       </HStack>
-                      <Box
-                        as="button"
-                        type="button"
-                        onClick={() => setActiveVariant({ pkgName: pkg.name, variant, description })}
-                        fontSize="xs"
-                        fontWeight="700"
-                        color="teal.700"
-                        textDecoration="underline"
-                      >
-                        View included tests
-                      </Box>
-                      <IconButton
-                        size="sm"
-                        bg="teal.600"
-                        color="white"
-                        _hover={{ bg: "teal.700" }}
-                        aria-label="Add package to cart"
-                        icon={<FiShoppingCart />}
-                        onClick={() => addVariantToCart(pkg, variant)}
-                      />
-                    </HStack>
 
-                    {includesOpen ? (
-                      <Box
-                        data-includes-popup
-                        position="absolute"
-                        zIndex={8}
-                        right={3}
-                        top="124px"
-                        w={{ base: "calc(100% - 24px)", md: "320px" }}
-                        maxH="220px"
-                        overflowY="auto"
-                        bg="white"
-                        borderWidth="1px"
-                        borderColor="gray.200"
-                        borderRadius="md"
-                        p={3}
-                        boxShadow="lg"
-                      >
-                        {(variant.tests || []).map((test) => (
-                          <Text key={test} fontSize="xs" color="gray.700" lineHeight="1.35">
-                            • {test}
-                          </Text>
-                        ))}
-                      </Box>
-                    ) : null}
-
-                    <Box flex="1" />
                     <Button
                       as={Link}
-                      href={siteConfig.bookingUrl}
+                      href={buildPackageEnquiryUrl(pkg.name, variant.name, variant.price)}
                       mt={3}
                       size="sm"
                       width="full"
                       target="_blank"
+                      rel="noopener noreferrer"
                       textAlign="center"
                     >
                       Enquire / Book
                     </Button>
+                    </Box>
                   </Box>
                 );
               })}
@@ -543,25 +529,28 @@ export default function PackagesExplorer() {
                     size="sm"
                     variant="outline"
                     aria-label="Share package"
-                    icon={<FiShare2 />}
                     onClick={() => handleShare(activeVariant.pkgName, activeVariant.variant)}
-                  />
+                  >
+                    <FiShare2 />
+                  </IconButton>
                 ) : (
                   <IconButton
                     size="sm"
                     variant="outline"
                     aria-label="Download package summary"
-                    icon={<FiDownload />}
                     onClick={() => handleDownload(activeVariant.pkgName, activeVariant.variant, activeVariant.description)}
-                  />
+                  >
+                    <FiDownload />
+                  </IconButton>
                 )}
                 <IconButton
                   size="sm"
                   variant="outline"
                   aria-label="Close modal"
-                  icon={<FiX />}
                   onClick={() => setActiveVariant(null)}
-                />
+                >
+                  <FiX />
+                </IconButton>
               </HStack>
             </Flex>
 
@@ -646,16 +635,18 @@ export default function PackagesExplorer() {
                   size="sm"
                   variant="outline"
                   aria-label="Download comparison JPG"
-                  icon={<FiDownload />}
                   onClick={downloadCompareImage}
-                />
+                >
+                  <FiDownload />
+                </IconButton>
                 <IconButton
                   size="sm"
                   variant="outline"
                   aria-label="Close comparison modal"
-                  icon={<FiX />}
                   onClick={() => setShowCompare(false)}
-                />
+                >
+                  <FiX />
+                </IconButton>
               </HStack>
             </Flex>
 

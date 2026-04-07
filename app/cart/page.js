@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Badge, Box, Button, Container, Heading, HStack, Text, VStack } from "@chakra-ui/react";
+import CartRequestPanel from "@/components/cart/CartRequestPanel";
 import { readCartItems, saveCartItems } from "@/lib/cart";
 
 function formatInr(amount) {
@@ -12,21 +13,26 @@ function formatInr(amount) {
 
 export default function CartPage() {
   const [items, setItems] = useState([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     setItems(readCartItems());
+    setLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!loaded) return;
     saveCartItems(items);
-  }, [items]);
+  }, [items, loaded]);
 
   const subtotal = useMemo(
     () => items.reduce((acc, item) => acc + (Number(item.price) || 0), 0),
     [items]
   );
-  const collectionFee = 0;
-  const total = subtotal + collectionFee;
+  const hasCenterOnlyItems = useMemo(
+    () => items.some((item) => item.home_collection === false),
+    [items]
+  );
 
   function removeItem(itemId) {
     setItems((prev) => prev.filter((item) => item.id !== itemId));
@@ -82,23 +88,18 @@ export default function CartPage() {
                 ))}
               </VStack>
 
-              <HStack mt={4} justify="space-between" pt={4} borderTop="1px solid" borderColor="gray.100">
-                <Text color="gray.600">Subtotal</Text>
-                <Text color="gray.600">{formatInr(subtotal)}</Text>
-              </HStack>
-              <HStack mt={1} justify="space-between">
-                <Text color="gray.600">Collection Fee</Text>
-                <Text color="gray.600">{formatInr(collectionFee)}</Text>
-              </HStack>
-              <HStack mt={2} justify="space-between">
-                <Text fontWeight="700">Total</Text>
-                <Text fontWeight="700" color="teal.700">{formatInr(total)}</Text>
-              </HStack>
-
               <HStack mt={5} spacing={2}>
                 <Button as={Link} href="/tests">Continue Adding</Button>
-                <Button variant="outline" onClick={() => setItems([])}>Clear Cart</Button>
+                <Button as={Link} href="/packages" variant="outline">Browse Packages</Button>
+                <Button variant="ghost" color="red.600" onClick={() => setItems([])}>Clear Cart</Button>
               </HStack>
+
+              <CartRequestPanel
+                cartItems={items}
+                subtotal={subtotal}
+                hasCenterOnlyItems={hasCenterOnlyItems}
+                source="/cart page"
+              />
             </Box>
           </VStack>
         )}

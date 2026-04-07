@@ -149,6 +149,34 @@ export default function HomePage() {
                 </Button>
               </HStack>
 
+              <SimpleGrid mt={4} columns={{ base: 1, sm: 3 }} spacing={3} maxW="760px">
+                <Box className="soft-card no-hover-lift" p={3}>
+                  <Text fontSize="xs" color="gray.500">Need help selecting tests?</Text>
+                  <Link href={"https://wa.me/" + siteConfig.internalNotifyNumber} target="_blank">
+                    <Text fontSize="sm" color="teal.700" fontWeight="700">Chat with lab team</Text>
+                  </Link>
+                </Box>
+                <Box className="soft-card no-hover-lift" p={3}>
+                  <Text fontSize="xs" color="gray.500">Already tested with SDRC?</Text>
+                  <Link href={siteConfig.reportsUrl} target="_blank">
+                    <Text
+                      fontSize="sm"
+                      color="teal.700"
+                      fontWeight="700"
+                      title="Get our bot to send your reports. Chat using your registered mobile number."
+                    >
+                      Download Reports
+                    </Text>
+                  </Link>
+                </Box>
+                <Box className="soft-card no-hover-lift" p={3}>
+                  <Text fontSize="xs" color="gray.500">Ready to place request?</Text>
+                  <Link href="/tests">
+                    <Text fontSize="sm" color="teal.700" fontWeight="700">Book A Test</Text>
+                  </Link>
+                </Box>
+              </SimpleGrid>
+
               <Text mt={3} fontSize="xs" color="gray.500">
                 NABL accredited laboratory. Reports available online and on WhatsApp.
               </Text>

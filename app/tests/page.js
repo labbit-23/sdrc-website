@@ -16,8 +16,9 @@ import {
   VStack
 } from "@chakra-ui/react";
 import { FiHome, FiShoppingCart } from "react-icons/fi";
-import { BsBuilding } from "react-icons/bs";
+import { BsBuilding, BsCartPlus } from "react-icons/bs";
 import healthPackagesData from "@/data/health-packages.json";
+import CartRequestPanel from "@/components/cart/CartRequestPanel";
 import { readCartItems, saveCartItems } from "@/lib/cart";
 
 const PAGE_SIZE = 20;
@@ -31,12 +32,6 @@ function formatInr(amount) {
   return `INR ${Number(amount).toLocaleString("en-IN")}`;
 }
 
-function normalizePhone(rawPhone) {
-  const digits = String(rawPhone || "").replace(/\D/g, "");
-  if (digits.length === 10) return `91${digits}`;
-  return digits;
-}
-
 function flattenPackageVariants(data) {
   const out = [];
   const packages = data?.packages || [];
@@ -47,7 +42,7 @@ function flattenPackageVariants(data) {
         id: `pkg_${pIdx}_${vIdx}`,
         item_type: "package",
         package_name: pkg.name,
-        name: variant.name ? `${pkg.name} - ${variant.name}` : pkg.name,
+        name: variant.name || pkg.name,
         short_description: variant.description || pkg.description || "",
         price: variant.price ?? null,
         parameters: variant.parameters ?? null,
@@ -66,10 +61,9 @@ export default function TestsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [sort, setSort] = useState("name_asc");
   const [page, setPage] = useState(1);
-  const [mostCommonOnly, setMostCommonOnly] = useState(true);
-  const [mostPopularOnly, setMostPopularOnly] = useState(false);
+  const [mostCommonOnly, setMostCommonOnly] = useState(false);
+  const [mostPopularOnly, setMostPopularOnly] = useState(true);
   const [homeCollectionFilter, setHomeCollectionFilter] = useState(false);
-  const [homeVisitRequested, setHomeVisitRequested] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -79,10 +73,6 @@ export default function TestsPage() {
   const [pagination, setPagination] = useState(defaultPagination);
 
   const [cartItems, setCartItems] = useState([]);
-  const [patientName, setPatientName] = useState("");
-  const [patientPhone, setPatientPhone] = useState("");
-  const [patientNotes, setPatientNotes] = useState("");
-  const [leadError, setLeadError] = useState("");
 
   const [openPackageIncludesId, setOpenPackageIncludesId] = useState(null);
 
@@ -91,6 +81,17 @@ export default function TestsPage() {
     () => (homeCollectionFilter ? packageVariants.filter((pkg) => pkg.home_collection) : packageVariants),
     [packageVariants, homeCollectionFilter]
   );
+  const groupedPackageVariants = useMemo(() => {
+    const groups = new Map();
+    filteredPackageVariants.forEach((pkg) => {
+      if (!groups.has(pkg.package_name)) groups.set(pkg.package_name, []);
+      groups.get(pkg.package_name).push(pkg);
+    });
+    return Array.from(groups.entries()).map(([packageName, variants]) => ({
+      packageName,
+      variants
+    }));
+  }, [filteredPackageVariants]);
   const categoryFilters = useMemo(() => ["All", ...categories], [categories]);
 
   const subtotal = useMemo(
@@ -248,58 +249,6 @@ export default function TestsPage() {
     setCartItems([]);
   }
 
-  function sendCartRequest() {
-    setLeadError("");
-
-    if (cartItems.length === 0) {
-      setLeadError("Add at least one test or package before sending.");
-      return;
-    }
-
-    if (!patientName.trim()) {
-      setLeadError("Patient name is required.");
-      return;
-    }
-
-    const normalizedPhone = normalizePhone(patientPhone);
-    if (normalizedPhone.length < 10) {
-      setLeadError("Enter a valid patient phone number.");
-      return;
-    }
-
-    const payload = {
-      action: "send_whatsapp_lead",
-      source: "/tests page",
-      patient_name: patientName.trim(),
-      patient_phone: normalizedPhone,
-      patient_notes: patientNotes.trim(),
-      home_visit_required: homeVisitRequested,
-      subtotal,
-      collection_fee: null,
-      total: subtotal,
-      items: cartItems.map((item) => ({
-        id: item.id,
-        item_type: item.item_type,
-        name: item.name,
-        internal_code: item.internal_code || null,
-        price: item.price,
-        home_collection: item.home_collection ?? null
-      }))
-    };
-
-    fetch("/api/tests", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    })
-      .then(async (res) => {
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data?.error || "Unable to send request right now.");
-      })
-      .then(() => setLeadError(""))
-      .catch((e) => setLeadError(e.message || "Unable to send request right now."));
-  }
-
   function clearSearchAndFilters() {
     setPage(1);
     setQuery("");
@@ -354,10 +303,15 @@ export default function TestsPage() {
         bottom={{ base: 5, md: 6 }}
         zIndex={30}
         size="lg"
+        variant="outline"
+        bg="white"
+        color="teal.700"
+        borderColor="teal.300"
         aria-label="Open cart"
-        icon={<FiShoppingCart />}
         onClick={scrollToCart}
-      />
+      >
+        <FiShoppingCart />
+      </IconButton>
 
       {itemCount > 0 ? (
         <Box
@@ -487,7 +441,16 @@ export default function TestsPage() {
               </HStack>
 
               {categoryFilters.map((cat) => (
-                <Button key={cat} size="xs" variant={activeCategory === cat ? "solid" : "outline"} onClick={() => { setPage(1); setActiveCategory(cat); }}>
+                <Button
+                  key={cat}
+                  size="xs"
+                  variant={activeCategory === cat ? "solid" : "outline"}
+                  onClick={() => {
+                    setPage(1);
+                    setQuery("");
+                    setActiveCategory(cat);
+                  }}
+                >
                   {cat}
                 </Button>
               ))}
@@ -519,9 +482,13 @@ export default function TestsPage() {
                               {test.internal_code || "No code"} {test.department ? `• ${test.department}` : ""}
                             </Text>
                             <Text fontWeight="700" color="gray.800">{test.name}</Text>
-                            <Text fontSize="xs" color="gray.600" mt={1}>
-                              Sample: {test.sample_type || "N/A"} • TAT: {test.tat_hours ? `${test.tat_hours}h` : "N/A"}
-                            </Text>
+                            {test.sample_type || test.tat_hours ? (
+                              <Text fontSize="xs" color="gray.600" mt={1}>
+                                {test.sample_type ? `Sample: ${test.sample_type}` : ""}
+                                {test.sample_type && test.tat_hours ? " • " : ""}
+                                {test.tat_hours ? `TAT: ${test.tat_hours}h` : ""}
+                              </Text>
+                            ) : null}
                             <HStack spacing={2} mt={1} flexWrap="wrap">
                               {test.is_most_common ? (
                                 <Text fontSize="10px" px={2} py={0.5} borderRadius="full" bg="teal.50" color="teal.700" fontWeight="700">
@@ -547,10 +514,19 @@ export default function TestsPage() {
                             </HStack>
                           </Box>
                           <VStack align="end" gap={2}>
-                            <Text fontWeight="700" color="orange.500">{test.price == null ? "Price N/A" : formatInr(test.price)}</Text>
-                            <Button size="xs" variant={added ? "solid" : "outline"} onClick={() => addTestToCart(test)} isDisabled={added}>
-                              {added ? "Added" : "Add"}
-                            </Button>
+                            <Text fontWeight="700" color="orange.500" whiteSpace="nowrap">{test.price == null ? "Price N/A" : formatInr(test.price)}</Text>
+                            <IconButton
+                              size="sm"
+                              variant="outline"
+                              bg="white"
+                              color="teal.700"
+                              borderColor="teal.300"
+                              aria-label={added ? "Added to cart" : "Add test to cart"}
+                              onClick={() => addTestToCart(test)}
+                              isDisabled={added}
+                            >
+                              <BsCartPlus />
+                            </IconButton>
                           </VStack>
                         </HStack>
                       </Box>
@@ -577,88 +553,105 @@ export default function TestsPage() {
             <Heading size="md" mb={2}>Find Your Packages</Heading>
             <Text fontSize="sm" color="gray.600" mb={4}>Add package variants to cart and review included tests.</Text>
 
-            <VStack align="stretch" gap={3}>
-              {filteredPackageVariants.map((pkg) => {
-                const added = isInCart(pkg.id);
-                const showIncludes = openPackageIncludesId === pkg.id;
-                return (
-                  <Box key={pkg.id} p={3} borderWidth="1px" borderColor="gray.100" borderRadius="md" position="relative">
-                    <HStack justify="space-between" align="start" gap={3}>
-                      <Box>
-                        <Text fontSize="xs" color="gray.500">{pkg.package_name}</Text>
-                        <Text fontWeight="700" color="gray.800">{pkg.name}</Text>
-                        {pkg.short_description ? (
-                          <Text fontSize="xs" color="gray.600" mt={1} noOfLines={2}>
-                            {pkg.short_description}
-                          </Text>
-                        ) : null}
-                        <HStack spacing={2} mt={1} flexWrap="wrap">
-                          {pkg.parameters != null ? (
-                            <Text fontSize="10px" px={2} py={0.5} borderRadius="full" bg="gray.100" color="gray.700" fontWeight="700">
-                              {pkg.parameters} parameters
-                            </Text>
+            <VStack align="stretch" gap={4}>
+              {groupedPackageVariants.map((group) => (
+                <Box key={group.packageName}>
+                  <Text fontWeight="700" color="gray.800" mb={2}>{group.packageName}</Text>
+                  <VStack align="stretch" gap={3}>
+                    {group.variants.map((pkg) => {
+                      const added = isInCart(pkg.id);
+                      const showIncludes = openPackageIncludesId === pkg.id;
+                      return (
+                        <Box key={pkg.id} p={3} borderWidth="1px" borderColor="gray.100" borderRadius="md" position="relative">
+                          <HStack justify="space-between" align="start" gap={3}>
+                            <Box>
+                              <Text fontSize="xs" color="gray.500">{pkg.name}</Text>
+                              {pkg.short_description ? (
+                                <Text fontSize="xs" color="gray.600" mt={1} noOfLines={2}>
+                                  {pkg.short_description}
+                                </Text>
+                              ) : null}
+                              <HStack spacing={2} mt={1} flexWrap="wrap">
+                                {pkg.parameters != null ? (
+                                  <Text fontSize="10px" px={2} py={0.5} borderRadius="full" bg="gray.100" color="gray.700" fontWeight="700">
+                                    {pkg.parameters} parameters
+                                  </Text>
+                                ) : null}
+
+                                <Box
+                                  as="button"
+                                  type="button"
+                                  fontSize="11px"
+                                  fontWeight="700"
+                                  color="teal.700"
+                                  textDecoration="underline"
+                                  data-includes-trigger
+                                  onClick={() => setOpenPackageIncludesId((v) => (v === pkg.id ? null : pkg.id))}
+                                >
+                                  Includes {pkg.tests_count ?? 0} tests
+                                </Box>
+
+                                {pkg.home_collection ? (
+                                  <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="green.50" color="green.700" title="Home sample collection available for this package">
+                                    <Box w="6px" h="6px" borderRadius="full" bg="green.500" />
+                                    <FiHome size={11} />
+                                    <Text fontSize="10px" fontWeight="700">Home Collection</Text>
+                                  </HStack>
+                                ) : (
+                                  <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="gray.100" color="gray.700" title="Center visit required">
+                                    <BsBuilding size={11} />
+                                    <Text fontSize="10px" fontWeight="700">Center Visit</Text>
+                                  </HStack>
+                                )}
+                              </HStack>
+                            </Box>
+                            <VStack align="end" gap={2}>
+                              <Text fontWeight="700" color="orange.500" whiteSpace="nowrap">{formatInr(pkg.price)}</Text>
+                              <IconButton
+                                size="sm"
+                                variant="outline"
+                                bg="white"
+                                color="teal.700"
+                                borderColor="teal.300"
+                                _disabled={{ bg: "gray.100", color: "gray.500", opacity: 1 }}
+                                aria-label={added ? "Added to cart" : "Add package to cart"}
+                                onClick={() => addPackageToCart(pkg)}
+                                isDisabled={added}
+                              >
+                                <BsCartPlus />
+                              </IconButton>
+                            </VStack>
+                          </HStack>
+
+                          {showIncludes ? (
+                            <Box
+                              data-includes-popup
+                              position="absolute"
+                              zIndex={8}
+                              right={3}
+                              top="68px"
+                              w={{ base: "calc(100% - 24px)", md: "320px" }}
+                              maxH="220px"
+                              overflowY="auto"
+                              bg="white"
+                              borderWidth="1px"
+                              borderColor="gray.200"
+                              borderRadius="md"
+                              p={3}
+                              boxShadow="lg"
+                            >
+                              <Text fontSize="xs" color="gray.500" mb={1} fontWeight="700">Included tests</Text>
+                              {pkg.tests.map((test) => (
+                                <Text key={test} fontSize="xs" color="gray.700" lineHeight="1.35">• {test}</Text>
+                              ))}
+                            </Box>
                           ) : null}
-
-                          <Box
-                            as="button"
-                            type="button"
-                            fontSize="11px"
-                            fontWeight="700"
-                            color="teal.700"
-                            textDecoration="underline"
-                            data-includes-trigger
-                            onClick={() => setOpenPackageIncludesId((v) => (v === pkg.id ? null : pkg.id))}
-                          >
-                            Includes {pkg.tests_count ?? 0} tests
-                          </Box>
-
-                          {pkg.home_collection ? (
-                            <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="green.50" color="green.700" title="Home sample collection available for this package">
-                              <FiHome size={11} />
-                              <Text fontSize="10px" fontWeight="700">Home Collection</Text>
-                            </HStack>
-                          ) : (
-                            <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="gray.100" color="gray.700" title="Center visit required">
-                              <BsBuilding size={11} />
-                              <Text fontSize="10px" fontWeight="700">Center Visit</Text>
-                            </HStack>
-                          )}
-                        </HStack>
-                      </Box>
-                      <VStack align="end" gap={2}>
-                        <Text fontWeight="700" color="orange.500">{formatInr(pkg.price)}</Text>
-                        <Button size="xs" bg="teal.600" color="white" _hover={{ bg: "teal.700" }} onClick={() => addPackageToCart(pkg)} isDisabled={added}>
-                          {added ? "Added" : "Add"}
-                        </Button>
-                      </VStack>
-                    </HStack>
-
-                    {showIncludes ? (
-                      <Box
-                        data-includes-popup
-                        position="absolute"
-                        zIndex={8}
-                        right={3}
-                        top="68px"
-                        w={{ base: "calc(100% - 24px)", md: "320px" }}
-                        maxH="220px"
-                        overflowY="auto"
-                        bg="white"
-                        borderWidth="1px"
-                        borderColor="gray.200"
-                        borderRadius="md"
-                        p={3}
-                        boxShadow="lg"
-                      >
-                        <Text fontSize="xs" color="gray.500" mb={1} fontWeight="700">Included tests</Text>
-                        {pkg.tests.map((test) => (
-                          <Text key={test} fontSize="xs" color="gray.700" lineHeight="1.35">• {test}</Text>
-                        ))}
-                      </Box>
-                    ) : null}
-                  </Box>
-                );
-              })}
+                        </Box>
+                      );
+                    })}
+                  </VStack>
+                </Box>
+              ))}
             </VStack>
           </Box>
         </Grid>
@@ -710,42 +703,12 @@ export default function TestsPage() {
             </VStack>
           )}
 
-          <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} mt={4}>
-            <Box>
-              <HStack justify="space-between" mb={1}><Text fontSize="sm" color="gray.600">Subtotal</Text><Text fontSize="sm" color="gray.600">{formatInr(subtotal)}</Text></HStack>
-              <HStack justify="space-between" mb={1}><Text fontSize="sm" color="gray.600">Collection Fee</Text><Text fontSize="sm" color="gray.600">TBA</Text></HStack>
-              <HStack justify="space-between" mt={2}><Text fontWeight="700">Estimated Total</Text><Text fontWeight="700" color="teal.700">{formatInr(subtotal)} + TBA</Text></HStack>
-            </Box>
-
-            <VStack align="stretch" gap={2}>
-              <Input bg="white" size="sm" placeholder="Patient name *" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
-              <Input bg="white" size="sm" placeholder="Patient phone number *" value={patientPhone} onChange={(e) => setPatientPhone(e.target.value)} />
-              <Input bg="white" size="sm" placeholder="Optional note (timing/preferences)" value={patientNotes} onChange={(e) => setPatientNotes(e.target.value)} />
-
-              <HStack spacing={2} mt={1} align="start">
-                <Box
-                  as="input"
-                  type="checkbox"
-                  checked={homeVisitRequested}
-                  onChange={(e) => setHomeVisitRequested(e.target.checked)}
-                  style={{ accentColor: "#008f82", marginTop: "2px" }}
-                />
-                <VStack align="start" gap={0}>
-                  <Text fontSize="sm" color="gray.700" fontWeight="600">Request Home Visit</Text>
-                  <Text fontSize="xs" color="gray.500">Uncheck if you plan to visit the center.</Text>
-                </VStack>
-              </HStack>
-
-              {homeVisitRequested && hasCenterOnlyItems ? (
-                <Text fontSize="xs" color="orange.600">
-                  Some selected items require center visit. Lab team will confirm final feasibility.
-                </Text>
-              ) : null}
-
-              {leadError ? <Text fontSize="xs" color="red.600">{leadError}</Text> : null}
-              <Button onClick={sendCartRequest} isDisabled={cartItems.length === 0}>Send Request to Lab</Button>
-            </VStack>
-          </Grid>
+          <CartRequestPanel
+            cartItems={cartItems}
+            subtotal={subtotal}
+            hasCenterOnlyItems={hasCenterOnlyItems}
+            source="/tests page"
+          />
         </Box>
       </Container>
     </>

@@ -27,7 +27,8 @@ export default function PackagesPage() {
               </Text>
               <HStack mt={5} spacing={3} flexWrap="wrap">
                 <Button as={Link} href={siteConfig.bookingUrl}>Book a package online</Button>
-                <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} variant="outline" target="_blank">Talk to us on WhatsApp</Button>
+                <Button as={Link} href="/tests" variant="outline">Book A Test</Button>
+                <Button as={Link} href={"https://wa.me/" + siteConfig.internalNotifyNumber} variant="outline" target="_blank">Talk to us on WhatsApp</Button>
               </HStack>
               <HStack mt={4} spacing={2} flexWrap="wrap">
                 <Text px={3} py={1} borderRadius="full" bg="white" className="shadow-soft" fontSize="11px" color="teal.700">

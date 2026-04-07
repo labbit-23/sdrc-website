@@ -115,7 +115,18 @@ export default function SiteHeader() {
 
           <HStack spacing={2} flexShrink={0}>
             <Box position="relative">
-              <IconButton as={Link} href="/cart" size="sm" variant="outline" aria-label="Cart" icon={<FiShoppingCart />} />
+              <IconButton
+                as={Link}
+                href="/cart"
+                size="sm"
+                variant="outline"
+                bg="white"
+                color="teal.700"
+                borderColor="teal.300"
+                aria-label="Cart"
+              >
+                <FiShoppingCart />
+              </IconButton>
               {cartCount > 0 ? (
                 <Box
                   position="absolute"
@@ -137,11 +148,20 @@ export default function SiteHeader() {
                 </Box>
               ) : null}
             </Box>
-            <Button as={Link} href={siteConfig.reportsUrl} target="_blank" rel="noopener noreferrer" size="sm" variant="outline" display={{ base: "none", lg: "inline-flex" }}>
-              Online Reports
+            <Button
+              as={Link}
+              href={siteConfig.reportsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="sm"
+              variant="outline"
+              display={{ base: "none", lg: "inline-flex" }}
+              title="Get our bot to send your reports. Chat using your registered mobile number."
+            >
+              Download Reports
             </Button>
-            <Button as={Link} href={siteConfig.bookingUrl} size="sm" display={{ base: "none", sm: "inline-flex" }}>
-              Book Now
+            <Button as={Link} href="/tests" size="sm" variant="outline" display={{ base: "none", md: "inline-flex" }}>
+              Book A Test
             </Button>
             <Button
               onClick={() => setMobileOpen((v) => !v)}
@@ -187,7 +207,18 @@ export default function SiteHeader() {
               ))}
               <HStack px={2} py={2} spacing={2} flexWrap="wrap">
                 <Box position="relative">
-                  <IconButton as={Link} href="/cart" size="sm" variant="outline" aria-label="Cart" icon={<FiShoppingCart />} />
+                  <IconButton
+                    as={Link}
+                    href="/cart"
+                    size="sm"
+                    variant="outline"
+                    bg="white"
+                    color="teal.700"
+                    borderColor="teal.300"
+                    aria-label="Cart"
+                  >
+                    <FiShoppingCart />
+                  </IconButton>
                   {cartCount > 0 ? (
                     <Box
                       position="absolute"
@@ -209,14 +240,22 @@ export default function SiteHeader() {
                     </Box>
                   ) : null}
                 </Box>
-                <Button as={Link} href={siteConfig.bookingUrl} size="sm">
-                  Book Now
+                <Button as={Link} href="/tests" size="sm" variant="outline">
+                  Book A Test
                 </Button>
                 <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} target="_blank" rel="noopener noreferrer" variant="outline" size="sm">
                   WhatsApp
                 </Button>
-                <Button as={Link} href={siteConfig.reportsUrl} target="_blank" rel="noopener noreferrer" variant="outline" size="sm">
-                  Online Reports
+                <Button
+                  as={Link}
+                  href={siteConfig.reportsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="outline"
+                  size="sm"
+                  title="Get our bot to send your reports. Chat using your registered mobile number."
+                >
+                  Download Reports
                 </Button>
               </HStack>
             </VStack>

@@ -19,7 +19,13 @@
             "Thyroid Stimulating Hormone (TSH)",
             "Urinalysis"
           ],
-          "home_collection": true
+          "home_collection": true,
+          "key_inclusions": [
+            "HbA1c",
+            "Lipid Profile*",
+            "Liver Function Tests*",
+            "Thyroid Stimulating Hormone (TSH)"
+          ]
         },
         {
           "name": "Total Value Pack",
@@ -39,7 +45,13 @@
             "X-Ray Chest PA View",
             "ECG - Electrocardiogram"
           ],
-          "home_collection": false
+          "home_collection": false,
+          "key_inclusions": [
+            "HbA1c",
+            "Lipid Profile*",
+            "ECG - Electrocardiogram",
+            "X-Ray Chest PA View"
+          ]
         }
       ]
     },
@@ -66,7 +78,13 @@
             "Serum Calcium",
             "Urinalysis"
           ],
-          "home_collection": true
+          "home_collection": true,
+          "key_inclusions": [
+            "HbA1c",
+            "Lipid Profile*",
+            "Vitamin D (25-OH)",
+            "Vitamin B12"
+          ]
         },
         {
           "name": "Total Value Pack",
@@ -91,7 +109,13 @@
             "X-Ray Chest PA View",
             "ECG"
           ],
-          "home_collection": false
+          "home_collection": false,
+          "key_inclusions": [
+            "Vitamin D (25-OH)",
+            "Vitamin B12",
+            "Ultrasound Scan of Abdomen (& Pelvis)",
+            "ECG"
+          ]
         }
       ]
     },
@@ -127,7 +151,13 @@
             "X-Ray Chest PA View",
             "ECG"
           ],
-          "home_collection": false
+          "home_collection": false,
+          "key_inclusions": [
+            "Insulin Resistance - Fasting (HOMA)",
+            "Cortisol (Stress Hormone)",
+            "Prostate Specific Antigen - PSA",
+            "2D Echo Color Doppler"
+          ]
         },
         {
           "name": "Specialised Female",
@@ -158,7 +188,13 @@
             "X-Ray Chest PA View",
             "ECG"
           ],
-          "home_collection": false
+          "home_collection": false,
+          "key_inclusions": [
+            "Insulin Resistance - Fasting (HOMA)",
+            "Cortisol (Stress Hormone)",
+            "PAP Smear",
+            "2D Echo Color Doppler"
+          ]
         }
       ]
     },
@@ -180,7 +216,13 @@
             "X-Ray Chest PA View",
             "ECG"
           ],
-          "home_collection": false
+          "home_collection": false,
+          "key_inclusions": [
+            "Cortisol (Stress Hormone)",
+            "Vitamin D (25-OH)",
+            "Vitamin B12",
+            "ECG"
+          ]
         }
       ]
     },
@@ -213,7 +255,13 @@
             "Vitamin B12",
             "Urinalysis"
           ],
-          "home_collection": true
+          "home_collection": true,
+          "key_inclusions": [
+            "Insulin Resistance - Fasting (HOMA)",
+            "CPK - Creatinine Kinase",
+            "Testosterone",
+            "Urine Protein Creatinine Ratio"
+          ]
         }
       ]
     },
@@ -250,7 +298,13 @@
             "Calcium",
             "ESR"
           ],
-          "home_collection": true
+          "home_collection": true,
+          "key_inclusions": [
+            "Ferritin",
+            "Iron, Total Iron Binding Capacity",
+            "Thyroid Function Tests (T3 T4 TSH)",
+            "Vitamin D (25-OH)"
+          ]
         },
         {
           "name": "Hair Fall Advanced",
@@ -268,7 +322,13 @@
             "Calcium",
             "ESR"
           ],
-          "home_collection": true
+          "home_collection": true,
+          "key_inclusions": [
+            "Serum Zinc",
+            "Ferritin",
+            "Thyroid Function Tests (T3 T4 TSH)",
+            "Vitamin D (25-OH)"
+          ]
         }
       ]
     },
@@ -295,7 +355,13 @@
             "Urinalysis",
             "ECG"
           ],
-          "home_collection": false
+          "home_collection": false,
+          "key_inclusions": [
+            "HbA1c",
+            "Urine Microalbumin Creatinine Ratio",
+            "Renal Function Tests*",
+            "ECG"
+          ]
         },
         {
           "name": "Diabetic Advanced",
@@ -320,7 +386,13 @@
             "Urinalysis",
             "ECG"
           ],
-          "home_collection": false
+          "home_collection": false,
+          "key_inclusions": [
+            "HbA1c",
+            "Insulin Resistance - Fasting (HOMA)",
+            "Apolipoproteins A1 & Apo B",
+            "High Sensitive CRP"
+          ]
         },
         {
           "name": "Diabetic Monitor",
@@ -333,7 +405,13 @@
             "HbA1c",
             "Creatinine"
           ],
-          "home_collection": true
+          "home_collection": true,
+          "key_inclusions": [
+            "HbA1c",
+            "Fasting Blood Sugar",
+            "Post Prandial Blood Sugar",
+            "Creatinine"
+          ]
         }
       ]
     },
@@ -358,7 +436,13 @@
             "Electrolytes",
             "Urinalysis"
           ],
-          "home_collection": false
+          "home_collection": false,
+          "key_inclusions": [
+            "Lipid Profile*",
+            "2D Echo Color Doppler",
+            "ECG",
+            "CPK Total"
+          ]
         },
         {
           "name": "Cardiac Comprehensive",
@@ -383,7 +467,13 @@
             "AST, ALT",
             "Urinalysis"
           ],
-          "home_collection": false
+          "home_collection": false,
+          "key_inclusions": [
+            "High Sensitive CRP",
+            "Homocysteine",
+            "CPK-MB",
+            "Treadmill Test"
+          ]
         }
       ]
     },
@@ -411,7 +501,13 @@
             "Ultrasound Scan of Breasts",
             "Ultrasound Scan of Abdomen (& Pelvis)"
           ],
-          "home_collection": false
+          "home_collection": false,
+          "key_inclusions": [
+            "Thyroid Stimulating Hormone (TSH)",
+            "Ultrasound Scan of Breasts",
+            "Ultrasound Scan of Abdomen (& Pelvis)",
+            "RA Factor"
+          ]
         },
         {
           "name": "Women's Comprehensive",
@@ -442,7 +538,13 @@
             "Ultrasound Scan of Abdomen (& Pelvis)",
             "DEXA Bone Densitometry OR Mammography"
           ],
-          "home_collection": false
+          "home_collection": false,
+          "key_inclusions": [
+            "CA-125",
+            "PAP Smear",
+            "DEXA Bone Densitometry OR Mammography",
+            "Thyroid Function Tests (T3 T4 TSH)"
+          ]
         }
       ]
     },
@@ -474,7 +576,13 @@
             "G6PD",
             "Urinalysis"
           ],
-          "home_collection": true
+          "home_collection": true,
+          "key_inclusions": [
+            "Apolipoproteins A1 & Apo B",
+            "High Sensitive CRP",
+            "Prostate Specific Antigen - PSA",
+            "Vitamin D (25-OH)"
+          ]
         },
         {
           "name": "Wellness Female",
@@ -500,7 +608,13 @@
             "G6PD",
             "Urinalysis"
           ],
-          "home_collection": true
+          "home_collection": true,
+          "key_inclusions": [
+            "Apolipoproteins A1 & Apo B",
+            "High Sensitive CRP",
+            "CA-125",
+            "Vitamin D (25-OH)"
+          ]
         }
       ]
     },
@@ -519,7 +633,13 @@
             "VDRL (Syphilis)",
             "TPHA"
           ],
-          "home_collection": true
+          "home_collection": true,
+          "key_inclusions": [
+            "HIV 1/2 Antibody & Antigen",
+            "Hepatitis B Surface Antigen",
+            "Hepatitis C Antibody",
+            "VDRL (Syphilis)"
+          ]
         },
         {
           "name": "STD Advanced",
@@ -534,7 +654,13 @@
             "Chlamydia IgM",
             "Herpes Simplex Virus (HSV) IgG IgM"
           ],
-          "home_collection": true
+          "home_collection": true,
+          "key_inclusions": [
+            "HIV 1/2 Antibody & Antigen",
+            "Chlamydia IgM",
+            "Herpes Simplex Virus (HSV) IgG IgM",
+            "TPHA"
+          ]
         }
       ]
     }
