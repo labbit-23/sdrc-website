@@ -12,6 +12,11 @@ function formatInr(amount) {
   return `INR ${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function formatLinePrice(amount) {
+  if (amount == null || Number.isNaN(Number(amount))) return "0";
+  return Number(amount).toLocaleString("en-IN");
+}
+
 export default function CartPage() {
   const [items, setItems] = useState([]);
   const [loaded, setLoaded] = useState(false);
@@ -78,8 +83,8 @@ export default function CartPage() {
                         {item.internal_code ? <Text fontSize="xs" color="gray.500">{item.internal_code}</Text> : null}
                         {item.tests_count ? <Text fontSize="xs" color="gray.500">Includes {item.tests_count} tests</Text> : null}
                       </Box>
-                      <VStack align={{ base: "start", md: "end" }} gap={1} minW="96px" ml={{ base: "0", md: "auto" }}>
-                        <Text fontWeight="700" color="orange.500">{formatInr(item.price)}</Text>
+                      <VStack align="end" gap={1} minW="96px" ml="auto">
+                        <Text fontWeight="700" color="orange.500">{formatLinePrice(item.price)}</Text>
                         <IconButton size="xs" variant="ghost" color="gray.500" aria-label="Remove item" onClick={() => removeItem(item.id)}>
                           <FiTrash2 />
                         </IconButton>

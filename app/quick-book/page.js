@@ -24,7 +24,7 @@ function formatDateIso(dateObj) {
   return `${y}-${m}-${d}`;
 }
 
-function getNextDays(count = 7) {
+function getNextDays(count = 5) {
   const days = [];
   const base = new Date();
   for (let i = 0; i < count; i += 1) {
@@ -62,7 +62,7 @@ function parseSlotHour(slot) {
 
 export default function QuickBookPage() {
   const whatsappQuickbookHref = `https://wa.me/${siteConfig.whatsappNumber}?text=${encodeURIComponent("Home visit")}`;
-  const dayOptions = useMemo(() => getNextDays(7), []);
+  const dayOptions = useMemo(() => getNextDays(5), []);
   const [selectedDate, setSelectedDate] = useState(dayOptions[0]?.iso || "");
   const [selectedSlot, setSelectedSlot] = useState("");
   const [slots, setSlots] = useState([]);
@@ -217,7 +217,18 @@ export default function QuickBookPage() {
             ) : (
               <VStack align="stretch" gap={4}>
                 {Object.entries(slotGroups).map(([groupName, groupSlots]) => (
-                  <Box key={groupName}>
+                  <Box
+                    key={groupName}
+                    p={2.5}
+                    borderRadius="xl"
+                    bg={
+                      groupName === "Morning"
+                        ? "teal.50"
+                        : groupName === "Afternoon"
+                          ? "orange.50"
+                          : "orange.100"
+                    }
+                  >
                     <Text fontSize="xs" fontWeight="700" color="teal.700" mb={2}>{groupName}</Text>
                     <SimpleGrid columns={{ base: 2, md: 3 }} gap={2}>
                       {groupSlots.map((slot) => {

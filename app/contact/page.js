@@ -187,7 +187,7 @@ export default function ContactPage() {
 
           <Box>
             <Heading size="xl" mb={4}>
-              Collection centres
+              Our centres
             </Heading>
             <Text fontSize="sm" color="gray.700" mb={4}>
               You can give samples or enquire about home collection at these SDRC centres.

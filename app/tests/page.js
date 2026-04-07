@@ -33,6 +33,11 @@ function formatInr(amount) {
   return `INR ${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function formatLinePrice(amount) {
+  if (amount == null || Number.isNaN(Number(amount))) return "0";
+  return Number(amount).toLocaleString("en-IN");
+}
+
 function flattenPackageVariants(data) {
   const out = [];
   const packages = sortPackages(data?.packages || []);
@@ -333,6 +338,47 @@ export default function TestsPage() {
                   Clear
                 </Button>
               </HStack>
+              <HStack mt={3} spacing={3} flexWrap="wrap">
+                <HStack spacing={2}>
+                  <Box
+                    as="input"
+                    type="checkbox"
+                    checked={mostCommonOnly}
+                    onChange={(e) => {
+                      setPage(1);
+                      setMostCommonOnly(e.target.checked);
+                    }}
+                    style={{ accentColor: "#008f82" }}
+                  />
+                  <Text fontSize="xs" fontWeight="600">Common tests</Text>
+                </HStack>
+                <HStack spacing={2}>
+                  <Box
+                    as="input"
+                    type="checkbox"
+                    checked={mostPopularOnly}
+                    onChange={(e) => {
+                      setPage(1);
+                      setMostPopularOnly(e.target.checked);
+                    }}
+                    style={{ accentColor: "#008f82" }}
+                  />
+                  <Text fontSize="xs" fontWeight="600">Most booked</Text>
+                </HStack>
+                <HStack spacing={2}>
+                  <Box
+                    as="input"
+                    type="checkbox"
+                    checked={homeCollectionFilter}
+                    onChange={(e) => {
+                      setPage(1);
+                      setHomeCollectionFilter(e.target.checked);
+                    }}
+                    style={{ accentColor: "#008f82" }}
+                  />
+                  <Text fontSize="xs" fontWeight="600">Home collection</Text>
+                </HStack>
+              </HStack>
             </Box>
           </Grid>
         </Container>
@@ -379,57 +425,6 @@ export default function TestsPage() {
 
       <Container maxW="1200px" py={10}>
         <VStack display={{ base: "flex", lg: "none" }} align="stretch" gap={4} mb={6}>
-          <Box className="soft-card no-hover-lift" p={4}>
-            <Heading size="sm" mb={3}>Search Tests or Packages</Heading>
-            <HStack>
-              <Input
-                bg="white"
-                placeholder="Search tests (TSH, HbA1c, Lipid...)"
-                value={query}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setPage(1);
-                  setQuery(value);
-                  if (value.trim().length > 0) {
-                    setActiveCategory("All");
-                    setMostCommonOnly(false);
-                    setMostPopularOnly(false);
-                    setHomeCollectionFilter(false);
-                  }
-                }}
-              />
-              <Button size="sm" variant="outline" onClick={clearSearchAndFilters}>Clear</Button>
-            </HStack>
-            <HStack mt={3} spacing={3} flexWrap="wrap">
-              <HStack spacing={2}>
-                <Box
-                  as="input"
-                  type="checkbox"
-                  checked={mostPopularOnly}
-                  onChange={(e) => {
-                    setPage(1);
-                    setMostPopularOnly(e.target.checked);
-                  }}
-                  style={{ accentColor: "#008f82" }}
-                />
-                <Text fontSize="xs" fontWeight="600">Most booked</Text>
-              </HStack>
-              <HStack spacing={2}>
-                <Box
-                  as="input"
-                  type="checkbox"
-                  checked={homeCollectionFilter}
-                  onChange={(e) => {
-                    setPage(1);
-                    setHomeCollectionFilter(e.target.checked);
-                  }}
-                  style={{ accentColor: "#008f82" }}
-                />
-                <Text fontSize="xs" fontWeight="600">Home collection</Text>
-              </HStack>
-            </HStack>
-          </Box>
-
           <Box className="soft-card no-hover-lift" p={4}>
             <HStack justify="space-between" mb={3}>
               <Heading size="sm">{isSearching ? "Matching Checkups" : "Popular Checkups"}</Heading>
@@ -884,9 +879,8 @@ export default function TestsPage() {
                       {item.internal_code ? <Text fontSize="xs" color="gray.500">{item.internal_code}</Text> : null}
                       {item.tests_count ? <Text fontSize="xs" color="gray.500">Includes {item.tests_count} tests</Text> : null}
                     </Box>
-                    <VStack align={{ base: "start", md: "end" }} gap={0.5} minW="80px" ml={{ base: "0", md: "auto" }}>
-                      <Text fontSize="10px" color="gray.500" fontWeight="700">INR</Text>
-                      <Text fontSize="sm" fontWeight="700" color="orange.500">{Number(item.price || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+                    <VStack align="end" gap={0.5} minW="80px" ml="auto">
+                      <Text fontSize="sm" fontWeight="700" color="orange.500">{formatLinePrice(item.price)}</Text>
                       <IconButton size="xs" variant="ghost" color="gray.500" aria-label="Remove item" onClick={() => removeFromCart(item.id)}>
                         <FiTrash2 />
                       </IconButton>

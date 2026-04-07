@@ -646,7 +646,7 @@ export default function PackagesExplorer() {
                 <Text fontSize="11px" px={2.5} py={1} borderRadius="full" bg="white" color="teal.700">
                   {activeVariant.variant.parameters} parameters
                 </Text>
-                <Text fontSize="11px" px={2.5} py={1} borderRadius="full" bg="white" color="orange.500" fontWeight="700">
+                <Text fontSize="md" px={3} py={1.5} borderRadius="full" bg="white" color="orange.500" fontWeight="800">
                   INR {Number(activeVariant.variant.price).toLocaleString("en-IN")}
                 </Text>
               </HStack>
@@ -761,7 +761,7 @@ export default function PackagesExplorer() {
                     {selectedVariants.map((v) => (
                       <th key={v.key} style={{ textAlign: "center", padding: "10px 12px", borderBottom: "1px solid #e2e8f0" }}>
                         <div>{v.variantName}</div>
-                        <div style={{ color: "#f26939", fontWeight: 700 }}>INR {Number(v.price).toLocaleString("en-IN")}</div>
+                        <div style={{ color: "#f26939", fontWeight: 800, fontSize: "18px" }}>INR {Number(v.price).toLocaleString("en-IN")}</div>
                       </th>
                     ))}
                   </tr>
