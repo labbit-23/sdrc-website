@@ -1,0 +1,24 @@
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .lift, .motion { animation: none !important; transition: none !important; }
+}
+
+/* Scroll reveal */
+.reveal{
+  opacity:0;
+  transform:translateY(14px);
+  transition:opacity .6s ease, transform .6s ease;
+  will-change:opacity, transform;
+}
+.reveal.is-visible{ opacity:1; transform:translateY(0); }
+
+/* Hover lift: ONLY on real hover devices (prevents mobile weirdness) */
+@media (hover:hover) and (pointer:fine){
+  .lift{ transition:transform .25s ease, box-shadow .25s ease; will-change:transform; }
+  .lift:hover{ transform:translateY(-3px); }
+}
+
+/* Optional float blobs (cheap) */
+@keyframes floaty{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(0,-12px,0) scale(1.02)}}
+@keyframes floaty2{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(0,10px,0) scale(1.03)}}
+.motion.float-1{ animation:floaty 7s ease-in-out infinite; will-change:transform; }
+.motion.float-2{ animation:floaty2 9s ease-in-out infinite; will-change:transform; }

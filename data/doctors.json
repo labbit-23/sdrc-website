@@ -1,0 +1,31 @@
+{
+  "doctors": [
+    {
+      "name": "Dr. C. Vijay Kumar",
+      "qualification": “MBBS, DCP, FICA)",
+      "specialty": “Director”,
+      "experience": “42+ years",
+      "days": "Mon–Sun”,
+      "photo": "/assets/doctors/dr-kumar.jpg",
+      "bio": "Leads laboratory reporting and quality systems. Focus on clinical correlation and standardized reporting."
+    },
+    {
+      "name": "Dr. Bharani K”,
+      "qualification": "MD (Pathology)”,
+      "specialty": “Haematology”, Clinical, Cyto and Histpathology,
+      "experience": “7+ years",
+      "days": "Mon–Sat",
+      "photo": "/assets/doctors/dr-reddy.jpg",
+      "bio": "Reporting for Haematology, Cyto and Clinical Pathology.”
+    },
+    {
+      "name": "Dr. Nalini Rani”,
+      "qualification": “MBBS, DMRD”,
+      "specialty": "Radiology & Imaging",
+      "experience": “25+ years",
+      "days": "Mon–Sat",
+      "photo": "/assets/doctors/dr-reddy.jpg",
+      "bio": "Reporting for CT, ultrasound and X-ray with emphasis on clear impressions and structured reports."
+    }
+  ]
+}
