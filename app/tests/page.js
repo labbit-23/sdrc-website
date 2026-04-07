@@ -16,7 +16,7 @@ import {
   VStack
 } from "@chakra-ui/react";
 import { FiHome, FiShoppingCart } from "react-icons/fi";
-import { BsBuilding, BsCartPlus } from "react-icons/bs";
+import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
 import healthPackagesData from "@/data/health-packages.json";
 import CartRequestPanel from "@/components/cart/CartRequestPanel";
 import { readCartItems, saveCartItems } from "@/lib/cart";
@@ -514,18 +514,18 @@ export default function TestsPage() {
                             </HStack>
                           </Box>
                           <VStack align="end" gap={2}>
-                            <Text fontWeight="700" color="orange.500" whiteSpace="nowrap">{test.price == null ? "Price N/A" : formatInr(test.price)}</Text>
+                            <Text fontSize="md" fontWeight="700" color="orange.500" whiteSpace="nowrap">{test.price == null ? "Price N/A" : formatInr(test.price)}</Text>
                             <IconButton
                               size="sm"
-                              variant="outline"
-                              bg="white"
-                              color="teal.700"
-                              borderColor="teal.300"
+                              variant={added ? "solid" : "outline"}
+                              bg={added ? "teal.600" : "white"}
+                              color={added ? "white" : "teal.700"}
+                              borderColor={added ? "teal.600" : "teal.300"}
                               aria-label={added ? "Added to cart" : "Add test to cart"}
                               onClick={() => addTestToCart(test)}
                               isDisabled={added}
                             >
-                              <BsCartPlus />
+                              {added ? <BsCartCheck /> : <BsCartPlus />}
                             </IconButton>
                           </VStack>
                         </HStack>
@@ -606,19 +606,19 @@ export default function TestsPage() {
                               </HStack>
                             </Box>
                             <VStack align="end" gap={2}>
-                              <Text fontWeight="700" color="orange.500" whiteSpace="nowrap">{formatInr(pkg.price)}</Text>
+                              <Text fontSize="md" fontWeight="700" color="orange.500" whiteSpace="nowrap">{formatInr(pkg.price)}</Text>
                               <IconButton
                                 size="sm"
-                                variant="outline"
-                                bg="white"
-                                color="teal.700"
-                                borderColor="teal.300"
+                                variant={added ? "solid" : "outline"}
+                                bg={added ? "teal.600" : "white"}
+                                color={added ? "white" : "teal.700"}
+                                borderColor={added ? "teal.600" : "teal.300"}
                                 _disabled={{ bg: "gray.100", color: "gray.500", opacity: 1 }}
                                 aria-label={added ? "Added to cart" : "Add package to cart"}
                                 onClick={() => addPackageToCart(pkg)}
                                 isDisabled={added}
                               >
-                                <BsCartPlus />
+                                {added ? <BsCartCheck /> : <BsCartPlus />}
                               </IconButton>
                             </VStack>
                           </HStack>
@@ -693,7 +693,7 @@ export default function TestsPage() {
                       <Text fontSize="sm" fontWeight="700" color="gray.800">{item.name}</Text>
                       {item.internal_code ? <Text fontSize="xs" color="gray.500">{item.internal_code}</Text> : null}
                       {item.tests_count ? <Text fontSize="xs" color="gray.500">Includes {item.tests_count} tests</Text> : null}
-                      <Text fontSize="xs" color="orange.500" mt={1}>{formatInr(item.price)}</Text>
+                      <Text fontSize="sm" fontWeight="700" color="orange.500" mt={1}>{formatInr(item.price)}</Text>
                     </Box>
                     <Button size="xs" variant="ghost" color="red.600" onClick={() => removeFromCart(item.id)}>Remove</Button>
                   </HStack>

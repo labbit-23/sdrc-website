@@ -105,6 +105,10 @@ a {
 }
 
 @media (max-width: 767px) {
+  html {
+    font-size: 18px;
+  }
+
   .hero-subline {
     font-size: 0.72em;
   }

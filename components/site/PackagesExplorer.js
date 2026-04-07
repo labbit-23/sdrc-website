@@ -18,7 +18,7 @@ import {
   VStack
 } from "@chakra-ui/react";
 import { FiDownload, FiHome, FiShare2, FiX } from "react-icons/fi";
-import { BsBuilding, BsCartPlus } from "react-icons/bs";
+import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
 import packagesData from "@/data/health-packages.json";
 import { siteConfig } from "@/data/siteConfig";
 import { readCartItems, saveCartItems } from "@/lib/cart";
@@ -51,17 +51,8 @@ function buildPackageEnquiryUrl(pkgName, variantName, price) {
   return `https://wa.me/${siteConfig.internalNotifyNumber}?text=${encodeURIComponent(message)}`;
 }
 
-function downloadTextFile(filename, content) {
-  if (typeof window === "undefined") return;
-  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+function getVariantCaptureId(pkgName, variantName) {
+  return `variant-capture-${slugify(pkgName)}-${slugify(variantName)}`;
 }
 
 function getApplicableNotesForTests(testNames) {
@@ -83,12 +74,24 @@ export default function PackagesExplorer() {
   const [showCompare, setShowCompare] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isMobile, setIsMobile] = useState(false);
+  const [showAddLabel, setShowAddLabel] = useState(true);
+  const [cartIds, setCartIds] = useState(new Set());
 
   useEffect(() => {
     const update = () => setIsMobile(window.innerWidth < 768);
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
+  }, []);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => setShowAddLabel(false), 4200);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    const ids = new Set(readCartItems().map((item) => item.id));
+    setCartIds(ids);
   }, []);
 
 
@@ -190,6 +193,7 @@ export default function PackagesExplorer() {
     ];
 
     saveCartItems(next);
+    setCartIds(new Set(next.map((item) => item.id)));
     showToast("Added to cart");
   };
 
@@ -215,74 +219,118 @@ export default function PackagesExplorer() {
     });
   };
 
-  const handleShare = async (pkgName, variant) => {
-    const url = variantShareUrl(pkgName);
-    const text = `${pkgName} - ${variant.name} at SDRC Diagnostics`;
+  async function nodeToCanvas(node) {
+    if (typeof window === "undefined" || !window.html2canvas || !node) return null;
+    return window.html2canvas(node, {
+      backgroundColor: "#ffffff",
+      scale: 2.2,
+      useCORS: true,
+      width: node.scrollWidth,
+      height: node.scrollHeight,
+      windowWidth: node.scrollWidth,
+      windowHeight: node.scrollHeight,
+      scrollX: 0,
+      scrollY: 0
+    });
+  }
 
-    if (typeof navigator === "undefined") return;
+  async function canvasToBlob(canvas) {
+    return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.96));
+  }
+
+  async function shareCanvas(canvas, fileName, text) {
+    const blob = await canvasToBlob(canvas);
+    if (!blob) return false;
+
+    const file = new File([blob], fileName, { type: "image/jpeg" });
+    const canShareFiles = typeof navigator !== "undefined" && navigator.share && navigator.canShare && navigator.canShare({ files: [file] });
+    if (canShareFiles) {
+      await navigator.share({ files: [file], text });
+      return true;
+    }
+    return false;
+  }
+
+  async function copyToClipboard(text) {
+    if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return false;
+  }
+
+  function downloadCanvas(canvas, fileName) {
+    const link = document.createElement("a");
+    link.download = fileName;
+    link.href = canvas.toDataURL("image/jpeg", 0.96);
+    link.click();
+  }
+
+  const handleShare = async (pkgName, variant) => {
+    const pageLink = `${window.location.origin}${variantShareUrl(pkgName)}`;
+    const shareText = `${pkgName} - ${variant.name}\n${pageLink}`;
+    const captureId = getVariantCaptureId(pkgName, variant.name);
+    const node = document.getElementById(captureId) || document.getElementById("package-detail-capture");
 
     try {
-      if (navigator.share) {
-        await navigator.share({ title: text, text, url });
+      const canvas = await nodeToCanvas(node);
+      if (canvas && await shareCanvas(canvas, `${slugify(pkgName)}-${slugify(variant.name)}.jpg`, shareText)) return;
+
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: `${pkgName} - ${variant.name}`, text: shareText, url: pageLink });
         return;
       }
 
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(url);
-        showToast("Package link copied");
+      if (canvas) {
+        downloadCanvas(canvas, `${slugify(pkgName)}-${slugify(variant.name)}.jpg`);
+      }
+      if (await copyToClipboard(pageLink)) {
+        showToast("Image downloaded. Package link copied");
+      } else {
+        showToast("Image downloaded. Please share with /packages link");
       }
     } catch (err) {
-      if (err && (err.name === "AbortError" || /cancel/i.test(String(err.message || "")))) {
-        return;
-      }
+      if (err && (err.name === "AbortError" || /cancel/i.test(String(err.message || "")))) return;
       showToast("Unable to share right now");
     }
   };
 
-  const handleDownload = (pkgName, variant, description) => {
-    const fileName = `${slugify(pkgName)}-${slugify(variant.name)}.txt`;
-    const lines = [
-      "SDRC Diagnostics Package Snapshot",
-      "",
-      `Package: ${pkgName}`,
-      `Variant: ${variant.name}`,
-      `Price: INR ${Number(variant.price).toLocaleString("en-IN")}`,
-      `Parameters: ${variant.parameters}`,
-      `Description: ${description}`,
-      "",
-      "Included Tests:",
-      ...(variant.tests || []).map((t) => "- " + t),
-      "",
-      "Important notes:",
-      ...getApplicableNotesForTests(variant.tests || []),
-      "",
-      "Book Online:",
-      siteConfig.bookingUrl
-    ];
-    downloadTextFile(fileName, lines.join("\n"));
-    showToast("Package summary downloaded");
-  };
-
-  const downloadCompareImage = async () => {
-    if (typeof window === "undefined" || !window.html2canvas) {
+  const handleDownload = async (pkgName, variant) => {
+    const captureId = getVariantCaptureId(pkgName, variant.name);
+    const node = document.getElementById(captureId) || document.getElementById("package-detail-capture");
+    const canvas = await nodeToCanvas(node);
+    if (!canvas) {
       showToast("Image export unavailable");
       return;
     }
+    downloadCanvas(canvas, `${slugify(pkgName)}-${slugify(variant.name)}.jpg`);
+    showToast("Package image downloaded");
+  };
+
+  async function captureCompareCanvas() {
+    if (typeof window === "undefined" || !window.html2canvas) {
+      showToast("Image export unavailable");
+      return null;
+    }
     const source = document.getElementById("compare-capture");
-    if (!source) return;
+    if (!source) return null;
 
     const wrapper = document.createElement("div");
     wrapper.style.position = "fixed";
     wrapper.style.left = "-100000px";
     wrapper.style.top = "0";
     wrapper.style.background = "#ffffff";
-    wrapper.style.padding = "18px";
-    wrapper.style.width = `${Math.max(source.scrollWidth, 960)}px`;
+    wrapper.style.padding = "24px";
+    wrapper.style.width = `${Math.max(source.scrollWidth, 1120)}px`;
 
     const clone = source.cloneNode(true);
     clone.style.overflow = "visible";
     clone.style.maxHeight = "none";
     clone.style.width = "100%";
+    clone.querySelectorAll("th, td, div, span, p").forEach((el) => {
+      const current = Number.parseFloat(window.getComputedStyle(el).fontSize || "0");
+      if (!Number.isNaN(current) && current < 16) el.style.fontSize = "16px";
+    });
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
 
@@ -290,11 +338,11 @@ export default function PackagesExplorer() {
       const width = wrapper.scrollWidth;
       const height = wrapper.scrollHeight;
       const maxDim = 14000;
-      const scale = Math.min(2, maxDim / Math.max(width, height));
+      const scale = Math.min(2.4, maxDim / Math.max(width, height));
 
       const canvas = await window.html2canvas(wrapper, {
         backgroundColor: "#ffffff",
-        scale: Math.max(0.65, scale),
+        scale: Math.max(1, scale),
         useCORS: true,
         width,
         height,
@@ -303,14 +351,31 @@ export default function PackagesExplorer() {
         scrollX: 0,
         scrollY: 0
       });
-
-      const link = document.createElement("a");
-      link.download = "sdrc-package-comparison.jpg";
-      link.href = canvas.toDataURL("image/jpeg", 0.96);
-      link.click();
-      showToast("Comparison downloaded as JPG");
+      return canvas;
     } finally {
       wrapper.remove();
+    }
+  }
+
+  const downloadCompareImage = async () => {
+    const canvas = await captureCompareCanvas();
+    if (!canvas) return;
+    downloadCanvas(canvas, "sdrc-package-comparison.jpg");
+    showToast("Comparison downloaded as JPG");
+  };
+
+  const shareCompareImage = async () => {
+    const canvas = await captureCompareCanvas();
+    if (!canvas) return;
+    const packagesLink = `${window.location.origin}/packages`;
+    const shared = await shareCanvas(canvas, "sdrc-package-comparison.jpg", `Compare SDRC packages\n${packagesLink}`);
+    if (!shared) {
+      downloadCanvas(canvas, "sdrc-package-comparison.jpg");
+      if (await copyToClipboard(packagesLink)) {
+        showToast("Image downloaded. Packages link copied");
+      } else {
+        showToast("Image downloaded. Please share with /packages link");
+      }
     }
   };
 
@@ -345,14 +410,28 @@ export default function PackagesExplorer() {
               {pkg.variants.map((variant) => {
                 const key = getVariantKey(pkg.name, variant.name);
                 const checked = Boolean(selected[key]);
+                const cartId = `pkg_${slugify(pkg.name)}_${slugify(variant.name)}`;
+                const added = cartIds.has(cartId);
                 const description = variant.description || pkg.description;
                 const keyInclusions = Array.isArray(variant.key_inclusions) && variant.key_inclusions.length > 0
                   ? variant.key_inclusions
                   : (variant.tests || []).slice(0, 4);
 
                 return (
-                  <Box key={key} className="soft-card no-hover-lift" p={4} position="relative" overflow="hidden" display="flex" flexDirection="column">
+                  <Box
+                    key={key}
+                    id={getVariantCaptureId(pkg.name, variant.name)}
+                    className="soft-card no-hover-lift"
+                    p={4}
+                    position="relative"
+                    overflow="hidden"
+                    display="flex"
+                    flexDirection="column"
+                  >
                     <Box position="absolute" top={0} left={0} right={0} h="4px" bgGradient="linear(to-r, teal.500, orange.400, teal.500)" />
+                    <Box position="absolute" top={3} right={3} opacity={0.9}>
+                      <Image src="/assets/sdrc-logo.png" alt="SDRC" width={62} height={18} />
+                    </Box>
                     <Heading size="sm" color="teal.700">
                       {variant.name}
                     </Heading>
@@ -430,14 +509,16 @@ export default function PackagesExplorer() {
                         <Button
                           size="sm"
                           variant="outline"
-                          bg="white"
-                          color="teal.700"
-                          borderColor="teal.300"
+                          bg={added ? "teal.600" : "white"}
+                          color={added ? "white" : "teal.700"}
+                          borderColor={added ? "teal.600" : "teal.300"}
                           onClick={() => addVariantToCart(pkg, variant)}
-                          px={0}
-                          minW="38px"
+                          isDisabled={added}
+                          px={showAddLabel && !added ? 3 : 0}
+                          minW={showAddLabel && !added ? "110px" : "38px"}
+                          leftIcon={showAddLabel && !added ? <BsCartPlus /> : null}
                         >
-                          <BsCartPlus />
+                          {added ? <BsCartCheck /> : showAddLabel ? "Add to Cart" : <BsCartPlus />}
                         </Button>
                       </HStack>
 
@@ -538,7 +619,7 @@ export default function PackagesExplorer() {
                     size="sm"
                     variant="outline"
                     aria-label="Download package summary"
-                    onClick={() => handleDownload(activeVariant.pkgName, activeVariant.variant, activeVariant.description)}
+                    onClick={() => handleDownload(activeVariant.pkgName, activeVariant.variant)}
                   >
                     <FiDownload />
                   </IconButton>
@@ -631,14 +712,25 @@ export default function PackagesExplorer() {
                 <Heading size="md">Compare packages</Heading>
               </HStack>
               <HStack spacing={1}>
-                <IconButton
-                  size="sm"
-                  variant="outline"
-                  aria-label="Download comparison JPG"
-                  onClick={downloadCompareImage}
-                >
-                  <FiDownload />
-                </IconButton>
+                {isMobile ? (
+                  <IconButton
+                    size="sm"
+                    variant="outline"
+                    aria-label="Share comparison"
+                    onClick={shareCompareImage}
+                  >
+                    <FiShare2 />
+                  </IconButton>
+                ) : (
+                  <IconButton
+                    size="sm"
+                    variant="outline"
+                    aria-label="Download comparison JPG"
+                    onClick={downloadCompareImage}
+                  >
+                    <FiDownload />
+                  </IconButton>
+                )}
                 <IconButton
                   size="sm"
                   variant="outline"
@@ -650,13 +742,18 @@ export default function PackagesExplorer() {
               </HStack>
             </Flex>
 
-            <Box overflowX="auto" id="compare-capture">
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px", lineHeight: 1.3 }}>
+            <Box id="compare-capture">
+              <HStack spacing={3} mb={3}>
+                <Image src="/assets/sdrc-logo.png" alt="SDRC" width={94} height={28} />
+                <Text fontWeight="700" color="gray.700">Package Comparison</Text>
+              </HStack>
+              <Box overflowX="auto">
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "15px", lineHeight: 1.35 }}>
                 <thead>
                   <tr>
-                    <th style={{ textAlign: "left", padding: "8px 10px", borderBottom: "1px solid #e2e8f0" }}>Test</th>
+                    <th style={{ textAlign: "left", padding: "10px 12px", borderBottom: "1px solid #e2e8f0" }}>Test</th>
                     {selectedVariants.map((v) => (
-                      <th key={v.key} style={{ textAlign: "center", padding: "8px 10px", borderBottom: "1px solid #e2e8f0" }}>
+                      <th key={v.key} style={{ textAlign: "center", padding: "10px 12px", borderBottom: "1px solid #e2e8f0" }}>
                         <div>{v.variantName}</div>
                         <div style={{ color: "#f26939", fontWeight: 700 }}>INR {Number(v.price).toLocaleString("en-IN")}</div>
                       </th>
@@ -667,7 +764,7 @@ export default function PackagesExplorer() {
                   {compareGrouped.map((group) => (
                     <Fragment key={group.category}>
                       <tr key={group.category + "-head"}>
-                        <td colSpan={1 + selectedVariants.length} style={{ padding: "7px 10px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0", fontWeight: 700 }}>
+                        <td colSpan={1 + selectedVariants.length} style={{ padding: "9px 12px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0", fontWeight: 700 }}>
                           <span style={{ display: "inline-flex", gap: "6px", alignItems: "center" }}>
                             {packagesData.categoryIconMap?.[group.category] ? (
                               <img src={packagesData.categoryIconMap[group.category]} alt={group.category} width="14" height="14" />
@@ -678,9 +775,9 @@ export default function PackagesExplorer() {
                       </tr>
                       {group.tests.map((test) => (
                         <tr key={group.category + "-" + test}>
-                          <td style={{ padding: "6px 8px", borderBottom: "1px solid #edf2f7" }}>{test}</td>
+                          <td style={{ padding: "8px 10px", borderBottom: "1px solid #edf2f7" }}>{test}</td>
                           {selectedVariants.map((v) => (
-                            <td key={v.key + "-" + test} style={{ textAlign: "center", padding: "6px 8px", borderBottom: "1px solid #edf2f7", fontWeight: 700 }}>
+                            <td key={v.key + "-" + test} style={{ textAlign: "center", padding: "8px 10px", borderBottom: "1px solid #edf2f7", fontWeight: 700 }}>
                               {v.tests.includes(test) ? "✓" : ""}
                             </td>
                           ))}
@@ -689,7 +786,8 @@ export default function PackagesExplorer() {
                     </Fragment>
                   ))}
                 </tbody>
-              </table>
+                </table>
+              </Box>
             </Box>
 
             {compareNotes.length > 0 ? (
