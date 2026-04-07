@@ -187,28 +187,27 @@ export default function QuickBookPage() {
             <Heading size="md" mb={1}>Collection Date & Time</Heading>
             <Text fontSize="sm" color="gray.600" mb={4}>Choose preferred date and slot.</Text>
 
-            <HStack gap={2} overflowX="auto" pb={1} mb={4} align="stretch">
+            <SimpleGrid columns={{ base: 5, md: 7 }} gap={2} mb={4}>
               {dayOptions.map((day) => {
                 const active = selectedDate === day.iso;
                 return (
                   <Button
                     key={day.iso}
                     variant={active ? "solid" : "outline"}
-                    minW="82px"
-                    h="84px"
-                    borderRadius="xl"
+                    h={{ base: "74px", md: "84px" }}
+                    borderRadius={{ base: "lg", md: "xl" }}
                     onClick={() => setSelectedDate(day.iso)}
-                    px={2}
+                    px={{ base: 1, md: 2 }}
                   >
                     <VStack gap={0}>
                       <Text fontSize="10px" opacity={0.9}>{day.month}</Text>
-                      <Text fontSize="2xl" lineHeight="1" fontWeight="800">{day.day}</Text>
+                      <Text fontSize={{ base: "xl", md: "2xl" }} lineHeight="1" fontWeight="800">{day.day}</Text>
                       <Text fontSize="11px">{day.label}</Text>
                     </VStack>
                   </Button>
                 );
               })}
-            </HStack>
+            </SimpleGrid>
 
             {loadingSlots ? (
               <HStack py={8} justify="center">
@@ -220,7 +219,7 @@ export default function QuickBookPage() {
                 {Object.entries(slotGroups).map(([groupName, groupSlots]) => (
                   <Box key={groupName}>
                     <Text fontSize="xs" fontWeight="700" color="teal.700" mb={2}>{groupName}</Text>
-                    <SimpleGrid columns={{ base: 2, sm: 3 }} gap={2}>
+                    <SimpleGrid columns={{ base: 2, md: 3 }} gap={2}>
                       {groupSlots.map((slot) => {
                         const active = selectedSlot === slot.id;
                         return (
