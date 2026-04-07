@@ -283,7 +283,7 @@ export default function TestsPage() {
     <>
       <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
         <Container maxW="1200px">
-          <Grid templateColumns={{ base: "1fr", lg: "1fr auto" }} gap={6} alignItems="center">
+          <Grid templateColumns={{ base: "1fr" }} gap={6} alignItems="center">
             <Box>
               <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="16ch" className="hero-title">
                 Test Selection
@@ -294,21 +294,27 @@ export default function TestsPage() {
               <Text mt={3} color="gray.700" fontSize={{ base: "md", md: "lg" }}>
                 Find tests and packages, then send one request to the lab team.
               </Text>
-            </Box>
-
-            <Box className="soft-card no-hover-lift" p={4} minW={{ lg: "290px" }}>
-              <Text fontSize="xs" color="gray.500">
-                Cart Snapshot
-              </Text>
-              <Text fontSize="2xl" fontWeight="800" color="teal.700">
-                {itemCount} item(s)
-              </Text>
-              <Text fontSize="sm" color="gray.600">
-                {formatInr(subtotal)}
-              </Text>
-              <Button mt={3} size="sm" onClick={scrollToCart} leftIcon={<FiShoppingCart />}>
-                Open Cart
-              </Button>
+              <HStack mt={4} maxW={{ base: "100%", md: "720px" }}>
+                <Input
+                  bg="white"
+                  placeholder="Search tests or packages (TSH, HbA1c, Lipid...)"
+                  value={query}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setPage(1);
+                    setQuery(value);
+                    if (value.trim().length > 0) {
+                      setActiveCategory("All");
+                      setMostCommonOnly(false);
+                      setMostPopularOnly(false);
+                      setHomeCollectionFilter(false);
+                    }
+                  }}
+                />
+                <Button size="sm" variant="outline" onClick={clearSearchAndFilters}>
+                  Clear
+                </Button>
+              </HStack>
             </Box>
           </Grid>
         </Container>
