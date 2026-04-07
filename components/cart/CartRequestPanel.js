@@ -95,8 +95,26 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
       </Box>
 
       <VStack align="stretch" gap={2}>
-        <Input bg="white" size="sm" placeholder="Patient name *" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
-        <Input bg="white" size="sm" placeholder="Patient phone number *" value={patientPhone} onChange={(e) => setPatientPhone(e.target.value)} />
+        <Input
+          bg="white"
+          size="sm"
+          placeholder="Patient name *"
+          name="patient_name"
+          autoComplete="name"
+          value={patientName}
+          onChange={(e) => setPatientName(e.target.value)}
+        />
+        <Input
+          bg="white"
+          size="sm"
+          placeholder="Patient phone number *"
+          name="patient_phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          value={patientPhone}
+          onChange={(e) => setPatientPhone(e.target.value)}
+        />
         <Input bg="white" size="sm" placeholder="Optional note (timing/preferences)" value={patientNotes} onChange={(e) => setPatientNotes(e.target.value)} />
 
         <HStack spacing={2} mt={1} align="start">
@@ -148,4 +166,3 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
     </Grid>
   );
 }
-
