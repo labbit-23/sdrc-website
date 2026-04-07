@@ -79,10 +79,22 @@ export default function TestsPage() {
   const [showFullTestsMobile, setShowFullTestsMobile] = useState(false);
 
   const packageVariants = useMemo(() => flattenPackageVariants(healthPackagesData), []);
-  const filteredPackageVariants = useMemo(
-    () => (homeCollectionFilter ? packageVariants.filter((pkg) => pkg.home_collection) : packageVariants),
-    [packageVariants, homeCollectionFilter]
-  );
+  const filteredPackageVariants = useMemo(() => {
+    const q = debouncedQuery.trim().toLowerCase();
+    const base = homeCollectionFilter ? packageVariants.filter((pkg) => pkg.home_collection) : packageVariants;
+    if (!q) return base;
+    return base.filter((pkg) => {
+      const blob = [
+        pkg.package_name,
+        pkg.name,
+        pkg.short_description,
+        ...(Array.isArray(pkg.tests) ? pkg.tests : [])
+      ]
+        .join(" ")
+        .toLowerCase();
+      return blob.includes(q);
+    });
+  }, [packageVariants, homeCollectionFilter, debouncedQuery]);
   const groupedPackageVariants = useMemo(() => {
     const groups = new Map();
     filteredPackageVariants.forEach((pkg) => {
@@ -110,6 +122,12 @@ export default function TestsPage() {
     const source = items.filter((test) => test.is_most_popular);
     return (source.length > 0 ? source : items).slice(0, 16);
   }, [items]);
+  const isSearching = debouncedQuery.trim().length > 0;
+  const mobileTestSectionTitle = isSearching ? "Matching Tests" : "Most Booked Tests";
+  const mobileTestCards = useMemo(() => {
+    if (isSearching) return items.slice(0, 16);
+    return mobilePopularTests;
+  }, [isSearching, items, mobilePopularTests]);
   const categoryFilters = useMemo(() => ["All", ...categories], [categories]);
 
   const subtotal = useMemo(
@@ -271,7 +289,7 @@ export default function TestsPage() {
     setQuery("");
     setActiveCategory("All");
     setMostCommonOnly(false);
-    setMostPopularOnly(false);
+    setMostPopularOnly(true);
     setHomeCollectionFilter(false);
   }
 
@@ -394,7 +412,7 @@ export default function TestsPage() {
                   }}
                   style={{ accentColor: "#008f82" }}
                 />
-                <Text fontSize="xs" fontWeight="600">Most popular</Text>
+                <Text fontSize="xs" fontWeight="600">Most booked</Text>
               </HStack>
               <HStack spacing={2}>
                 <Box
@@ -414,11 +432,16 @@ export default function TestsPage() {
 
           <Box className="soft-card no-hover-lift" p={4}>
             <HStack justify="space-between" mb={3}>
-              <Heading size="sm">Popular Checkups</Heading>
+              <Heading size="sm">{isSearching ? "Matching Checkups" : "Popular Checkups"}</Heading>
               <Button as="a" href="/packages" size="xs" variant="outline">View all</Button>
             </HStack>
-            <HStack gap={3} overflowX="auto" pb={1} align="stretch">
-              {mobileFeaturedPackages.map((pkg) => {
+            {mobileFeaturedPackages.length === 0 ? (
+              <Box borderWidth="1px" borderStyle="dashed" borderColor="gray.200" borderRadius="lg" p={3}>
+                <Text fontSize="sm" color="gray.500">No packages match this search.</Text>
+              </Box>
+            ) : (
+              <HStack gap={3} overflowX="auto" pb={1} align="stretch">
+                {mobileFeaturedPackages.map((pkg) => {
                 const added = isInCart(pkg.id);
                 return (
                   <Box key={pkg.id} minW="220px" borderWidth="1px" borderColor="gray.100" borderRadius="xl" p={3} bg="white">
@@ -442,12 +465,13 @@ export default function TestsPage() {
                     </HStack>
                   </Box>
                 );
-              })}
-            </HStack>
+                })}
+              </HStack>
+            )}
           </Box>
 
           <Box className="soft-card no-hover-lift" p={4}>
-            <Heading size="sm" mb={3}>Most Booked Tests</Heading>
+            <Heading size="sm" mb={3}>{mobileTestSectionTitle}</Heading>
             {loading ? (
               <HStack py={6} justify="center">
                 <Spinner color="teal.500" />
@@ -455,7 +479,7 @@ export default function TestsPage() {
               </HStack>
             ) : (
               <HStack gap={3} overflowX="auto" pb={1} align="stretch">
-                {mobilePopularTests.map((test) => {
+                {mobileTestCards.map((test) => {
                   const added = isInCart(test.id);
                   return (
                     <Box key={test.id} minW="230px" borderWidth="1px" borderColor="gray.100" borderRadius="xl" p={3} bg="white">
@@ -546,27 +570,9 @@ export default function TestsPage() {
             </Text>
 
             <Grid templateColumns={{ base: "1fr", md: "1fr auto" }} gap={3} alignItems="center">
-              <HStack>
-                <Input
-                  bg="white"
-                  placeholder="Search tests (TSH, HbA1c, Lipid...)"
-                  value={query}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setPage(1);
-                    setQuery(value);
-                    if (value.trim().length > 0) {
-                      setActiveCategory("All");
-                      setMostCommonOnly(false);
-                      setMostPopularOnly(false);
-                      setHomeCollectionFilter(false);
-                    }
-                  }}
-                />
-                <Button size="sm" variant="outline" onClick={clearSearchAndFilters}>
-                  Clear
-                </Button>
-              </HStack>
+              <Text fontSize="sm" color="gray.600">
+                Use the hero search above to find tests instantly.
+              </Text>
 
               <Button size="sm" variant="outline" onClick={() => setShowDepartmentFilters((v) => !v)} leftIcon={<FiFilter />}>
                 {showDepartmentFilters ? "Hide Departments" : "Show Departments"}
@@ -586,7 +592,7 @@ export default function TestsPage() {
                   style={{ accentColor: "#008f82" }}
                 />
                 <Text fontSize="xs" fontWeight="600">
-                  Most common
+                  Common tests
                 </Text>
               </HStack>
 
@@ -602,7 +608,7 @@ export default function TestsPage() {
                   style={{ accentColor: "#008f82" }}
                 />
                 <Text fontSize="xs" fontWeight="600">
-                  Most popular
+                  Most booked
                 </Text>
               </HStack>
 

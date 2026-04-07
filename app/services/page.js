@@ -168,11 +168,11 @@ export default function ServicesPage() {
                 </Box>
               </Heading>
 
-              <Text mt={4} fontSize="lg" color="gray.700">
+              <Text mt={4} fontSize="lg" color="gray.700" display={{ base: "none", md: "block" }}>
                 Imaging, cardio-pulmonary, neurology and a full-service pathology lab at Jade Arcade, Paradise.
               </Text>
 
-              <HStack mt={5} spacing={2} flexWrap="wrap">
+              <HStack mt={5} spacing={2} flexWrap="wrap" display={{ base: "none", md: "flex" }}>
                 {chips.map((chip) => (
                   <Link key={chip.label} href={"#" + chip.id}>
                     <Box
@@ -213,7 +213,7 @@ export default function ServicesPage() {
                 </Box>
               </Box>
 
-              <SimpleGrid columns={4} spacing={2} mt={3}>
+              <SimpleGrid columns={4} spacing={2} mt={3} display={{ base: "none", md: "grid" }}>
                 {gallery.map((img, idx) => (
                   <Box
                     as="button"

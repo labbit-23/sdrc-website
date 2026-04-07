@@ -45,7 +45,7 @@ export default function AccreditationPage() {
                 <Box as="span" color="teal.700" className="hero-subline">NABL Accreditation</Box>
               </Heading>
 
-              <Text mt={4} fontSize={{ base: "md", md: "lg" }} color="gray.700">
+              <Text mt={4} fontSize={{ base: "md", md: "lg" }} color="gray.700" display={{ base: "none", md: "block" }}>
                 SDRC Diagnostics is committed to reliable, repeatable and clinically meaningful laboratory results for effective patient care.
               </Text>
 
@@ -123,7 +123,7 @@ export default function AccreditationPage() {
           </SimpleGrid>
         </Box>
 
-        <Box mt={12}>
+        <Box mt={12} display={{ base: "none", md: "block" }}>
           <Heading size="xl" mb={4}>
             Laboratory quality systems
           </Heading>

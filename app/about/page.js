@@ -37,7 +37,7 @@ export default function AboutPage() {
               <Text mt={4} fontSize={{ base: "md", md: "lg" }} color="gray.700">
                 SDRC (Secunderabad Diagnostic and Research Centre) is a multi-specialty diagnostic centre at Jade Arcade, Paradise, bringing together imaging, cardiology, neurology, pulmonology and a comprehensive laboratory under one roof.
               </Text>
-              <Text mt={3} color="gray.600" fontSize="sm">
+              <Text mt={3} color="gray.600" fontSize="sm" display={{ base: "none", md: "block" }}>
                 Established in 1983, SDRC has grown from a standalone laboratory into a benchmark for diagnostics in Secunderabad, combining experienced professionals, calibrated equipment and structured reporting.
               </Text>
             </Box>
@@ -80,7 +80,7 @@ export default function AboutPage() {
             </SimpleGrid>
           </Box>
 
-          <Box>
+          <Box display={{ base: "none", md: "block" }}>
             <Heading size="xl" mb={4}>
               Clinical & management team
             </Heading>
@@ -116,7 +116,7 @@ export default function AboutPage() {
             </SimpleGrid>
           </Box>
 
-          <Box>
+          <Box display={{ base: "none", md: "block" }}>
             <Heading size="xl" mb={4}>
               Our journey since 1983
             </Heading>
@@ -140,7 +140,7 @@ export default function AboutPage() {
             </Grid>
           </Box>
 
-          <Box>
+          <Box display={{ base: "none", md: "block" }}>
             <Heading size="xl" mb={4}>
               Centres & coverage
             </Heading>

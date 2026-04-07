@@ -63,12 +63,12 @@ export default function ContactPage() {
                   Main Centre and Collection Centres
                 </Box>
               </Heading>
-              <Text mt={3} color="gray.700" fontSize={{ base: "md", md: "lg" }}>
+              <Text mt={3} color="gray.700" fontSize={{ base: "md", md: "lg" }} display={{ base: "none", md: "block" }}>
                 Reach us for appointments, health packages, home sample collection or report-related queries.
               </Text>
 
               <SimpleGrid mt={6} columns={{ base: 1, sm: 3 }} spacing={4}>
-                <Box className="soft-card" p={4}>
+                <Box className="soft-card" p={4} display={{ base: "none", sm: "block" }}>
                   <Text fontWeight="700" mb={1}>
                     Call
                   </Text>
@@ -100,7 +100,7 @@ export default function ContactPage() {
               </SimpleGrid>
             </Box>
 
-            <Box className="soft-card" p={6}>
+            <Box className="soft-card" p={6} display={{ base: "none", lg: "block" }}>
               <Heading size="md" mb={2}>
                 Quick enquiry
               </Heading>
@@ -125,7 +125,7 @@ export default function ContactPage() {
 
       <Container maxW="1200px" py={12}>
         <VStack align="stretch" gap={12}>
-          <Box>
+          <Box display={{ base: "none", md: "block" }}>
             <Heading size="xl" mb={4}>
               Main centre - Jade Arcade, Paradise
             </Heading>

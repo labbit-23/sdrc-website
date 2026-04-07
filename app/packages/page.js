@@ -21,7 +21,7 @@ export default function PackagesPage() {
               <Text mt={4} fontSize="lg" color="gray.700">
                 From quick screening panels to in-depth cardiac, diabetic, women’s and lifestyle wellness plans — all under one roof.
               </Text>
-              <Text mt={3} color="gray.600" fontSize="sm">
+              <Text mt={3} color="gray.600" fontSize="sm" display={{ base: "none", md: "block" }}>
                 Select <Box as="span" fontWeight="700">“Compare”</Box> on two or more variants to see them side-by-side,
                 or <Box as="span" fontWeight="700">“View Included Tests”</Box> to see full details for a single package.
               </Text>
@@ -30,7 +30,7 @@ export default function PackagesPage() {
                 <Button as={Link} href="/tests" variant="outline">Book A Test</Button>
                 <Button as={Link} href={"https://wa.me/" + siteConfig.internalNotifyNumber} variant="outline" target="_blank">Talk to us on WhatsApp</Button>
               </HStack>
-              <HStack mt={4} spacing={2} flexWrap="wrap">
+              <HStack mt={4} spacing={2} flexWrap="wrap" display={{ base: "none", md: "flex" }}>
                 <Text px={3} py={1} borderRadius="full" bg="white" className="shadow-soft" fontSize="11px" color="teal.700">
                   Fasting guidance shared in advance
                 </Text>
@@ -43,7 +43,7 @@ export default function PackagesPage() {
               </HStack>
             </Box>
 
-            <Box className="soft-card" p={6}>
+            <Box className="soft-card" p={6} display={{ base: "none", lg: "block" }}>
               <Heading size="md" mb={2}>Not sure which package is right for you?</Heading>
               <Text color="gray.700" fontSize="sm" mb={3}>
                 You can compare packages or share your age, concerns and existing conditions on WhatsApp.

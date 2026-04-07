@@ -125,12 +125,12 @@ export default function HomePage() {
                 <Box as="span" color="orange.500" className="hero-subline">at Jade Arcade, Paradise</Box>
               </Heading>
 
-              <Text mt={4} fontSize={{ base: "md", md: "lg" }} color="gray.700" maxW="2xl">
+              <Text mt={4} fontSize={{ base: "md", md: "lg" }} color="gray.700" maxW="2xl" display={{ base: "none", md: "block" }}>
                 Ultrasound and Doppler, CT, Digital X-Ray, Mammography, DEXA, ECG/2D-Echo,
                 EEG/ENMG, TMT, Spirometry and a full-service pathology lab with preventive health packages.
               </Text>
 
-              <HStack mt={5} spacing={2} flexWrap="wrap">
+              <HStack mt={5} spacing={2} flexWrap="wrap" display={{ base: "none", md: "flex" }}>
                 {facilityChips.map((chip) => (
                   <Link key={chip} href="/services">
                     <Box px={3} py={1.5} bg="white" border="1px solid" borderColor="teal.100" borderRadius="full" fontSize="xs" fontWeight="500" color="gray.700" className="shadow-soft">
@@ -175,7 +175,7 @@ export default function HomePage() {
                 NABL accredited laboratory. Reports available online and on WhatsApp.
               </Text>
 
-              <SimpleGrid mt={8} columns={{ base: 1, sm: 3 }} spacing={4} maxW="760px">
+              <SimpleGrid mt={8} columns={{ base: 1, sm: 3 }} spacing={4} maxW="760px" display={{ base: "none", sm: "grid" }}>
                 <Box className="soft-card" p={4} textAlign="center">
                   <Text fontSize="sm" color="gray.600">Reports/day</Text>
                   <Heading size="lg" color="teal.700">{reportCount.toLocaleString("en-IN")}+</Heading>
@@ -202,7 +202,7 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      <Container maxW="1200px" py={12}>
+      <Container maxW="1200px" py={12} display={{ base: "none", md: "block" }}>
         <Heading size="xl" mb={6}>All facilities under one roof</Heading>
         <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
           {facilities.map((group) => (
@@ -216,7 +216,7 @@ export default function HomePage() {
         </SimpleGrid>
       </Container>
 
-      <Container maxW="1200px" py={6}>
+      <Container maxW="1200px" py={6} display={{ base: "none", md: "block" }}>
         <HStack justify="space-between" align="end" mb={6} flexWrap="wrap" gap={3}>
           <Box>
             <Heading size="xl">Popular health check packages</Heading>
@@ -247,7 +247,7 @@ export default function HomePage() {
         </SimpleGrid>
       </Container>
 
-      <Container maxW="1200px" py={12}>
+      <Container maxW="1200px" py={12} display={{ base: "none", md: "block" }}>
         <Heading size="xl" mb={6}>What patients say</Heading>
         <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
           {reviews.map((review) => (
