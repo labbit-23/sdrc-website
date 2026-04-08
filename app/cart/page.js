@@ -13,8 +13,8 @@ function formatInr(amount) {
 }
 
 function formatLinePrice(amount) {
-  if (amount == null || Number.isNaN(Number(amount))) return "0";
-  return Number(amount).toLocaleString("en-IN");
+  if (amount == null || Number.isNaN(Number(amount))) return "0.00";
+  return Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export default function CartPage() {
@@ -70,26 +70,26 @@ export default function CartPage() {
               <Heading size="md" mb={3}>Selected Items ({items.length})</Heading>
               <VStack align="stretch" gap={2}>
                 {items.map((item) => (
-                  <Box key={item.id} borderWidth="1px" borderColor="gray.100" borderRadius="md" p={3}>
-                    <HStack justify="space-between" align="start" gap={2} flexWrap="wrap">
-                      <Box>
-                        <HStack spacing={2} mb={1}>
+                  <Box key={item.id} borderWidth="1px" borderColor="gray.100" borderRadius="md" p={3} bg={{ base: "teal.50", md: "white" }}>
+                    <VStack align="stretch" gap={1}>
+                      <HStack justify="space-between" align="start" gap={2}>
+                        <HStack spacing={2} mb={1} flexWrap="wrap" pr={2}>
                           <Badge colorPalette={item.item_type === "package" ? "orange" : "teal"} variant="subtle">
                             {item.item_type === "package" ? "Package" : "Test"}
                           </Badge>
                           {item.department ? <Text fontSize="xs" color="gray.500">{item.department}</Text> : null}
                         </HStack>
-                        <Text fontWeight="700" color="gray.800">{item.name}</Text>
-                        {item.internal_code ? <Text fontSize="xs" color="gray.500">{item.internal_code}</Text> : null}
-                        {item.tests_count ? <Text fontSize="xs" color="gray.500">Includes {item.tests_count} tests</Text> : null}
-                      </Box>
-                      <VStack align="end" gap={1} minW="96px" ml="auto">
-                        <Text fontWeight="700" color="orange.500">{formatLinePrice(item.price)}</Text>
                         <IconButton size="xs" variant="ghost" color="gray.500" aria-label="Remove item" onClick={() => removeItem(item.id)}>
                           <FiTrash2 />
                         </IconButton>
-                      </VStack>
-                    </HStack>
+                      </HStack>
+                      <Text fontWeight="700" color="gray.800">{item.name}</Text>
+                      {item.internal_code ? <Text fontSize="xs" color="gray.500">{item.internal_code}</Text> : null}
+                      {item.tests_count ? <Text fontSize="xs" color="gray.500">Includes {item.tests_count} tests</Text> : null}
+                      <HStack justify="flex-end" mt={0.5}>
+                        <Text fontWeight="700" color="orange.500">{formatLinePrice(item.price)}</Text>
+                      </HStack>
+                    </VStack>
                   </Box>
                 ))}
               </VStack>

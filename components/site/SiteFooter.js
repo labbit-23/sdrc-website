@@ -38,7 +38,7 @@ export default function SiteFooter() {
 
           <VStack align="start" spacing={2}>
             <Text fontWeight="700" fontSize="sm">
-              Collection centres
+              Our centres
             </Text>
             <Link href={siteConfig.locations.main} target="_blank">Jade Arcade - Paradise (Main Centre)</Link>
             <Link href={siteConfig.locations.sdRoad} target="_blank">S.D. Road Collection Centre</Link>

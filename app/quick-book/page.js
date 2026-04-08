@@ -68,8 +68,11 @@ export default function QuickBookPage() {
   const [slots, setSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingPrescription, setUploadingPrescription] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [prescriptionFile, setPrescriptionFile] = useState(null);
+  const [prescriptionMeta, setPrescriptionMeta] = useState(null);
 
   const [form, setForm] = useState({
     patientName: "",
@@ -112,6 +115,20 @@ export default function QuickBookPage() {
     };
   }, []);
 
+  async function uploadPrescription(file, phone) {
+    const fd = new FormData();
+    fd.append("action", "upload_prescription");
+    fd.append("file", file);
+    fd.append("patient_phone", phone || "");
+    const res = await fetch("/api/quickbook", {
+      method: "POST",
+      body: fd
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || "Prescription upload failed");
+    return data;
+  }
+
   async function handleSubmit() {
     setError("");
     setSuccess("");
@@ -140,6 +157,13 @@ export default function QuickBookPage() {
 
     setSubmitting(true);
     try {
+      let uploadedPrescription = prescriptionMeta;
+      if (prescriptionFile && !uploadedPrescription?.path) {
+        setUploadingPrescription(true);
+        uploadedPrescription = await uploadPrescription(prescriptionFile, phone);
+        setPrescriptionMeta(uploadedPrescription);
+      }
+
       const res = await fetch("/api/quickbook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -150,6 +174,9 @@ export default function QuickBookPage() {
           area: form.area.trim(),
           date: selectedDate,
           timeslot: selectedSlot,
+          prescription_url: uploadedPrescription?.url || "",
+          prescription_path: uploadedPrescription?.path || "",
+          prescription_file_name: uploadedPrescription?.file_name || "",
           persons: Number(form.persons || 1),
           whatsapp: form.whatsapp,
           agree: form.agree
@@ -159,10 +186,13 @@ export default function QuickBookPage() {
       if (!res.ok) throw new Error(data?.error || "Quick booking failed");
       setSuccess("Booking request submitted. Our team will contact you shortly.");
       setSelectedSlot("");
+      setPrescriptionFile(null);
+      setPrescriptionMeta(null);
       setForm((prev) => ({ ...prev, patientName: "", phone: "", area: "" }));
     } catch (e) {
       setError(e.message || "Quick booking failed");
     } finally {
+      setUploadingPrescription(false);
       setSubmitting(false);
     }
   }
@@ -288,6 +318,31 @@ export default function QuickBookPage() {
                 value={form.packageName}
                 onChange={(e) => setForm((prev) => ({ ...prev, packageName: e.target.value }))}
               />
+              <Box>
+                <Input
+                  bg="white"
+                  type="file"
+                  accept=".pdf,image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setPrescriptionFile(file);
+                    setPrescriptionMeta(null);
+                  }}
+                />
+                <Text fontSize="xs" color="gray.500" mt={1}>
+                  Optional: upload prescription (PDF/JPG/PNG/WEBP, max 8 MB)
+                </Text>
+                {prescriptionFile ? (
+                  <Text fontSize="xs" color="teal.700" mt={0.5}>
+                    Selected: {prescriptionFile.name}
+                  </Text>
+                ) : null}
+                {prescriptionMeta?.url ? (
+                  <Text fontSize="xs" color="green.700" mt={0.5}>
+                    Prescription uploaded and attached.
+                  </Text>
+                ) : null}
+              </Box>
 
               <HStack spacing={2}>
                 <Box
@@ -313,7 +368,7 @@ export default function QuickBookPage() {
               {error ? <Text fontSize="sm" color="red.600">{error}</Text> : null}
               {success ? <Text fontSize="sm" color="green.700">{success}</Text> : null}
 
-              <Button onClick={handleSubmit} isLoading={submitting}>
+              <Button onClick={handleSubmit} isLoading={submitting || uploadingPrescription}>
                 Submit Home Visit Request
               </Button>
               <Button as={Link} href="/tests" variant="outline">

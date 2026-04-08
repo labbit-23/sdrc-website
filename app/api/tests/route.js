@@ -418,7 +418,25 @@ function formatInr(amount) {
   return `INR ${Number(amount).toLocaleString("en-IN")}`;
 }
 
-function buildLeadMessage({ patientName, patientPhone, patientNotes, items, subtotal, collectionFee, total, source, homeVisitRequired }) {
+function toQuickbookPhone(rawPhone) {
+  const digits = String(rawPhone || "").replace(/\D/g, "");
+  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
+  return digits;
+}
+
+function buildLeadMessage({
+  patientName,
+  patientPhone,
+  patientNotes,
+  items,
+  subtotal,
+  collectionFee,
+  total,
+  source,
+  homeVisitRequired,
+  preferredDate,
+  preferredTimeslot
+}) {
   const now = new Date();
   const formattedDate = now.toLocaleString("en-IN", {
     dateStyle: "medium",
@@ -430,6 +448,10 @@ function buildLeadMessage({ patientName, patientPhone, patientNotes, items, subt
   lines.push(`Source: ${source || "/tests page"}`);
   lines.push(`Date: ${formattedDate}`);
   lines.push(`Home Visit Required: ${homeVisitRequired ? "Yes" : "No"}`);
+  if (homeVisitRequired) {
+    lines.push(`Preferred Date: ${preferredDate || "Not provided"}`);
+    lines.push(`Preferred Slot: ${preferredTimeslot || "Not provided"}`);
+  }
   lines.push("");
   lines.push("*Patient Details*");
   lines.push(`Name: ${String(patientName || "").trim() || "Not provided"}`);
@@ -454,6 +476,109 @@ function buildLeadMessage({ patientName, patientPhone, patientNotes, items, subt
   return lines.join("\n");
 }
 
+async function sendOutboundTemplate({
+  outboundUrl,
+  headers,
+  apiKey,
+  campaignName,
+  outboundSource,
+  destination,
+  userName,
+  message
+}) {
+  if (!destination) return { attempted: false, skipped: true, reason: "Missing destination" };
+  const payload = {
+    lab_id: process.env.DEFAULT_LAB_ID || process.env.NEXT_PUBLIC_DEFAULT_LAB_ID || undefined,
+    apiKey,
+    campaignName,
+    destination,
+    userName: userName || "Website Lead",
+    source: outboundSource,
+    templateParams: [message]
+  };
+
+  const response = await fetch(outboundUrl, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`WhatsApp outbound failed (${destination}): ${errText}`);
+  }
+
+  let provider = null;
+  try {
+    provider = await response.json();
+  } catch {
+    provider = { ok: true };
+  }
+
+  return { attempted: true, skipped: false, provider };
+}
+
+async function createClickupQuickbookTask({
+  patientName,
+  patientPhone,
+  source,
+  homeVisitRequired,
+  preferredDate,
+  preferredTimeslot,
+  items,
+  subtotal,
+  patientNotes
+}) {
+  const token = process.env.CLICKUP_API_TOKEN;
+  const listId = process.env.CLICKUP_LIST_ID_QUICKBOOK;
+  if (!token || !listId) {
+    return { attempted: false, skipped: true, reason: "Missing ClickUp token/list id" };
+  }
+
+  const itemLines = items
+    .map((item, index) => `${index + 1}. [${item.item_type === "package" ? "Package" : "Test"}] ${item.name} (${formatInr(item.price)})`)
+    .join("\n");
+
+  const taskName = `Home Visit Request - ${patientName || "Patient"} - ${preferredDate || "Date TBA"}`;
+  const description = [
+    "New website booking request",
+    `Source: ${source}`,
+    `Patient: ${patientName}`,
+    `Phone: ${patientPhone}`,
+    `Home Visit: ${homeVisitRequired ? "Yes" : "No"}`,
+    `Preferred Date: ${preferredDate || "Not provided"}`,
+    `Preferred Slot: ${preferredTimeslot || "Not provided"}`,
+    `Subtotal: ${formatInr(subtotal)}`,
+    "",
+    "Items:",
+    itemLines || "None",
+    "",
+    `Note: ${patientNotes || "None"}`
+  ].join("\n");
+
+  const response = await fetch(`https://api.clickup.com/api/v2/list/${listId}/task`, {
+    method: "POST",
+    headers: {
+      Authorization: token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: taskName,
+      description,
+      priority: 3,
+      tags: ["website", "home-visit", "quickbook"]
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`ClickUp task create failed: ${errText}`);
+  }
+
+  const result = await response.json().catch(() => ({}));
+  return { attempted: true, skipped: false, result };
+}
+
 async function postQuickbookingLead({
   patientName,
   patientPhone,
@@ -462,10 +587,46 @@ async function postQuickbookingLead({
   subtotal,
   collectionFee,
   total,
-  source
+  source,
+  preferredDate,
+  preferredTimeslot
 }) {
+  const quickbookSubmitUrl =
+    process.env.QUICKBOOK_SUBMIT_URL ||
+    (process.env.QUICKBOOK_BASE_URL ? `${process.env.QUICKBOOK_BASE_URL}/api/quickbook` : "");
+  if (preferredDate && preferredTimeslot && quickbookSubmitUrl) {
+    const packageName = items
+      .map((item) => `[${item.item_type === "package" ? "Package" : "Test"}] ${item.name}`)
+      .join(" | ")
+      .slice(0, 2000);
+    const payload = {
+      patientName,
+      phone: toQuickbookPhone(patientPhone),
+      packageName,
+      area: "",
+      date: preferredDate,
+      timeslot: preferredTimeslot,
+      persons: 1,
+      whatsapp: true,
+      agree: true
+    };
+
+    const response = await fetch(quickbookSubmitUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Quickbook submit failed: ${errText}`);
+    }
+    const result = await response.json().catch(() => ({ ok: true }));
+    return { attempted: true, skipped: false, mode: "quickbook_submit", result };
+  }
+
   const quickbookingUrl = process.env.QUICKBOOKING_LEAD_URL;
-  if (!quickbookingUrl) return { attempted: false, skipped: true, reason: "QUICKBOOKING_LEAD_URL not set" };
+  if (!quickbookingUrl) return { attempted: false, skipped: true, reason: "No quickbooking endpoint configured" };
 
   const payload = {
     source,
@@ -475,7 +636,9 @@ async function postQuickbookingLead({
     subtotal,
     collection_fee: collectionFee,
     total,
-    items
+    items,
+    preferred_date: preferredDate || null,
+    preferred_timeslot: preferredTimeslot || null
   };
 
   const headers = { "Content-Type": "application/json" };
@@ -501,7 +664,7 @@ async function postQuickbookingLead({
     result = { ok: true };
   }
 
-  return { attempted: true, skipped: false, result };
+  return { attempted: true, skipped: false, mode: "lead_webhook", result };
 }
 
 export async function POST(request) {
@@ -521,6 +684,8 @@ export async function POST(request) {
     const patientNotes = String(body?.patient_notes || "").trim();
     const source = String(body?.source || "/tests page");
     const homeVisitRequired = Boolean(body?.home_visit_required);
+    const preferredDate = String(body?.preferred_date || "").trim();
+    const preferredTimeslot = String(body?.preferred_timeslot || "").trim();
     const subtotal = Number(body?.subtotal || 0);
     const collectionFee = Number(body?.collection_fee || 0);
     const total = Number(body?.total || subtotal + collectionFee);
@@ -555,18 +720,10 @@ export async function POST(request) {
       collectionFee,
       total,
       source,
-      homeVisitRequired
+      homeVisitRequired,
+      preferredDate,
+      preferredTimeslot
     });
-
-    const payload = {
-      lab_id: process.env.DEFAULT_LAB_ID || process.env.NEXT_PUBLIC_DEFAULT_LAB_ID || undefined,
-      apiKey,
-      campaignName,
-      destination,
-      userName: patientName || "Website Lead",
-      source: outboundSource,
-      templateParams: [message]
-    };
 
     const headers = { "Content-Type": "application/json" };
     if (apiKey) {
@@ -577,26 +734,26 @@ export async function POST(request) {
       headers.Authorization = `Bearer ${process.env.WHATSAPP_OUTBOUND_BEARER_TOKEN}`;
     }
 
-    const response = await fetch(outboundUrl, {
-      method: "POST",
+    const patientTemplate = await sendOutboundTemplate({
+      outboundUrl,
       headers,
-      body: JSON.stringify(payload)
+      apiKey,
+      campaignName,
+      outboundSource,
+      destination: patientPhone,
+      userName: patientName || "Patient",
+      message
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      return NextResponse.json(
-        { error: `WhatsApp outbound failed: ${errText}` },
-        { status: 502 }
-      );
-    }
-
-    let provider = null;
-    try {
-      provider = await response.json();
-    } catch {
-      provider = { ok: true };
-    }
+    const internalTemplate = await sendOutboundTemplate({
+      outboundUrl,
+      headers,
+      apiKey,
+      campaignName,
+      outboundSource,
+      destination,
+      userName: patientName || "Website Lead",
+      message
+    });
 
     let quickbooking = { attempted: false, skipped: true, reason: "Not eligible" };
     if (shouldRouteQuickbooking) {
@@ -608,15 +765,33 @@ export async function POST(request) {
         subtotal,
         collectionFee,
         total,
-        source
+        source,
+        preferredDate,
+        preferredTimeslot
       });
     }
+
+    const clickup = await createClickupQuickbookTask({
+      patientName,
+      patientPhone,
+      source,
+      homeVisitRequired,
+      preferredDate,
+      preferredTimeslot,
+      items,
+      subtotal,
+      patientNotes
+    });
 
     return NextResponse.json({
       success: true,
       destination,
-      provider,
-      quickbooking
+      templates: {
+        patient: patientTemplate,
+        internal: internalTemplate
+      },
+      quickbooking,
+      clickup
     });
   } catch (error) {
     return NextResponse.json(
