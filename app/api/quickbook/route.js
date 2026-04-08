@@ -56,6 +56,15 @@ function buildQuickbookMessage({ patientName, phone, packageName, area, date, ti
   ].join("\n");
 }
 
+function buildQuickbookPatientAck({ patientName, date, timeslot }) {
+  return [
+    `Hello ${String(patientName || "").trim() || "Patient"},`,
+    "Your home visit request has been received by SDRC.",
+    `Preferred schedule: ${date || "Date TBA"} • ${timeslot || "Slot TBA"}`,
+    "Our team will contact you shortly for confirmation."
+  ].join("\n");
+}
+
 async function submitQuickbookRequest({ submitUrl, payload, signal }) {
   const response = await fetch(submitUrl, {
     method: "POST",
@@ -80,13 +89,48 @@ async function submitQuickbookRequest({ submitUrl, payload, signal }) {
   };
 }
 
-async function sendOutboundTemplate({ destination, userName, message }) {
-  const outboundUrl = process.env.WHATSAPP_OUTBOUND_URL;
-  if (!outboundUrl || !destination) return { attempted: false, skipped: true };
+async function sendOutboundTemplate({ destination, message }) {
+  if (!destination) return { attempted: false, skipped: true };
 
-  const apiKey = process.env.WHATSAPP_OUTBOUND_API_KEY || "";
   const campaignName = process.env.WHATSAPP_OUTBOUND_CAMPAIGN || "website_lead";
-  const outboundSource = process.env.WHATSAPP_OUTBOUND_SOURCE || "sdrc-website";
+  const templateName = String(campaignName || "").trim();
+  if (!templateName) return { attempted: false, skipped: true, reason: "Missing campaign/template name" };
+
+  const internalSendUrl = process.env.WHATSAPP_INTERNAL_SEND_URL || process.env.LABBIT_WHATSAPP_SEND_URL || "";
+  if (internalSendUrl) {
+    const ingestToken = process.env.WHATSAPP_INTERNAL_SEND_TOKEN || process.env.WHATSAPP_EXTERNAL_INGEST_TOKEN || "";
+    const labId = String(process.env.DEFAULT_LAB_ID || "").trim() || undefined;
+    const source = String(process.env.WHATSAPP_OUTBOUND_SOURCE || "sdrc-website").trim();
+    const internalHeaders = { "Content-Type": "application/json" };
+    if (ingestToken) {
+      internalHeaders["x-ingest-token"] = ingestToken;
+    }
+
+    const internalPayload = {
+      ...(labId ? { lab_id: labId } : {}),
+      destination,
+      campaignName: templateName,
+      templateParams: [String(message || "")],
+      source
+    };
+
+    const internalResponse = await fetch(internalSendUrl, {
+      method: "POST",
+      headers: internalHeaders,
+      body: JSON.stringify(internalPayload)
+    });
+    if (!internalResponse.ok) {
+      const errText = await internalResponse.text();
+      throw new Error(`WhatsApp internal gateway failed (${destination}): ${errText}`);
+    }
+    const provider = await internalResponse.json().catch(() => ({ ok: true }));
+    return { attempted: true, skipped: false, provider, mode: "internal_gateway" };
+  }
+
+  const outboundUrl = process.env.WHATSAPP_OUTBOUND_URL;
+  if (!outboundUrl) return { attempted: false, skipped: true, reason: "Missing WHATSAPP_OUTBOUND_URL" };
+  const apiKey = process.env.WHATSAPP_OUTBOUND_API_KEY || "";
+  const languageCode = process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en";
   const headers = { "Content-Type": "application/json" };
   if (apiKey) {
     const apiKeyHeader = process.env.WHATSAPP_OUTBOUND_API_KEY_HEADER || "X-API-KEY";
@@ -96,15 +140,24 @@ async function sendOutboundTemplate({ destination, userName, message }) {
     headers.Authorization = `Bearer ${process.env.WHATSAPP_OUTBOUND_BEARER_TOKEN}`;
   }
 
-  const payload = {
-    lab_id: process.env.DEFAULT_LAB_ID || process.env.NEXT_PUBLIC_DEFAULT_LAB_ID || undefined,
-    apiKey,
-    campaignName,
-    destination,
-    userName: userName || "Website Lead",
-    source: outboundSource,
-    templateParams: [message]
-  };
+  const buildPayload = (params) => ({
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: destination,
+    type: "template",
+    template: {
+      name: templateName,
+      language: { code: String(languageCode) },
+      components: [
+        {
+          type: "body",
+          parameters: (params || []).map((p) => ({ type: "text", text: String(p ?? "") }))
+        }
+      ]
+    }
+  });
+
+  const payload = buildPayload([String(message || "")]);
 
   const response = await fetch(outboundUrl, {
     method: "POST",
@@ -259,22 +312,11 @@ export async function POST(request) {
     const { submitUrl } = getUrls();
     const { controller, timer } = withTimeout(20000);
     try {
-      let submitResult = await submitQuickbookRequest({
+      const submitResult = await submitQuickbookRequest({
         submitUrl,
         payload,
         signal: controller.signal
       });
-
-      // Some upstreams reject/ignore lab_id in this path; retry once without lab_id.
-      if (!submitResult.ok && payload.lab_id) {
-        const retryPayload = { ...payload };
-        delete retryPayload.lab_id;
-        submitResult = await submitQuickbookRequest({
-          submitUrl,
-          payload: retryPayload,
-          signal: controller.signal
-        });
-      }
 
       if (!submitResult.ok) {
         const upstreamError =
@@ -296,7 +338,7 @@ export async function POST(request) {
       const internalNotify = normalizePhone(
         process.env.INTERNAL_NOTIFY_WHATSAPP || process.env.NEXT_PUBLIC_INTERNAL_NOTIFY_WHATSAPP || ""
       );
-      const message = buildQuickbookMessage({
+      const internalMessage = buildQuickbookMessage({
         patientName: payload.patientName,
         phone: payload.phone,
         packageName: payload.packageName,
@@ -305,14 +347,18 @@ export async function POST(request) {
         timeslot: payload.timeslot,
         prescriptionUrl: payload.prescription_url
       });
+      const patientAckMessage = buildQuickbookPatientAck({
+        patientName: payload.patientName,
+        date: payload.date,
+        timeslot: payload.timeslot
+      });
 
       let templates = { patient: { attempted: false, skipped: true }, internal: { attempted: false, skipped: true } };
       let clickup = { attempted: false, skipped: true };
       try {
         templates.patient = await sendOutboundTemplate({
           destination: phone,
-          userName: payload.patientName || "Patient",
-          message
+          message: patientAckMessage
         });
       } catch (error) {
         templates.patient = { attempted: true, failed: true, error: error?.message || "Template send failed" };
@@ -320,11 +366,20 @@ export async function POST(request) {
       try {
         templates.internal = await sendOutboundTemplate({
           destination: internalNotify,
-          userName: payload.patientName || "Website Lead",
-          message
+          message: internalMessage
         });
       } catch (error) {
         templates.internal = { attempted: true, failed: true, error: error?.message || "Template send failed" };
+      }
+      if (templates.patient?.failed && templates.internal?.failed) {
+        return NextResponse.json(
+          {
+            ...data,
+            error: "Quickbook saved but WhatsApp template delivery failed for patient and internal notify.",
+            templates
+          },
+          { status: 502 }
+        );
       }
       try {
         clickup = await createClickupTask({

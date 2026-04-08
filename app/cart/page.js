@@ -84,9 +84,10 @@ export default function CartPage() {
                         </IconButton>
                       </HStack>
                       <Text fontWeight="700" color="gray.800">{item.name}</Text>
-                      {item.internal_code ? <Text fontSize="xs" color="gray.500">{item.internal_code}</Text> : null}
-                      {item.tests_count ? <Text fontSize="xs" color="gray.500">Includes {item.tests_count} tests</Text> : null}
-                      <HStack justify="flex-end" mt={0.5}>
+                      <HStack justify="space-between" mt={0.5}>
+                        <Text fontSize="xs" color="gray.500">
+                          {item.internal_code ? item.internal_code : item.tests_count ? `Includes ${item.tests_count} tests` : ""}
+                        </Text>
                         <Text fontWeight="700" color="orange.500">{formatLinePrice(item.price)}</Text>
                       </HStack>
                     </VStack>

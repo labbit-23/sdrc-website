@@ -427,6 +427,7 @@ function toQuickbookPhone(rawPhone) {
 function buildLeadMessage({
   patientName,
   patientPhone,
+  patientArea,
   patientNotes,
   items,
   subtotal,
@@ -456,6 +457,7 @@ function buildLeadMessage({
   lines.push("*Patient Details*");
   lines.push(`Name: ${String(patientName || "").trim() || "Not provided"}`);
   lines.push(`Phone: ${patientPhone}`);
+  lines.push(`Area: ${String(patientArea || "").trim() || "Not provided"}`);
   lines.push("");
   lines.push("*Cart Items*");
   items.forEach((item, index) => {
@@ -476,28 +478,90 @@ function buildLeadMessage({
   return lines.join("\n");
 }
 
+function buildPatientAckMessage({
+  patientName,
+  itemCount,
+  homeVisitRequired,
+  preferredDate,
+  preferredTimeslot
+}) {
+  const lines = [];
+  lines.push(`Hello ${String(patientName || "").trim() || "Patient"},`);
+  lines.push("Your booking request has been received by SDRC.");
+  lines.push(`Items: ${Number(itemCount || 0)} selected`);
+  if (homeVisitRequired) {
+    lines.push(`Home visit: Yes (${preferredDate || "Date TBA"} • ${preferredTimeslot || "Slot TBA"})`);
+  } else {
+    lines.push("Home visit: No (Center visit selected)");
+  }
+  lines.push("Our team will validate tests and share final confirmation shortly.");
+  return lines.join("\n");
+}
+
 async function sendOutboundTemplate({
   outboundUrl,
   headers,
-  apiKey,
   campaignName,
-  outboundSource,
   destination,
-  userName,
-  message
+  templateParams = []
 }) {
   if (!destination) return { attempted: false, skipped: true, reason: "Missing destination" };
-  const payload = {
-    lab_id: process.env.DEFAULT_LAB_ID || process.env.NEXT_PUBLIC_DEFAULT_LAB_ID || undefined,
-    apiKey,
-    campaignName,
-    destination,
-    userName: userName || "Website Lead",
-    source: outboundSource,
-    templateParams: [message]
-  };
+  const templateName = String(campaignName || "").trim();
+  if (!templateName) return { attempted: false, skipped: true, reason: "Missing campaign/template name" };
+  const internalSendUrl = process.env.WHATSAPP_INTERNAL_SEND_URL || process.env.LABBIT_WHATSAPP_SEND_URL || "";
+  if (internalSendUrl) {
+    const ingestToken = process.env.WHATSAPP_INTERNAL_SEND_TOKEN || process.env.WHATSAPP_EXTERNAL_INGEST_TOKEN || "";
+    const labId = String(process.env.DEFAULT_LAB_ID || "").trim() || undefined;
+    const source = String(process.env.WHATSAPP_OUTBOUND_SOURCE || "sdrc-website").trim();
+    const internalHeaders = { "Content-Type": "application/json" };
+    if (ingestToken) {
+      internalHeaders["x-ingest-token"] = ingestToken;
+    }
 
-  const response = await fetch(outboundUrl, {
+    const internalPayload = {
+      ...(labId ? { lab_id: labId } : {}),
+      destination,
+      campaignName: templateName,
+      templateParams: (templateParams || []).map((p) => String(p ?? "")),
+      source
+    };
+
+    const internalResponse = await fetch(internalSendUrl, {
+      method: "POST",
+      headers: internalHeaders,
+      body: JSON.stringify(internalPayload)
+    });
+
+    if (!internalResponse.ok) {
+      const errText = await internalResponse.text();
+      throw new Error(`WhatsApp internal gateway failed (${destination}): ${errText}`);
+    }
+
+    const provider = await internalResponse.json().catch(() => ({ ok: true }));
+    return { attempted: true, skipped: false, provider, mode: "internal_gateway" };
+  }
+
+  const languageCode = process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en";
+  const buildPayload = (params) => ({
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: destination,
+    type: "template",
+    template: {
+      name: templateName,
+      language: { code: String(languageCode) },
+      components: [
+        {
+          type: "body",
+          parameters: (params || []).map((p) => ({ type: "text", text: String(p ?? "") }))
+        }
+      ]
+    }
+  });
+
+  let payload = buildPayload(templateParams);
+
+  let response = await fetch(outboundUrl, {
     method: "POST",
     headers,
     body: JSON.stringify(payload)
@@ -521,6 +585,7 @@ async function sendOutboundTemplate({
 async function createClickupQuickbookTask({
   patientName,
   patientPhone,
+  patientArea,
   source,
   homeVisitRequired,
   preferredDate,
@@ -545,6 +610,7 @@ async function createClickupQuickbookTask({
     `Source: ${source}`,
     `Patient: ${patientName}`,
     `Phone: ${patientPhone}`,
+    `Area: ${patientArea || "Not provided"}`,
     `Home Visit: ${homeVisitRequired ? "Yes" : "No"}`,
     `Preferred Date: ${preferredDate || "Not provided"}`,
     `Preferred Slot: ${preferredTimeslot || "Not provided"}`,
@@ -582,33 +648,72 @@ async function createClickupQuickbookTask({
 async function postQuickbookingLead({
   patientName,
   patientPhone,
+  patientArea,
   patientNotes,
   items,
   subtotal,
   collectionFee,
   total,
   source,
+  homeVisitRequired,
   preferredDate,
   preferredTimeslot
 }) {
+  const flattenedItems = items
+    .map((item) => `[${item.item_type === "package" ? "Package" : "Test"}] ${item.name}`)
+    .filter(Boolean);
+  const packageName = [
+    `Cart request (${flattenedItems.length} item${flattenedItems.length === 1 ? "" : "s"})`,
+    flattenedItems.join(" | "),
+    patientNotes ? `Note: ${patientNotes}` : null
+  ]
+    .filter(Boolean)
+    .join("\n")
+    .slice(0, 2000);
+
   const quickbookSubmitUrl =
     process.env.QUICKBOOK_SUBMIT_URL ||
-    (process.env.QUICKBOOK_BASE_URL ? `${process.env.QUICKBOOK_BASE_URL}/api/quickbook` : "");
-  if (preferredDate && preferredTimeslot && quickbookSubmitUrl) {
-    const packageName = items
-      .map((item) => `[${item.item_type === "package" ? "Package" : "Test"}] ${item.name}`)
-      .join(" | ")
-      .slice(0, 2000);
+    (process.env.QUICKBOOK_BASE_URL ? `${process.env.QUICKBOOK_BASE_URL}/api/quickbook` : "https://lab.sdrc.in/api/quickbook");
+  if (quickbookSubmitUrl) {
+    let resolvedTimeslot = String(preferredTimeslot || "").trim();
+    if (!resolvedTimeslot) {
+      const slotsUrl =
+        process.env.QUICKBOOK_TIMESLOTS_URL ||
+        (process.env.QUICKBOOK_BASE_URL ? `${process.env.QUICKBOOK_BASE_URL}/api/visits/time_slots` : "https://lab.sdrc.in/api/visits/time_slots");
+      try {
+        const slotResponse = await fetch(slotsUrl, { method: "GET", cache: "no-store" });
+        if (slotResponse.ok) {
+          const slots = await slotResponse.json().catch(() => []);
+          if (Array.isArray(slots) && slots.length > 0) {
+            const first = slots[0] || {};
+            resolvedTimeslot = String(first.id || first.slot_name || first.title || "").trim();
+          }
+        }
+      } catch {
+        resolvedTimeslot = "";
+      }
+    }
+    if (!resolvedTimeslot) {
+      resolvedTimeslot = String(process.env.QUICKBOOK_DEFAULT_TIMESLOT_ID || "").trim();
+    }
+    if (!resolvedTimeslot) {
+      throw new Error("Quickbook slot unavailable: no timeslot selected and no default timeslot id configured.");
+    }
+
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const fallbackDate = tomorrow.toISOString().slice(0, 10);
     const payload = {
       patientName,
       phone: toQuickbookPhone(patientPhone),
       packageName,
-      area: "",
-      date: preferredDate,
-      timeslot: preferredTimeslot,
+      area: patientArea || "",
+      date: preferredDate || fallbackDate,
+      timeslot: resolvedTimeslot,
       persons: 1,
       whatsapp: true,
-      agree: true
+      agree: true,
+      home_visit_required: Boolean(homeVisitRequired),
+      ...(process.env.DEFAULT_LAB_ID ? { lab_id: process.env.DEFAULT_LAB_ID } : {})
     };
 
     const response = await fetch(quickbookSubmitUrl, {
@@ -632,6 +737,7 @@ async function postQuickbookingLead({
     source,
     patient_name: patientName,
     patient_phone: patientPhone,
+    patient_area: patientArea || "",
     patient_notes: patientNotes,
     subtotal,
     collection_fee: collectionFee,
@@ -681,6 +787,7 @@ export async function POST(request) {
 
     const patientName = String(body?.patient_name || "").trim();
     const patientPhone = normalizePhone(body?.patient_phone || "");
+    const patientArea = String(body?.patient_area || "").trim();
     const patientNotes = String(body?.patient_notes || "").trim();
     const source = String(body?.source || "/tests page");
     const homeVisitRequired = Boolean(body?.home_visit_required);
@@ -689,23 +796,50 @@ export async function POST(request) {
     const subtotal = Number(body?.subtotal || 0);
     const collectionFee = Number(body?.collection_fee || 0);
     const total = Number(body?.total || subtotal + collectionFee);
-    const allItemsHomeEligible = items.every((item) => item?.home_collection !== false);
-    const shouldRouteQuickbooking = homeVisitRequired && allItemsHomeEligible;
+    const shouldRouteQuickbooking = true;
 
     if (patientPhone.length < 10) {
       return NextResponse.json({ error: "Invalid patient phone number." }, { status: 400 });
     }
 
+    if (shouldRouteQuickbooking) {
+      const quickbooking = await postQuickbookingLead({
+        patientName,
+        patientPhone,
+        patientArea,
+        patientNotes,
+        items,
+        subtotal,
+        collectionFee,
+        total,
+        source,
+        homeVisitRequired,
+        preferredDate,
+        preferredTimeslot
+      });
+
+      return NextResponse.json({
+        success: true,
+        mode: "quickbook_only",
+        quickbooking,
+        templates: {
+          patient: { attempted: false, skipped: true, reason: "Delegated to quickbook flow" },
+          internal: { attempted: false, skipped: true, reason: "Delegated to quickbook flow" }
+        },
+        clickup: { attempted: false, skipped: true, reason: "Delegated to quickbook flow" }
+      });
+    }
+
     const outboundUrl = process.env.WHATSAPP_OUTBOUND_URL;
+    const internalSendUrl = process.env.WHATSAPP_INTERNAL_SEND_URL || process.env.LABBIT_WHATSAPP_SEND_URL || "";
     const destination = normalizePhone(
       process.env.INTERNAL_NOTIFY_WHATSAPP || process.env.NEXT_PUBLIC_INTERNAL_NOTIFY_WHATSAPP || ""
     );
     const apiKey = process.env.WHATSAPP_OUTBOUND_API_KEY || "";
     const campaignName = process.env.WHATSAPP_OUTBOUND_CAMPAIGN || "website_lead";
-    const outboundSource = process.env.WHATSAPP_OUTBOUND_SOURCE || "sdrc-website";
 
-    if (!outboundUrl) {
-      return NextResponse.json({ error: "Missing WHATSAPP_OUTBOUND_URL." }, { status: 500 });
+    if (!internalSendUrl && !outboundUrl) {
+      return NextResponse.json({ error: "Missing WhatsApp outbound config (WHATSAPP_INTERNAL_SEND_URL or WHATSAPP_OUTBOUND_URL)." }, { status: 500 });
     }
     if (!destination) {
       return NextResponse.json({ error: "Missing INTERNAL_NOTIFY_WHATSAPP." }, { status: 500 });
@@ -714,12 +848,20 @@ export async function POST(request) {
     const message = buildLeadMessage({
       patientName,
       patientPhone,
+      patientArea,
       patientNotes,
       items,
       subtotal,
       collectionFee,
       total,
       source,
+      homeVisitRequired,
+      preferredDate,
+      preferredTimeslot
+    });
+    const patientAckMessage = buildPatientAckMessage({
+      patientName,
+      itemCount: items.length,
       homeVisitRequired,
       preferredDate,
       preferredTimeslot
@@ -743,12 +885,9 @@ export async function POST(request) {
       patientTemplate = await sendOutboundTemplate({
         outboundUrl,
         headers,
-        apiKey,
         campaignName,
-        outboundSource,
         destination: patientPhone,
-        userName: patientName || "Patient",
-        message
+        templateParams: [patientAckMessage]
       });
     } catch (error) {
       patientError = error?.message || "Patient WhatsApp send failed";
@@ -759,12 +898,9 @@ export async function POST(request) {
       internalTemplate = await sendOutboundTemplate({
         outboundUrl,
         headers,
-        apiKey,
         campaignName,
-        outboundSource,
         destination,
-        userName: patientName || "Website Lead",
-        message
+        templateParams: [message]
       });
     } catch (error) {
       internalError = error?.message || "Internal WhatsApp send failed";
@@ -782,25 +918,12 @@ export async function POST(request) {
       );
     }
 
-    let quickbooking = { attempted: false, skipped: true, reason: "Not eligible" };
-    if (shouldRouteQuickbooking) {
-      quickbooking = await postQuickbookingLead({
-        patientName,
-        patientPhone,
-        patientNotes,
-        items,
-        subtotal,
-        collectionFee,
-        total,
-        source,
-        preferredDate,
-        preferredTimeslot
-      });
-    }
+    const quickbooking = { attempted: false, skipped: true, reason: "Not eligible" };
 
     const clickup = await createClickupQuickbookTask({
       patientName,
       patientPhone,
+      patientArea,
       source,
       homeVisitRequired,
       preferredDate,

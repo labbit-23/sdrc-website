@@ -53,6 +53,7 @@ function parseSlotHour(slot) {
 export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyItems, source = "cart", onRequestSuccess }) {
   const [patientName, setPatientName] = useState("");
   const [patientPhone, setPatientPhone] = useState("");
+  const [patientArea, setPatientArea] = useState("");
   const [patientNotes, setPatientNotes] = useState("");
   const [homeVisitRequested, setHomeVisitRequested] = useState(false);
   const [leadError, setLeadError] = useState("");
@@ -95,6 +96,14 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
     });
     return groups;
   }, [slots]);
+  const preferredDateLabel = useMemo(
+    () => dateOptions.find((d) => d.iso === preferredDate)?.label || preferredDate,
+    [dateOptions, preferredDate]
+  );
+  const preferredSlotLabel = useMemo(() => {
+    const matched = slots.find((s) => s.id === preferredSlot);
+    return matched?.slot_name || (matched ? `${matched.start_time || ""} - ${matched.end_time || ""}` : preferredSlot);
+  }, [slots, preferredSlot]);
 
   useEffect(() => {
     if (!homeVisitRequested) return;
@@ -154,6 +163,7 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
       patient_name: patientName.trim(),
       patient_phone: normalizedPhone,
       patient_notes: patientNotes.trim(),
+      patient_area: patientArea.trim(),
       home_visit_required: homeVisitRequested,
       preferred_date: homeVisitRequested ? preferredDate : null,
       preferred_timeslot: homeVisitRequested ? preferredSlot : null,
@@ -232,6 +242,16 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
           disabled={formBusy}
           value={patientPhone}
           onChange={(e) => setPatientPhone(e.target.value)}
+        />
+        <Input
+          bg="white"
+          size="sm"
+          placeholder="Area / locality"
+          name="patient_area"
+          autoComplete="address-level2"
+          disabled={formBusy}
+          value={patientArea}
+          onChange={(e) => setPatientArea(e.target.value)}
         />
         <Input
           bg="white"
@@ -340,6 +360,11 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
 
         {leadError ? <Text fontSize="xs" color="red.600">{leadError}</Text> : null}
         {leadSuccess ? <Text fontSize="xs" color="green.700">{leadSuccess}</Text> : null}
+        {homeVisitRequested && preferredDate && preferredSlot ? (
+          <Text fontSize="xs" color="gray.700">
+            Selected home visit: <strong>{preferredDateLabel}</strong> • <strong>{preferredSlotLabel}</strong>
+          </Text>
+        ) : null}
         {successCountdown != null ? (
           <Text fontSize="xs" color="teal.700">Going to top and clearing cart in {successCountdown}...</Text>
         ) : null}
@@ -352,23 +377,28 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
         >
           Send Request to Lab
         </Button>
-        <VStack align="stretch" gap={0.5}>
-          <Link href={"https://wa.me/" + siteConfig.internalNotifyNumber} target="_blank">
-            <Text fontSize="xs" color="teal.700" fontWeight="600">
-              Need help deciding tests? Chat with our team on WhatsApp
-            </Text>
-          </Link>
-          <Link href={siteConfig.reportsUrl} target="_blank">
-            <Text
-              fontSize="xs"
-              color="teal.700"
-              fontWeight="600"
-              title="Get our bot to send your reports. Chat using your registered mobile number."
-            >
-              Download Reports (bot-assisted)
-            </Text>
-          </Link>
-        </VStack>
+        <HStack align="stretch" spacing={2} flexWrap="wrap">
+          <Button
+            as={Link}
+            href={"https://wa.me/" + siteConfig.internalNotifyNumber}
+            target="_blank"
+            size="xs"
+            variant="outline"
+            title="Need help deciding tests?"
+          >
+            Chat on WhatsApp
+          </Button>
+          <Button
+            as={Link}
+            href={siteConfig.reportsUrl}
+            target="_blank"
+            size="xs"
+            variant="outline"
+            title="Get our bot to send your reports. Chat using your registered mobile number."
+          >
+            Download Reports
+          </Button>
+        </HStack>
       </VStack>
     </Grid>
   );
