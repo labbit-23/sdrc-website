@@ -62,6 +62,36 @@ function flattenPackageVariants(data) {
   return out;
 }
 
+function prioritizeSearchResults(items, query) {
+  const q = String(query || "").trim().toLowerCase();
+  if (!q) return items;
+
+  const score = (item) => {
+    let s = 0;
+    const name = String(item?.name || "").toLowerCase();
+    const code = String(item?.internal_code || "").toLowerCase();
+
+    if (item?.is_most_popular) s += 1000;
+    if (item?.is_most_common) s += 500;
+
+    if (name === q) s += 300;
+    else if (name.startsWith(q)) s += 220;
+    else if (name.includes(q)) s += 120;
+
+    if (code === q) s += 140;
+    else if (code.startsWith(q)) s += 80;
+    else if (code.includes(q)) s += 40;
+
+    return s;
+  };
+
+  return [...items].sort((a, b) => {
+    const diff = score(b) - score(a);
+    if (diff !== 0) return diff;
+    return String(a?.name || "").localeCompare(String(b?.name || ""));
+  });
+}
+
 export default function TestsPage() {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
@@ -201,7 +231,7 @@ export default function TestsPage() {
         const cached = clientCache.get(key);
         if (cached && Date.now() - cached.ts < CLIENT_CACHE_TTL_MS) {
           if (!cancelled) {
-            setItems(cached.data.items || []);
+            setItems(prioritizeSearchResults(cached.data.items || [], debouncedQuery));
             setCategories(cached.data.filters?.categories || []);
             setPagination(cached.data.pagination || defaultPagination);
             setLoading(false);
@@ -215,7 +245,7 @@ export default function TestsPage() {
         if (!res.ok) throw new Error(data?.error || "Failed to fetch tests");
         if (cancelled) return;
 
-        setItems(data.items || []);
+        setItems(prioritizeSearchResults(data.items || [], debouncedQuery));
         setCategories(data.filters?.categories || []);
         setPagination(data.pagination || defaultPagination);
         clientCache.set(key, { ts: Date.now(), data });

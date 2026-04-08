@@ -278,7 +278,7 @@ export default function PackagesExplorer() {
     const node = document.getElementById("package-detail-capture") || document.getElementById(captureId);
 
     try {
-      const canvas = await nodeToCanvas(node);
+      const canvas = (await capturePackageCanvas()) || (await nodeToCanvas(node));
       if (canvas && await shareCanvas(canvas, `${slugify(pkgName)}-${slugify(variant.name)}.jpg`, shareText)) return;
 
       if (typeof navigator !== "undefined" && navigator.share) {
@@ -303,7 +303,7 @@ export default function PackagesExplorer() {
   const handleDownload = async (pkgName, variant) => {
     const captureId = getVariantCaptureId(pkgName, variant.name);
     const node = document.getElementById("package-detail-capture") || document.getElementById(captureId);
-    const canvas = await nodeToCanvas(node);
+    const canvas = (await capturePackageCanvas()) || (await nodeToCanvas(node));
     if (!canvas) {
       showToast("Image export unavailable");
       return;
@@ -311,6 +311,55 @@ export default function PackagesExplorer() {
     downloadCanvas(canvas, `${slugify(pkgName)}-${slugify(variant.name)}.jpg`);
     showToast("Package image downloaded");
   };
+
+  async function capturePackageCanvas() {
+    if (typeof window === "undefined" || !window.html2canvas) return null;
+    const source = document.getElementById("package-detail-capture");
+    if (!source) return null;
+
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "fixed";
+    wrapper.style.left = "-100000px";
+    wrapper.style.top = "0";
+    wrapper.style.background = "#ffffff";
+    wrapper.style.padding = "24px";
+    wrapper.style.width = `${Math.max(920, source.scrollWidth + 80)}px`;
+
+    const clone = source.cloneNode(true);
+    clone.style.maxHeight = "none";
+    clone.style.height = "auto";
+    clone.style.overflow = "visible";
+    clone.style.width = "100%";
+    clone.querySelectorAll('[data-export-hide="true"]').forEach((el) => el.remove());
+    clone.querySelectorAll("img").forEach((img) => {
+      img.style.maxWidth = "100%";
+      img.style.height = "auto";
+      img.style.objectFit = "contain";
+      img.style.display = "block";
+    });
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+
+    try {
+      const width = wrapper.scrollWidth;
+      const height = wrapper.scrollHeight;
+      const maxDim = 14000;
+      const scale = Math.min(2.8, maxDim / Math.max(width, height));
+      return await window.html2canvas(wrapper, {
+        backgroundColor: "#ffffff",
+        scale: Math.max(1, scale),
+        useCORS: true,
+        width,
+        height,
+        windowWidth: width,
+        windowHeight: height,
+        scrollX: 0,
+        scrollY: 0
+      });
+    } finally {
+      wrapper.remove();
+    }
+  }
 
   async function captureCompareCanvas() {
     if (typeof window === "undefined" || !window.html2canvas) {
@@ -604,13 +653,13 @@ export default function PackagesExplorer() {
           >
             <Flex justify="space-between" align="center" px={4} py={3} borderBottom="1px solid" borderColor="gray.200">
               <HStack spacing={3}>
-                <Image src="/assets/sdrc-logo.png" alt="SDRC" width={94} height={28} />
+                <img src="/assets/sdrc-logo.png" alt="SDRC" width="94" height="28" />
                 <Box>
                   <Text fontSize="11px" color="gray.500">{activeVariant.pkgName}</Text>
                   <Heading size="sm">{activeVariant.variant.name}</Heading>
                 </Box>
               </HStack>
-              <HStack spacing={1}>
+              <HStack spacing={1} data-export-hide="true">
                 {isMobile ? (
                   <IconButton
                     size="sm"
@@ -683,7 +732,7 @@ export default function PackagesExplorer() {
                 </Box>
               ) : null}
 
-              <Text fontSize="11px" color="gray.500">
+              <Text fontSize="11px" color="gray.500" data-export-hide="true">
                 Use the top-right icons to share on mobile or download on desktop.
               </Text>
             </Box>
