@@ -73,6 +73,7 @@ export default function QuickBookPage() {
   const [success, setSuccess] = useState("");
   const [prescriptionFile, setPrescriptionFile] = useState(null);
   const [prescriptionMeta, setPrescriptionMeta] = useState(null);
+  const formBusy = submitting || uploadingPrescription;
 
   const [form, setForm] = useState({
     patientName: "",
@@ -293,6 +294,7 @@ export default function QuickBookPage() {
                 bg="white"
                 placeholder="Patient name *"
                 value={form.patientName}
+                disabled={formBusy}
                 onChange={(e) => setForm((prev) => ({ ...prev, patientName: e.target.value }))}
                 autoComplete="name"
               />
@@ -300,6 +302,7 @@ export default function QuickBookPage() {
                 bg="white"
                 placeholder="Mobile number *"
                 value={form.phone}
+                disabled={formBusy}
                 onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
                 autoComplete="tel"
                 inputMode="tel"
@@ -310,12 +313,14 @@ export default function QuickBookPage() {
                 name="address_line1"
                 autoComplete="street-address"
                 value={form.area}
+                disabled={formBusy}
                 onChange={(e) => setForm((prev) => ({ ...prev, area: e.target.value }))}
               />
               <Input
                 bg="white"
                 placeholder="Tests / package (optional)"
                 value={form.packageName}
+                disabled={formBusy}
                 onChange={(e) => setForm((prev) => ({ ...prev, packageName: e.target.value }))}
               />
               <Box>
@@ -323,6 +328,7 @@ export default function QuickBookPage() {
                   bg="white"
                   type="file"
                   accept=".pdf,image/*"
+                  disabled={formBusy}
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
                     setPrescriptionFile(file);
@@ -349,6 +355,7 @@ export default function QuickBookPage() {
                   as="input"
                   type="checkbox"
                   checked={form.whatsapp}
+                  disabled={formBusy}
                   onChange={(e) => setForm((prev) => ({ ...prev, whatsapp: e.target.checked }))}
                   style={{ accentColor: "#008f82" }}
                 />
@@ -359,6 +366,7 @@ export default function QuickBookPage() {
                   as="input"
                   type="checkbox"
                   checked={form.agree}
+                  disabled={formBusy}
                   onChange={(e) => setForm((prev) => ({ ...prev, agree: e.target.checked }))}
                   style={{ accentColor: "#008f82" }}
                 />
@@ -367,8 +375,9 @@ export default function QuickBookPage() {
 
               {error ? <Text fontSize="sm" color="red.600">{error}</Text> : null}
               {success ? <Text fontSize="sm" color="green.700">{success}</Text> : null}
+              {formBusy ? <Text fontSize="sm" color="teal.700">Submitting booking request...</Text> : null}
 
-              <Button onClick={handleSubmit} isLoading={submitting || uploadingPrescription}>
+              <Button onClick={handleSubmit} isLoading={formBusy} loadingText="Submitting..." disabled={formBusy}>
                 Submit Home Visit Request
               </Button>
               <Button as={Link} href="/tests" variant="outline">

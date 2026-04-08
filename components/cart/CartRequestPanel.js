@@ -50,7 +50,7 @@ function parseSlotHour(slot) {
   return h;
 }
 
-export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyItems, source = "cart" }) {
+export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyItems, source = "cart", onRequestSuccess }) {
   const [patientName, setPatientName] = useState("");
   const [patientPhone, setPatientPhone] = useState("");
   const [patientNotes, setPatientNotes] = useState("");
@@ -63,6 +63,28 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
   const dateOptions = useMemo(() => getNextDays(5), []);
   const [preferredDate, setPreferredDate] = useState(dateOptions[0]?.iso || "");
   const [preferredSlot, setPreferredSlot] = useState("");
+  const [successCountdown, setSuccessCountdown] = useState(null);
+  const formBusy = isSubmitting || loadingSlots || successCountdown != null;
+
+  useEffect(() => {
+    if (successCountdown == null) return;
+    if (successCountdown <= 0) {
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      if (typeof onRequestSuccess === "function") {
+        onRequestSuccess();
+      }
+      setSuccessCountdown(null);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setSuccessCountdown((prev) => (prev == null ? null : prev - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [successCountdown, onRequestSuccess]);
   const slotGroups = useMemo(() => {
     const groups = { Morning: [], Afternoon: [], Evening: [] };
     slots.forEach((slot) => {
@@ -161,6 +183,7 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
         ? " Home visit booking has been queued."
         : "";
       setLeadSuccess(`Request received successfully.${quickbookStatus}`);
+      setSuccessCountdown(3);
     } catch (e) {
       setLeadError(e.message || "Unable to send request right now.");
     } finally {
@@ -194,6 +217,7 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
           placeholder="Patient name *"
           name="patient_name"
           autoComplete="name"
+          disabled={formBusy}
           value={patientName}
           onChange={(e) => setPatientName(e.target.value)}
         />
@@ -205,16 +229,25 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
           type="tel"
           inputMode="tel"
           autoComplete="tel"
+          disabled={formBusy}
           value={patientPhone}
           onChange={(e) => setPatientPhone(e.target.value)}
         />
-        <Input bg="white" size="sm" placeholder="Optional note (timing/preferences)" value={patientNotes} onChange={(e) => setPatientNotes(e.target.value)} />
+        <Input
+          bg="white"
+          size="sm"
+          placeholder="Optional note (timing/preferences)"
+          disabled={formBusy}
+          value={patientNotes}
+          onChange={(e) => setPatientNotes(e.target.value)}
+        />
 
         <HStack spacing={2} mt={1} align="start">
           <Box
             as="input"
             type="checkbox"
             checked={homeVisitRequested}
+            disabled={formBusy}
             onChange={(e) => setHomeVisitRequested(e.target.checked)}
             style={{ accentColor: "#008f82", marginTop: "2px" }}
           />
@@ -238,6 +271,7 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
                     h="64px"
                     px={1}
                     borderRadius="lg"
+                    disabled={formBusy}
                     onClick={() => setPreferredDate(day.iso)}
                   >
                     <VStack gap={0}>
@@ -277,6 +311,7 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
                             whiteSpace="nowrap"
                             overflow="hidden"
                             textOverflow="ellipsis"
+                            disabled={formBusy}
                             onClick={() => setPreferredSlot(slot.id)}
                           >
                             {slot.slot_name || `${slot.start_time || ""} - ${slot.end_time || ""}`}
@@ -305,7 +340,18 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
 
         {leadError ? <Text fontSize="xs" color="red.600">{leadError}</Text> : null}
         {leadSuccess ? <Text fontSize="xs" color="green.700">{leadSuccess}</Text> : null}
-        <Button onClick={sendCartRequest} isLoading={isSubmitting} isDisabled={cartItems.length === 0}>Send Request to Lab</Button>
+        {successCountdown != null ? (
+          <Text fontSize="xs" color="teal.700">Going to top and clearing cart in {successCountdown}...</Text>
+        ) : null}
+        {isSubmitting ? <Text fontSize="xs" color="teal.700">Submitting request...</Text> : null}
+        <Button
+          onClick={sendCartRequest}
+          isLoading={isSubmitting}
+          loadingText="Sending..."
+          disabled={cartItems.length === 0 || formBusy}
+        >
+          Send Request to Lab
+        </Button>
         <VStack align="stretch" gap={0.5}>
           <Link href={"https://wa.me/" + siteConfig.internalNotifyNumber} target="_blank">
             <Text fontSize="xs" color="teal.700" fontWeight="600">

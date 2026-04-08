@@ -56,6 +56,30 @@ function buildQuickbookMessage({ patientName, phone, packageName, area, date, ti
   ].join("\n");
 }
 
+async function submitQuickbookRequest({ submitUrl, payload, signal }) {
+  const response = await fetch(submitUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    signal
+  });
+
+  let data = null;
+  let rawText = "";
+  try {
+    data = await response.json();
+  } catch {
+    rawText = await response.text().catch(() => "");
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    data,
+    rawText
+  };
+}
+
 async function sendOutboundTemplate({ destination, userName, message }) {
   const outboundUrl = process.env.WHATSAPP_OUTBOUND_URL;
   if (!outboundUrl || !destination) return { attempted: false, skipped: true };
@@ -235,16 +259,39 @@ export async function POST(request) {
     const { submitUrl } = getUrls();
     const { controller, timer } = withTimeout(20000);
     try {
-      const response = await fetch(submitUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      let submitResult = await submitQuickbookRequest({
+        submitUrl,
+        payload,
         signal: controller.signal
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        return NextResponse.json({ error: data?.error || "Quick booking failed" }, { status: response.status });
+
+      // Some upstreams reject/ignore lab_id in this path; retry once without lab_id.
+      if (!submitResult.ok && payload.lab_id) {
+        const retryPayload = { ...payload };
+        delete retryPayload.lab_id;
+        submitResult = await submitQuickbookRequest({
+          submitUrl,
+          payload: retryPayload,
+          signal: controller.signal
+        });
       }
+
+      if (!submitResult.ok) {
+        const upstreamError =
+          submitResult?.data?.error ||
+          submitResult?.data?.message ||
+          submitResult?.rawText ||
+          "Quick booking failed";
+        console.error("[/api/quickbook] Upstream submit failed", {
+          status: submitResult.status,
+          upstreamError
+        });
+        return NextResponse.json(
+          { error: `Quick booking failed (${submitResult.status}): ${String(upstreamError).slice(0, 400)}` },
+          { status: submitResult.status || 502 }
+        );
+      }
+      const data = submitResult.data || {};
 
       const internalNotify = normalizePhone(
         process.env.INTERNAL_NOTIFY_WHATSAPP || process.env.NEXT_PUBLIC_INTERNAL_NOTIFY_WHATSAPP || ""
@@ -298,6 +345,7 @@ export async function POST(request) {
       clearTimeout(timer);
     }
   } catch (error) {
+    console.error("[/api/quickbook] POST failed:", error);
     return NextResponse.json({ error: error?.message || "Quick booking failed" }, { status: 500 });
   }
 }

@@ -105,6 +105,7 @@ export default function CartPage() {
                 subtotal={subtotal}
                 hasCenterOnlyItems={hasCenterOnlyItems}
                 source="/cart page"
+                onRequestSuccess={() => setItems([])}
               />
             </Box>
           </VStack>

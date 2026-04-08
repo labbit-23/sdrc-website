@@ -734,26 +734,53 @@ export async function POST(request) {
       headers.Authorization = `Bearer ${process.env.WHATSAPP_OUTBOUND_BEARER_TOKEN}`;
     }
 
-    const patientTemplate = await sendOutboundTemplate({
-      outboundUrl,
-      headers,
-      apiKey,
-      campaignName,
-      outboundSource,
-      destination: patientPhone,
-      userName: patientName || "Patient",
-      message
-    });
-    const internalTemplate = await sendOutboundTemplate({
-      outboundUrl,
-      headers,
-      apiKey,
-      campaignName,
-      outboundSource,
-      destination,
-      userName: patientName || "Website Lead",
-      message
-    });
+    let patientTemplate = { attempted: false, skipped: true };
+    let internalTemplate = { attempted: false, skipped: true };
+    let patientError = null;
+    let internalError = null;
+
+    try {
+      patientTemplate = await sendOutboundTemplate({
+        outboundUrl,
+        headers,
+        apiKey,
+        campaignName,
+        outboundSource,
+        destination: patientPhone,
+        userName: patientName || "Patient",
+        message
+      });
+    } catch (error) {
+      patientError = error?.message || "Patient WhatsApp send failed";
+      patientTemplate = { attempted: true, failed: true, error: patientError };
+    }
+
+    try {
+      internalTemplate = await sendOutboundTemplate({
+        outboundUrl,
+        headers,
+        apiKey,
+        campaignName,
+        outboundSource,
+        destination,
+        userName: patientName || "Website Lead",
+        message
+      });
+    } catch (error) {
+      internalError = error?.message || "Internal WhatsApp send failed";
+      internalTemplate = { attempted: true, failed: true, error: internalError };
+    }
+
+    if (patientError && internalError) {
+      console.error("[/api/tests] WhatsApp outbound failed for both destinations", {
+        patientError,
+        internalError
+      });
+      return NextResponse.json(
+        { error: `WhatsApp send failed. Patient: ${patientError}. Internal: ${internalError}.` },
+        { status: 502 }
+      );
+    }
 
     let quickbooking = { attempted: false, skipped: true, reason: "Not eligible" };
     if (shouldRouteQuickbooking) {
@@ -794,6 +821,7 @@ export async function POST(request) {
       clickup
     });
   } catch (error) {
+    console.error("[/api/tests] POST send_whatsapp_lead failed:", error);
     return NextResponse.json(
       { error: error?.message || "Unexpected error while sending WhatsApp lead." },
       { status: 500 }

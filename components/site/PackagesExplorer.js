@@ -323,7 +323,7 @@ export default function PackagesExplorer() {
     wrapper.style.top = "0";
     wrapper.style.background = "#ffffff";
     wrapper.style.padding = "24px";
-    wrapper.style.width = `${Math.max(920, source.scrollWidth + 80)}px`;
+    wrapper.style.width = `${Math.min(760, Math.max(390, source.scrollWidth + 24))}px`;
 
     const clone = source.cloneNode(true);
     clone.style.maxHeight = "none";
@@ -344,7 +344,7 @@ export default function PackagesExplorer() {
       const width = wrapper.scrollWidth;
       const height = wrapper.scrollHeight;
       const maxDim = 14000;
-      const scale = Math.min(2.8, maxDim / Math.max(width, height));
+      const scale = Math.min(3, maxDim / Math.max(width, height));
       return await window.html2canvas(wrapper, {
         backgroundColor: "#ffffff",
         scale: Math.max(1, scale),
@@ -375,7 +375,7 @@ export default function PackagesExplorer() {
     wrapper.style.top = "0";
     wrapper.style.background = "#ffffff";
     wrapper.style.padding = "28px";
-    wrapper.style.width = `${Math.max(source.scrollWidth, 1400)}px`;
+    wrapper.style.width = `${Math.max(source.scrollWidth, 980)}px`;
 
     const clone = source.cloneNode(true);
     clone.style.overflow = "visible";
@@ -383,7 +383,7 @@ export default function PackagesExplorer() {
     clone.style.width = "100%";
     clone.querySelectorAll("th, td, div, span, p").forEach((el) => {
       const current = Number.parseFloat(window.getComputedStyle(el).fontSize || "0");
-      if (!Number.isNaN(current) && current < 18) el.style.fontSize = "18px";
+      if (!Number.isNaN(current) && current < 16) el.style.fontSize = "16px";
     });
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
@@ -449,11 +449,25 @@ export default function PackagesExplorer() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <HStack mt={4} spacing={2} flexWrap="wrap">
+            {filteredPackages.map((pkg) => (
+              <Button
+                as={Link}
+                key={pkg.name}
+                href={`#${slugify(pkg.name)}`}
+                size="xs"
+                variant="outline"
+                borderRadius="full"
+              >
+                {pkg.name}
+              </Button>
+            ))}
+          </HStack>
         </Box>
 
         {filteredPackages.map((pkg) => (
           <Box key={pkg.name} id={slugify(pkg.name)} scrollMarginTop="110px">
-            <Heading size="md" mb={1}>
+            <Heading size="md" mb={1} noOfLines={2}>
               {pkg.name}
             </Heading>
             <Text color="gray.600" mb={4}>
@@ -482,11 +496,21 @@ export default function PackagesExplorer() {
                     display="flex"
                     flexDirection="column"
                   >
-                    <Box position="absolute" top={0} left={0} right={0} h="4px" bgGradient="linear(to-r, teal.500, orange.400, teal.500)" />
+                    <Box
+                      position="absolute"
+                      top={0}
+                      left={0}
+                      right={0}
+                      h="5px"
+                      bgImage="linear-gradient(90deg, #008f82 0%, #f46c3b 52%, #008f82 100%)"
+                      borderTopRadius="xl"
+                      zIndex={2}
+                      boxShadow="0 1px 0 rgba(0,0,0,0.06)"
+                    />
                     <Box position="absolute" top={3} right={3} opacity={0.9}>
                       <Image src="/assets/sdrc-logo.png" alt="SDRC" width={62} height={18} />
                     </Box>
-                    <Heading size="sm" color="teal.700">
+                    <Heading size="sm" color="teal.700" noOfLines={2}>
                       {variant.name}
                     </Heading>
                     <Text fontSize="sm" color="gray.600" mt={1}>
@@ -567,7 +591,7 @@ export default function PackagesExplorer() {
                           color={added ? "white" : "teal.700"}
                           borderColor={added ? "teal.600" : "teal.300"}
                           onClick={() => addVariantToCart(pkg, variant)}
-                          isDisabled={added}
+                          disabled={added}
                           px={showAddLabel && !added ? 3 : 0}
                           minW={showAddLabel && !added ? "110px" : "38px"}
                           leftIcon={showAddLabel && !added ? <BsCartPlus /> : null}
@@ -620,7 +644,7 @@ export default function PackagesExplorer() {
             </Button>
             <Button
               size="sm"
-              isDisabled={selectedVariants.length < 2}
+              disabled={selectedVariants.length < 2}
               onClick={() => setShowCompare(true)}
             >
               Compare now
@@ -762,10 +786,7 @@ export default function PackagesExplorer() {
             onClick={(e) => e.stopPropagation()}
           >
             <Flex justify="space-between" align="center" mb={3} wrap="wrap" gap={2}>
-              <HStack spacing={3}>
-                <Image src="/assets/sdrc-logo.png" alt="SDRC" width={96} height={28} />
-                <Heading size="md">Compare packages</Heading>
-              </HStack>
+              <Box />
               <HStack spacing={1}>
                 {isMobile ? (
                   <IconButton
@@ -803,7 +824,7 @@ export default function PackagesExplorer() {
                 <Text fontWeight="700" color="gray.700">Package Comparison</Text>
               </HStack>
               <Box overflowX="auto">
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "15px", lineHeight: 1.35 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "16px", lineHeight: 1.4 }}>
                 <thead>
                   <tr>
                     <th style={{ textAlign: "left", padding: "10px 12px", borderBottom: "1px solid #e2e8f0" }}>Test</th>
@@ -843,16 +864,15 @@ export default function PackagesExplorer() {
                 </tbody>
                 </table>
               </Box>
-            </Box>
-
-            {compareNotes.length > 0 ? (
-              <Box mt={3}>
+              {compareNotes.length > 0 ? (
+                <Box mt={3}>
                 <Text fontSize="11px" color="gray.500" fontWeight="700" mb={1}>Important notes</Text>
                 {compareNotes.map((note) => (
                   <Text key={note} fontSize="11px" color="gray.500">{note}</Text>
                 ))}
-              </Box>
-            ) : null}
+                </Box>
+              ) : null}
+            </Box>
           </Box>
         </Box>
       ) : null}

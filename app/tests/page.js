@@ -483,7 +483,7 @@ export default function TestsPage() {
                         borderColor={added ? "teal.600" : "teal.300"}
                         aria-label={added ? "Added to cart" : "Add package to cart"}
                         onClick={() => addPackageToCart(pkg)}
-                        isDisabled={added}
+                        disabled={added}
                       >
                         {added ? <BsCartCheck /> : <BsCartPlus />}
                       </IconButton>
@@ -522,7 +522,7 @@ export default function TestsPage() {
                           borderColor={added ? "teal.600" : "teal.300"}
                           aria-label={added ? "Added to cart" : "Add test to cart"}
                           onClick={() => addTestToCart(test)}
-                          isDisabled={added}
+                          disabled={added}
                         >
                           {added ? <BsCartCheck /> : <BsCartPlus />}
                         </IconButton>
@@ -560,7 +560,7 @@ export default function TestsPage() {
                             borderColor={added ? "teal.600" : "teal.300"}
                             aria-label={added ? "Added to cart" : "Add test to cart"}
                             onClick={() => addTestToCart(test)}
-                            isDisabled={added}
+                            disabled={added}
                           >
                             {added ? <BsCartCheck /> : <BsCartPlus />}
                           </IconButton>
@@ -571,13 +571,13 @@ export default function TestsPage() {
                 })}
               </VStack>
               <HStack justify="space-between" mt={4}>
-                <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.max(1, p - 1))} isDisabled={loading || page <= 1}>
+                <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={loading || page <= 1}>
                   Previous
                 </Button>
                 <Text fontSize="xs" color="gray.600">
                   Page {page} of {Math.max(1, Math.ceil((pagination.total || 0) / (pagination.limit || PAGE_SIZE)))}
                 </Text>
-                <Button size="sm" variant="outline" onClick={() => setPage((p) => p + 1)} isDisabled={loading || !pagination.has_next}>
+                <Button size="sm" variant="outline" onClick={() => setPage((p) => p + 1)} disabled={loading || !pagination.has_next}>
                   Next
                 </Button>
               </HStack>
@@ -738,7 +738,7 @@ export default function TestsPage() {
                               borderColor={added ? "teal.600" : "teal.300"}
                               aria-label={added ? "Added to cart" : "Add test to cart"}
                               onClick={() => addTestToCart(test)}
-                              isDisabled={added}
+                              disabled={added}
                             >
                               {added ? <BsCartCheck /> : <BsCartPlus />}
                             </IconButton>
@@ -751,13 +751,13 @@ export default function TestsPage() {
               )}
 
               <HStack justify="space-between" mt={5}>
-                <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.max(1, p - 1))} isDisabled={loading || page <= 1}>
+                <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={loading || page <= 1}>
                   Previous
                 </Button>
                 <Text fontSize="sm" color="gray.600">
                   Page {page} of {Math.max(1, Math.ceil((pagination.total || 0) / (pagination.limit || PAGE_SIZE)))}
                 </Text>
-                <Button size="sm" variant="outline" onClick={() => setPage((p) => p + 1)} isDisabled={loading || !pagination.has_next}>
+                <Button size="sm" variant="outline" onClick={() => setPage((p) => p + 1)} disabled={loading || !pagination.has_next}>
                   Next
                 </Button>
               </HStack>
@@ -831,7 +831,7 @@ export default function TestsPage() {
                                 _disabled={{ bg: "gray.100", color: "gray.500", opacity: 1 }}
                                 aria-label={added ? "Added to cart" : "Add package to cart"}
                                 onClick={() => addPackageToCart(pkg)}
-                                isDisabled={added}
+                                disabled={added}
                               >
                                 {added ? <BsCartCheck /> : <BsCartPlus />}
                               </IconButton>
@@ -927,6 +927,7 @@ export default function TestsPage() {
             subtotal={subtotal}
             hasCenterOnlyItems={hasCenterOnlyItems}
             source="/tests page"
+            onRequestSuccess={clearCart}
           />
         </Box>
       </Container>

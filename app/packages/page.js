@@ -14,7 +14,7 @@ export default function PackagesPage() {
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr", lg: "1.05fr .95fr" }} gap={10} alignItems="center">
             <Box>
-              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="13ch" className="hero-title">
+              <Heading color="gray.800" className="hero-title">
                 Master Health Check
                 <Box as="span" color="orange.500" className="hero-subline">Packages</Box>
               </Heading>
