@@ -56,13 +56,15 @@ function buildQuickbookMessage({ patientName, phone, packageName, area, date, ti
   ].join("\n");
 }
 
-function buildQuickbookPatientAck({ patientName, date, timeslot }) {
+function buildHomeVisitTemplateParams({ patientName, date, timeslot, contactNumber }) {
   return [
-    `Hello ${String(patientName || "").trim() || "Patient"},`,
-    "Your home visit request has been received by SDRC.",
-    `Preferred schedule: ${date || "Date TBA"} • ${timeslot || "Slot TBA"}`,
-    "Our team will contact you shortly for confirmation."
-  ].join("\n");
+    String(patientName || "").trim() || "Patient",
+    "recorded and UNDER REVIEW",
+    String(date || "").trim() || "Date TBA",
+    String(timeslot || "").trim() || "Slot TBA",
+    "SDRC",
+    String(contactNumber || "").trim() || "919849025601"
+  ];
 }
 
 async function submitQuickbookRequest({ submitUrl, payload, signal }) {
@@ -89,12 +91,10 @@ async function submitQuickbookRequest({ submitUrl, payload, signal }) {
   };
 }
 
-async function sendOutboundTemplate({ destination, message }) {
+async function sendOutboundTemplate({ destination, templateName, templateParams = [] }) {
   if (!destination) return { attempted: false, skipped: true };
-
-  const campaignName = process.env.WHATSAPP_OUTBOUND_CAMPAIGN || "website_lead";
-  const templateName = String(campaignName || "").trim();
-  if (!templateName) return { attempted: false, skipped: true, reason: "Missing campaign/template name" };
+  const safeTemplateName = String(templateName || "").trim();
+  if (!safeTemplateName) return { attempted: false, skipped: true, reason: "Missing template name" };
 
   const internalSendUrl = process.env.WHATSAPP_INTERNAL_SEND_URL || process.env.LABBIT_WHATSAPP_SEND_URL || "";
   if (internalSendUrl) {
@@ -109,8 +109,8 @@ async function sendOutboundTemplate({ destination, message }) {
     const internalPayload = {
       ...(labId ? { lab_id: labId } : {}),
       destination,
-      campaignName: templateName,
-      templateParams: [String(message || "")],
+      campaignName: safeTemplateName,
+      templateParams: (templateParams || []).map((p) => String(p ?? "")),
       source
     };
 
@@ -146,7 +146,7 @@ async function sendOutboundTemplate({ destination, message }) {
     to: destination,
     type: "template",
     template: {
-      name: templateName,
+      name: safeTemplateName,
       language: { code: String(languageCode) },
       components: [
         {
@@ -157,7 +157,7 @@ async function sendOutboundTemplate({ destination, message }) {
     }
   });
 
-  const payload = buildPayload([String(message || "")]);
+  const payload = buildPayload((templateParams || []).map((p) => String(p ?? "")));
 
   const response = await fetch(outboundUrl, {
     method: "POST",
@@ -338,19 +338,15 @@ export async function POST(request) {
       const internalNotify = normalizePhone(
         process.env.INTERNAL_NOTIFY_WHATSAPP || process.env.NEXT_PUBLIC_INTERNAL_NOTIFY_WHATSAPP || ""
       );
-      const internalMessage = buildQuickbookMessage({
-        patientName: payload.patientName,
-        phone: payload.phone,
-        packageName: payload.packageName,
-        area: payload.area,
-        date: payload.date,
-        timeslot: payload.timeslot,
-        prescriptionUrl: payload.prescription_url
-      });
-      const patientAckMessage = buildQuickbookPatientAck({
+      const templateTimeslot = String(data?.timeslot_label || payload.timeslot || "").trim();
+      const templateContactNumber = normalizePhone(
+        process.env.INTERNAL_NOTIFY_WHATSAPP || process.env.NEXT_PUBLIC_INTERNAL_NOTIFY_WHATSAPP || ""
+      );
+      const homeVisitTemplateParams = buildHomeVisitTemplateParams({
         patientName: payload.patientName,
         date: payload.date,
-        timeslot: payload.timeslot
+        timeslot: templateTimeslot,
+        contactNumber: templateContactNumber
       });
 
       let templates = { patient: { attempted: false, skipped: true }, internal: { attempted: false, skipped: true } };
@@ -358,7 +354,8 @@ export async function POST(request) {
       try {
         templates.patient = await sendOutboundTemplate({
           destination: phone,
-          message: patientAckMessage
+          templateName: "home_visit",
+          templateParams: homeVisitTemplateParams
         });
       } catch (error) {
         templates.patient = { attempted: true, failed: true, error: error?.message || "Template send failed" };
@@ -366,7 +363,8 @@ export async function POST(request) {
       try {
         templates.internal = await sendOutboundTemplate({
           destination: internalNotify,
-          message: internalMessage
+          templateName: "home_visit",
+          templateParams: homeVisitTemplateParams
         });
       } catch (error) {
         templates.internal = { attempted: true, failed: true, error: error?.message || "Template send failed" };

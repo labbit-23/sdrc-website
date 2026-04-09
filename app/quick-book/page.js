@@ -16,6 +16,7 @@ import {
   VStack
 } from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
+import { CART_UPDATED_EVENT, readCartItems } from "@/lib/cart";
 
 function formatDateIso(dateObj) {
   const y = dateObj.getFullYear();
@@ -47,6 +48,11 @@ function normalizePhone(rawPhone) {
   return digits;
 }
 
+function formatInr(amount) {
+  if (amount == null || Number.isNaN(Number(amount))) return "INR 0.00";
+  return `INR ${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 function parseSlotHour(slot) {
   const candidate = String(slot?.start_time || slot?.slot_name || "");
   const m24 = candidate.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/);
@@ -73,6 +79,7 @@ export default function QuickBookPage() {
   const [success, setSuccess] = useState("");
   const [prescriptionFile, setPrescriptionFile] = useState(null);
   const [prescriptionMeta, setPrescriptionMeta] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
   const formBusy = submitting || uploadingPrescription;
 
   const [form, setForm] = useState({
@@ -94,6 +101,15 @@ export default function QuickBookPage() {
     });
     return groups;
   }, [slots]);
+  const cartSubtotal = useMemo(
+    () => cartItems.reduce((sum, item) => sum + (Number(item?.price) || 0), 0),
+    [cartItems]
+  );
+  const cartPackageName = useMemo(() => {
+    if (!Array.isArray(cartItems) || cartItems.length === 0) return "";
+    const lines = cartItems.map((item) => `[${item?.item_type === "package" ? "Package" : "Test"}] ${item?.name || ""}`.trim());
+    return `Cart request (${cartItems.length} item${cartItems.length === 1 ? "" : "s"})\n${lines.join(" | ")}`.slice(0, 2000);
+  }, [cartItems]);
 
   useEffect(() => {
     let cancelled = false;
@@ -114,6 +130,13 @@ export default function QuickBookPage() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    const syncCart = () => setCartItems(readCartItems());
+    syncCart();
+    window.addEventListener(CART_UPDATED_EVENT, syncCart);
+    return () => window.removeEventListener(CART_UPDATED_EVENT, syncCart);
   }, []);
 
   async function uploadPrescription(file, phone) {
@@ -171,10 +194,11 @@ export default function QuickBookPage() {
         body: JSON.stringify({
           patientName: form.patientName.trim(),
           phone,
-          packageName: form.packageName.trim(),
+          packageName: (cartPackageName || form.packageName || "").trim(),
           area: form.area.trim(),
           date: selectedDate,
           timeslot: selectedSlot,
+          home_visit_required: true,
           prescription_url: uploadedPrescription?.url || "",
           prescription_path: uploadedPrescription?.path || "",
           prescription_file_name: uploadedPrescription?.file_name || "",
@@ -289,6 +313,24 @@ export default function QuickBookPage() {
 
           <Box className="soft-card no-hover-lift" p={{ base: 4, md: 6 }}>
             <Heading size="md" mb={3}>Patient Details</Heading>
+            {cartItems.length > 0 ? (
+              <Box mb={4} p={3} borderRadius="lg" bg="teal.50" borderWidth="1px" borderColor="teal.100">
+                <Text fontSize="sm" fontWeight="700" color="teal.800">
+                  Items from Cart ({cartItems.length})
+                </Text>
+                <VStack align="start" gap={0.5} mt={1.5}>
+                  {cartItems.slice(0, 6).map((item) => (
+                    <Text key={item.id} fontSize="xs" color="gray.700">
+                      • {item.name}
+                    </Text>
+                  ))}
+                  {cartItems.length > 6 ? (
+                    <Text fontSize="xs" color="gray.500">+ {cartItems.length - 6} more items</Text>
+                  ) : null}
+                </VStack>
+                <Text fontSize="xs" color="teal.700" mt={2}>Estimated subtotal: {formatInr(cartSubtotal)}</Text>
+              </Box>
+            ) : null}
             <VStack align="stretch" gap={3}>
               <Input
                 bg="white"
@@ -319,9 +361,13 @@ export default function QuickBookPage() {
               <Input
                 bg="white"
                 placeholder="Tests / package (optional)"
-                value={form.packageName}
+                value={cartPackageName || form.packageName}
+                isReadOnly={Boolean(cartPackageName)}
                 disabled={formBusy}
-                onChange={(e) => setForm((prev) => ({ ...prev, packageName: e.target.value }))}
+                onChange={(e) => {
+                  if (cartPackageName) return;
+                  setForm((prev) => ({ ...prev, packageName: e.target.value }));
+                }}
               />
               <Box>
                 <Input

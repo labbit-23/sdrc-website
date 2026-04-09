@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Box, Button, Grid, HStack, Input, SimpleGrid, Spinner, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Grid, HStack, Input, SimpleGrid, Spinner, Text, VStack, useToast } from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
 
 function normalizePhone(rawPhone) {
@@ -51,41 +51,20 @@ function parseSlotHour(slot) {
 }
 
 export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyItems, source = "cart", onRequestSuccess }) {
+  const toast = useToast();
   const [patientName, setPatientName] = useState("");
   const [patientPhone, setPatientPhone] = useState("");
   const [patientArea, setPatientArea] = useState("");
   const [patientNotes, setPatientNotes] = useState("");
   const [homeVisitRequested, setHomeVisitRequested] = useState(false);
   const [leadError, setLeadError] = useState("");
-  const [leadSuccess, setLeadSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [slots, setSlots] = useState([]);
   const dateOptions = useMemo(() => getNextDays(5), []);
   const [preferredDate, setPreferredDate] = useState(dateOptions[0]?.iso || "");
   const [preferredSlot, setPreferredSlot] = useState("");
-  const [successCountdown, setSuccessCountdown] = useState(null);
-  const formBusy = isSubmitting || loadingSlots || successCountdown != null;
-
-  useEffect(() => {
-    if (successCountdown == null) return;
-    if (successCountdown <= 0) {
-      if (typeof window !== "undefined") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-      if (typeof onRequestSuccess === "function") {
-        onRequestSuccess();
-      }
-      setSuccessCountdown(null);
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      setSuccessCountdown((prev) => (prev == null ? null : prev - 1));
-    }, 1000);
-
-    return () => window.clearTimeout(timer);
-  }, [successCountdown, onRequestSuccess]);
+  const formBusy = isSubmitting || loadingSlots;
   const slotGroups = useMemo(() => {
     const groups = { Morning: [], Afternoon: [], Evening: [] };
     slots.forEach((slot) => {
@@ -106,7 +85,6 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
   }, [slots, preferredSlot]);
 
   useEffect(() => {
-    if (!homeVisitRequested) return;
     if (slots.length > 0) return;
     let cancelled = false;
     setLoadingSlots(true);
@@ -126,11 +104,16 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
     return () => {
       cancelled = true;
     };
-  }, [homeVisitRequested, slots.length]);
+  }, [slots.length]);
+
+  useEffect(() => {
+    if (!preferredSlot && Array.isArray(slots) && slots.length > 0) {
+      setPreferredSlot(String(slots[0]?.id || ""));
+    }
+  }, [slots, preferredSlot]);
 
   async function sendCartRequest() {
     setLeadError("");
-    setLeadSuccess("");
 
     if (cartItems.length === 0) {
       setLeadError("Add at least one test or package before sending.");
@@ -148,12 +131,12 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
       return;
     }
 
-    if (homeVisitRequested && !preferredDate) {
-      setLeadError("Select preferred date for home visit.");
+    if (!preferredDate) {
+      setLeadError(homeVisitRequested ? "Select preferred date for home visit." : "Select tentative date for center visit.");
       return;
     }
-    if (homeVisitRequested && !preferredSlot) {
-      setLeadError("Select preferred time slot for home visit.");
+    if (!preferredSlot) {
+      setLeadError(homeVisitRequested ? "Select preferred time slot for home visit." : "Select tentative time slot for center visit.");
       return;
     }
 
@@ -192,8 +175,22 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
       const quickbookStatus = data?.quickbooking?.attempted
         ? " Home visit booking has been queued."
         : "";
-      setLeadSuccess(`Request received successfully.${quickbookStatus}`);
-      setSuccessCountdown(3);
+      toast({
+        title: "Request received successfully",
+        description: `Our team will connect shortly.${quickbookStatus}`,
+        status: "success",
+        duration: 2600,
+        isClosable: true,
+        position: "top"
+      });
+      if (typeof onRequestSuccess === "function") {
+        onRequestSuccess();
+      }
+      window.setTimeout(() => {
+        if (typeof window !== "undefined") {
+          window.location.assign("/");
+        }
+      }, 900);
     } catch (e) {
       setLeadError(e.message || "Unable to send request right now.");
     } finally {
@@ -248,7 +245,7 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
           size="sm"
           placeholder="Area / locality"
           name="patient_area"
-          autoComplete="address-level2"
+          autoComplete="street-address"
           disabled={formBusy}
           value={patientArea}
           onChange={(e) => setPatientArea(e.target.value)}
@@ -277,74 +274,75 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
           </VStack>
         </HStack>
 
-        {homeVisitRequested ? (
-          <>
-            <SimpleGrid columns={{ base: 5, md: 5 }} gap={1.5}>
-              {dateOptions.map((day) => {
-                const active = preferredDate === day.iso;
-                const [dayNum] = day.label.split(" ");
-                const meta = day.label.slice(dayNum.length + 1);
-                return (
-                  <Button
-                    key={day.iso}
-                    variant={active ? "solid" : "outline"}
-                    h="64px"
-                    px={1}
-                    borderRadius="lg"
-                    disabled={formBusy}
-                    onClick={() => setPreferredDate(day.iso)}
-                  >
-                    <VStack gap={0}>
-                      <Text fontSize="lg" lineHeight="1" fontWeight="800">{dayNum}</Text>
-                      <Text fontSize="10px" color={active ? "white" : "gray.600"}>{meta}</Text>
-                    </VStack>
-                  </Button>
-                );
-              })}
-            </SimpleGrid>
-            {loadingSlots ? (
-              <HStack>
-                <Spinner size="sm" color="teal.500" />
-                <Text fontSize="xs" color="gray.600">Loading time slots...</Text>
-              </HStack>
-            ) : (
-              <VStack align="stretch" gap={2}>
-                {Object.entries(slotGroups).map(([groupName, groupSlots]) => (
-                  <Box
-                    key={groupName}
-                    p={2}
-                    borderRadius="lg"
-                    bg={groupName === "Morning" ? "teal.50" : groupName === "Afternoon" ? "orange.50" : "orange.100"}
-                  >
-                    <Text fontSize="xs" fontWeight="700" color="teal.700" mb={1.5}>{groupName}</Text>
-                    <SimpleGrid columns={{ base: 2, md: 3 }} gap={1.5}>
-                      {groupSlots.map((slot) => {
-                        const active = preferredSlot === slot.id;
-                        return (
-                          <Button
-                            key={slot.id}
-                            variant={active ? "solid" : "outline"}
-                            h="34px"
-                            px={2}
-                            borderRadius="md"
-                            fontSize="xs"
-                            whiteSpace="nowrap"
-                            overflow="hidden"
-                            textOverflow="ellipsis"
-                            disabled={formBusy}
-                            onClick={() => setPreferredSlot(slot.id)}
-                          >
-                            {slot.slot_name || `${slot.start_time || ""} - ${slot.end_time || ""}`}
-                          </Button>
-                        );
-                      })}
-                    </SimpleGrid>
-                  </Box>
-                ))}
-              </VStack>
-            )}
-          </>
-        ) : null}
+        <Text fontSize="xs" color="gray.600">
+          {homeVisitRequested
+            ? "Select preferred home-visit date and time."
+            : "Select tentative center-visit date and time. Our team may adjust and confirm."}
+        </Text>
+        <SimpleGrid columns={{ base: 5, md: 5 }} gap={1.5}>
+          {dateOptions.map((day) => {
+            const active = preferredDate === day.iso;
+            const [dayNum] = day.label.split(" ");
+            const meta = day.label.slice(dayNum.length + 1);
+            return (
+              <Button
+                key={day.iso}
+                variant={active ? "solid" : "outline"}
+                h="64px"
+                px={1}
+                borderRadius="lg"
+                disabled={formBusy}
+                onClick={() => setPreferredDate(day.iso)}
+              >
+                <VStack gap={0}>
+                  <Text fontSize="lg" lineHeight="1" fontWeight="800">{dayNum}</Text>
+                  <Text fontSize="10px" color={active ? "white" : "gray.600"}>{meta}</Text>
+                </VStack>
+              </Button>
+            );
+          })}
+        </SimpleGrid>
+        {loadingSlots ? (
+          <HStack>
+            <Spinner size="sm" color="teal.500" />
+            <Text fontSize="xs" color="gray.600">Loading time slots...</Text>
+          </HStack>
+        ) : (
+          <VStack align="stretch" gap={2}>
+            {Object.entries(slotGroups).map(([groupName, groupSlots]) => (
+              <Box
+                key={groupName}
+                p={2}
+                borderRadius="lg"
+                bg={groupName === "Morning" ? "teal.50" : groupName === "Afternoon" ? "orange.50" : "orange.100"}
+              >
+                <Text fontSize="xs" fontWeight="700" color="teal.700" mb={1.5}>{groupName}</Text>
+                <SimpleGrid columns={{ base: 2, md: 3 }} gap={1.5}>
+                  {groupSlots.map((slot) => {
+                    const active = preferredSlot === slot.id;
+                    return (
+                      <Button
+                        key={slot.id}
+                        variant={active ? "solid" : "outline"}
+                        h="34px"
+                        px={2}
+                        borderRadius="md"
+                        fontSize="xs"
+                        whiteSpace="nowrap"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                        disabled={formBusy}
+                        onClick={() => setPreferredSlot(slot.id)}
+                      >
+                        {slot.slot_name || `${slot.start_time || ""} - ${slot.end_time || ""}`}
+                      </Button>
+                    );
+                  })}
+                </SimpleGrid>
+              </Box>
+            ))}
+          </VStack>
+        )}
 
         {homeVisitRequested && hasCenterOnlyItems ? (
           <Text fontSize="xs" color="orange.600">
@@ -359,14 +357,10 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
         ) : null}
 
         {leadError ? <Text fontSize="xs" color="red.600">{leadError}</Text> : null}
-        {leadSuccess ? <Text fontSize="xs" color="green.700">{leadSuccess}</Text> : null}
-        {homeVisitRequested && preferredDate && preferredSlot ? (
+        {preferredDate && preferredSlot ? (
           <Text fontSize="xs" color="gray.700">
-            Selected home visit: <strong>{preferredDateLabel}</strong> • <strong>{preferredSlotLabel}</strong>
+            {homeVisitRequested ? "Selected home visit:" : "Tentative center visit:"} <strong>{preferredDateLabel}</strong> • <strong>{preferredSlotLabel}</strong>
           </Text>
-        ) : null}
-        {successCountdown != null ? (
-          <Text fontSize="xs" color="teal.700">Going to top and clearing cart in {successCountdown}...</Text>
         ) : null}
         {isSubmitting ? <Text fontSize="xs" color="teal.700">Submitting request...</Text> : null}
         <Button

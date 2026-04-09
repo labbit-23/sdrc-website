@@ -702,6 +702,23 @@ async function postQuickbookingLead({
 
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const fallbackDate = tomorrow.toISOString().slice(0, 10);
+    const requestPayloadJson = {
+      source,
+      comments: patientNotes || null,
+      pricing: {
+        subtotal: Number(subtotal || 0),
+        collection_fee: collectionFee == null ? null : Number(collectionFee),
+        total: Number(total || 0)
+      },
+      items: (items || []).map((item) => ({
+        id: item?.id || null,
+        type: item?.item_type === "package" ? "package" : "test",
+        name: String(item?.name || "").trim(),
+        price: item?.price == null ? null : Number(item.price),
+        internal_code: item?.internal_code || null,
+        home_collection: typeof item?.home_collection === "boolean" ? item.home_collection : null
+      }))
+    };
     const payload = {
       patientName,
       phone: toQuickbookPhone(patientPhone),
@@ -713,6 +730,7 @@ async function postQuickbookingLead({
       whatsapp: true,
       agree: true,
       home_visit_required: Boolean(homeVisitRequired),
+      request_payload_json: requestPayloadJson,
       ...(process.env.DEFAULT_LAB_ID ? { lab_id: process.env.DEFAULT_LAB_ID } : {})
     };
 
