@@ -799,9 +799,6 @@ export async function POST(request) {
     }
 
     const items = Array.isArray(body?.items) ? body.items : [];
-    if (items.length === 0) {
-      return NextResponse.json({ error: "Cart is empty." }, { status: 400 });
-    }
 
     const patientName = String(body?.patient_name || "").trim();
     const patientPhone = normalizePhone(body?.patient_phone || "");

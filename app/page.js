@@ -121,9 +121,14 @@ export default function HomePage() {
                 Secunderabad Diagnostic and Research Centre
               </Text>
 
-              <Heading mt={4} size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="14ch" className="hero-title">
+              <Heading mt={4} size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW={{ base: "14ch", md: "15.5ch" }} className="hero-title">
                 Advanced Diagnostic Care
-                <Box as="span" color="orange.500" className="hero-subline">at Jade Arcade, Paradise</Box>
+                <Box as="span" color="orange.500" className="hero-subline">
+                  at{" "}
+                  <Box as="span" whiteSpace={{ base: "normal", md: "nowrap" }}>
+                    Jade Arcade, Paradise
+                  </Box>
+                </Box>
               </Heading>
 
               <Text mt={4} fontSize={{ base: "md", md: "lg" }} color="gray.700" maxW="2xl" display={{ base: "none", md: "block" }}>
@@ -149,18 +154,11 @@ export default function HomePage() {
                   as={Link}
                   href={siteConfig.bookingUrl}
                   size="lg"
-                  target="_blank"
                   leftIcon={<FiSearch />}
-                  bg="linear-gradient(135deg, #f97316 0%, #fb923c 100%)"
-                  color="white"
-                  _hover={{ bg: "linear-gradient(135deg, #ea580c 0%, #f97316 100%)" }}
+                  className="book-test-cta"
                 >
-                  <HStack spacing={2}>
-                    <Text>Book a Test</Text>
-                    <Box as="span" bg="whiteAlpha.350" color="white" px={2} py={0.5} borderRadius="full" fontSize="10px" lineHeight="1" fontWeight="800">
-                      New!
-                    </Box>
-                  </HStack>
+                  <Text>Book a Test</Text>
+                  <Box as="span" className="book-test-ribbon">NEW</Box>
                 </Button>
               </HStack>
 
@@ -300,9 +298,10 @@ export default function HomePage() {
               lineHeight="1"
               alignItems="center"
               justifyContent="center"
-              target="_blank"
+              className="book-test-cta"
             >
               Book tests online
+              <Box as="span" className="book-test-ribbon">NEW</Box>
             </Button>
           </HStack>
         </Container>

@@ -31,7 +31,7 @@ export default function ReportingTermsPage() {
         <Container maxW="1200px">
           <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="16ch" className="hero-title">
             Terms & Conditions
-            <Box as="span" color="teal.700" className="hero-subline">of Reporting</Box>
+            <Box as="span" color="teal.700" className="hero-subline">&nbsp;of Reporting</Box>
           </Heading>
           <Text mt={3} color="gray.600" fontSize="sm">
             Please review these reporting terms before using any report for medical decisions.
@@ -64,4 +64,3 @@ export default function ReportingTermsPage() {
     </>
   );
 }
-

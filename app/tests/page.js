@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  Badge,
   Box,
   Button,
   Container,
@@ -15,27 +14,25 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
-import { FiFilter, FiHome, FiShoppingCart, FiTrash2 } from "react-icons/fi";
+import { FiFilter, FiHome, FiShoppingCart } from "react-icons/fi";
 import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
 import healthPackagesData from "@/data/health-packages.json";
 import CartRequestPanel from "@/components/cart/CartRequestPanel";
 import { readCartItems, saveCartItems } from "@/lib/cart";
+import { trackEvent } from "@/lib/analytics";
 import { sortPackages, sortPackageVariants } from "@/lib/packageOrdering";
 
 const PAGE_SIZE = 20;
 const QUERY_DEBOUNCE_MS = 350;
 const CLIENT_CACHE_TTL_MS = 20 * 1000;
+const MOST_BOOKED_CACHE_KEY = "sdrc_tests_default_cache_v1";
+const MOST_BOOKED_CACHE_TTL_MS = 15 * 60 * 1000;
 const clientCache = new Map();
 const defaultPagination = { page: 1, limit: PAGE_SIZE, total: 0, has_next: false };
 
 function formatInr(amount) {
   if (amount == null || Number.isNaN(Number(amount))) return "INR 0.00";
   return `INR ${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function formatLinePrice(amount) {
-  if (amount == null || Number.isNaN(Number(amount))) return "0.00";
-  return Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function flattenPackageVariants(data) {
@@ -151,8 +148,7 @@ export default function TestsPage() {
 
     return Array.from(byName.values())
       .map((variants) => variants.find((v) => v.home_collection) || variants[0])
-      .filter(Boolean)
-      .slice(0, 8);
+      .filter(Boolean);
   }, [filteredPackageVariants]);
   const mobilePopularTests = useMemo(() => {
     const source = items.filter((test) => test.is_most_popular);
@@ -191,6 +187,10 @@ export default function TestsPage() {
   }, []);
 
   useEffect(() => {
+    trackEvent("page_view", { page_type: "tests" }, { pagePath: "/tests" });
+  }, []);
+
+  useEffect(() => {
     saveCartItems(cartItems);
   }, [cartItems]);
 
@@ -198,6 +198,11 @@ export default function TestsPage() {
     const t = window.setTimeout(() => setDebouncedQuery(query.trim()), QUERY_DEBOUNCE_MS);
     return () => window.clearTimeout(t);
   }, [query]);
+
+  useEffect(() => {
+    if (!debouncedQuery) return;
+    trackEvent("search_tests", { query: debouncedQuery, page }, { pagePath: "/tests" });
+  }, [debouncedQuery, page]);
 
   useEffect(() => {
     const onDocClick = (event) => {
@@ -217,6 +222,32 @@ export default function TestsPage() {
       setLoading(true);
       setError("");
       try {
+        const isDefaultMostBookedView =
+          page === 1 &&
+          !debouncedQuery &&
+          activeCategory === "All" &&
+          !mostCommonOnly &&
+          mostPopularOnly &&
+          !homeCollectionFilter;
+
+        if (isDefaultMostBookedView && typeof window !== "undefined") {
+          const raw = window.localStorage.getItem(MOST_BOOKED_CACHE_KEY);
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw);
+              if (Date.now() - Number(parsed?.ts || 0) < MOST_BOOKED_CACHE_TTL_MS) {
+                if (!cancelled && parsed?.data) {
+                  setItems(prioritizeSearchResults(parsed.data.items || [], debouncedQuery));
+                  setCategories(parsed.data.filters?.categories || []);
+                  setPagination(parsed.data.pagination || defaultPagination);
+                  setLoading(false);
+                  return;
+                }
+              }
+            } catch {}
+          }
+        }
+
         const params = new URLSearchParams({
           page: String(page),
           limit: String(PAGE_SIZE),
@@ -250,6 +281,20 @@ export default function TestsPage() {
         setCategories(data.filters?.categories || []);
         setPagination(data.pagination || defaultPagination);
         clientCache.set(key, { ts: Date.now(), data });
+
+        if (
+          page === 1 &&
+          !debouncedQuery &&
+          activeCategory === "All" &&
+          !mostCommonOnly &&
+          mostPopularOnly &&
+          !homeCollectionFilter &&
+          typeof window !== "undefined"
+        ) {
+          try {
+            window.localStorage.setItem(MOST_BOOKED_CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+          } catch {}
+        }
       } catch (e) {
         if (e?.name === "AbortError") return;
         if (!cancelled) {
@@ -273,6 +318,7 @@ export default function TestsPage() {
   }
 
   function addTestToCart(test) {
+    trackEvent("add_to_cart", { item_type: "test", test_id: test.id, name: test.name }, { pagePath: "/tests" });
     setCartItems((prev) => {
       if (prev.some((item) => item.id === test.id)) return prev;
       return [
@@ -293,6 +339,7 @@ export default function TestsPage() {
   }
 
   function addPackageToCart(pkg) {
+    trackEvent("add_to_cart", { item_type: "package", package_id: pkg.id, name: pkg.name }, { pagePath: "/tests" });
     setCartItems((prev) => {
       if (prev.some((item) => item.id === pkg.id)) return prev;
       return [
@@ -313,10 +360,12 @@ export default function TestsPage() {
   }
 
   function removeFromCart(itemId) {
+    trackEvent("remove_from_cart", { item_id: itemId }, { pagePath: "/tests" });
     setCartItems((prev) => prev.filter((item) => item.id !== itemId));
   }
 
   function clearCart() {
+    trackEvent("clear_cart", { item_count: cartItems.length }, { pagePath: "/tests" });
     setCartItems([]);
   }
 
@@ -459,7 +508,7 @@ export default function TestsPage() {
           <Box className="soft-card no-hover-lift" p={4}>
             <HStack justify="space-between" mb={3}>
               <Heading size="sm">{isSearching ? "Matching Checkups" : "Popular Checkups"}</Heading>
-              <Button as="a" href="/packages" size="xs" variant="outline">View all</Button>
+              <Button as="a" href="/packages" size="xs" variant="outline">Compare</Button>
             </HStack>
             {mobileFeaturedPackages.length === 0 ? (
               <Box borderWidth="1px" borderStyle="dashed" borderColor="gray.200" borderRadius="lg" p={3}>
@@ -896,58 +945,11 @@ export default function TestsPage() {
 
         <Box id="cart-section" mt={8} className="soft-card no-hover-lift" p={5}>
           <HStack justify="space-between" mb={2}>
-            <Heading size="md">Your Cart</Heading>
-            <Text fontSize="xs" color="gray.600" fontWeight="700">{itemCount} item(s)</Text>
+            <IconButton size="sm" variant="outline" aria-label="Cart">
+              <FiShoppingCart />
+            </IconButton>
           </HStack>
           <Text fontSize="sm" color="gray.600" mb={4}>Selected tests and packages for booking request.</Text>
-          <Text fontSize="xs" color="gray.600" mb={4}>
-            * Prices shown are indicative for planning. Final pricing and test availability are confirmed by the lab team after request review, including sample requirements and any legacy/repeat test mappings.
-          </Text>
-
-          {cartItems.length === 0 ? (
-            <Box borderWidth="1px" borderStyle="dashed" borderColor="gray.300" borderRadius="md" p={4} bg="gray.50">
-              <Text fontSize="sm" color="gray.500">No items selected yet.</Text>
-            </Box>
-          ) : (
-            <VStack align="stretch" gap={2}>
-              {cartItems.map((item) => (
-                <Box key={item.id} borderWidth="1px" borderColor="gray.100" borderRadius="md" p={3} bg={{ base: "teal.50", md: "white" }}>
-                  <VStack align="stretch" gap={1}>
-                    <HStack justify="space-between" align="start" gap={2}>
-                      <HStack spacing={2} flexWrap="wrap" pr={2}>
-                        <Badge colorPalette={item.item_type === "package" ? "orange" : "teal"} variant="subtle">
-                          {item.item_type === "package" ? "Package" : "Test"}
-                        </Badge>
-                        {item.department ? <Text fontSize="xs" color="gray.500">{item.department}</Text> : null}
-                        {item.home_collection === true ? (
-                          <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="green.50" color="green.700" title="Home sample collection available">
-                            <FiHome size={11} />
-                            <Text fontSize="10px" fontWeight="700">Home</Text>
-                          </HStack>
-                        ) : item.home_collection === false ? (
-                          <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="gray.100" color="gray.700" title="Center visit required">
-                            <BsBuilding size={11} />
-                            <Text fontSize="10px" fontWeight="700">Center</Text>
-                          </HStack>
-                        ) : null}
-                      </HStack>
-                      <IconButton size="xs" variant="ghost" color="gray.500" aria-label="Remove item" onClick={() => removeFromCart(item.id)}>
-                        <FiTrash2 />
-                      </IconButton>
-                    </HStack>
-                    <Text fontSize="sm" fontWeight="700" color="gray.800">{item.name}</Text>
-                    <HStack justify="space-between" mt={0.5}>
-                      <Text fontSize="xs" color="gray.500">
-                        {item.internal_code ? item.internal_code : item.tests_count ? `Includes ${item.tests_count} tests` : ""}
-                      </Text>
-                      <Text fontSize="sm" fontWeight="700" color="orange.500">{formatLinePrice(item.price)}</Text>
-                    </HStack>
-                  </VStack>
-                </Box>
-              ))}
-              <Button size="xs" variant="outline" color="gray.700" borderColor="gray.300" alignSelf="flex-end" onClick={clearCart}>Clear cart</Button>
-            </VStack>
-          )}
 
           <CartRequestPanel
             cartItems={cartItems}
@@ -955,6 +957,8 @@ export default function TestsPage() {
             hasCenterOnlyItems={hasCenterOnlyItems}
             source="/tests page"
             onRequestSuccess={clearCart}
+            onRemoveItem={removeFromCart}
+            onClearCart={clearCart}
           />
         </Box>
       </Container>

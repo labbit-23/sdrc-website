@@ -78,6 +78,38 @@ a {
   box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
 }
 
+.book-test-cta {
+  position: relative;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, #008f82 0%, #f97316 100%) border-box !important;
+  border: 2px solid transparent !important;
+  color: #006f65 !important;
+  overflow: visible !important;
+}
+
+.book-test-cta:hover {
+  background:
+    linear-gradient(#fff7f2, #fff7f2) padding-box,
+    linear-gradient(135deg, #007a6f 0%, #ea580c 100%) border-box !important;
+  color: #00564d !important;
+}
+
+.book-test-ribbon {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 8px;
+  box-shadow: 0 6px 12px rgba(220, 38, 38, 0.35);
+}
+
 .chakra-button {
   border-radius: 9999px !important;
   font-weight: 600 !important;
@@ -93,17 +125,18 @@ a {
 
 .hero-title {
   display: block;
-  max-width: 18ch !important;
-  font-size: clamp(1.72rem, 3.5vw, 3.45rem) !important;
-  line-height: 1.1;
+  font-size: clamp(1.58rem, 3.15vw, 3.02rem) !important;
+  line-height: 1.05;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.018em;
   text-wrap: balance;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .hero-subline {
   display: inline;
-  font-size: 0.74em !important;
+  font-size: 0.78em !important;
   line-height: 1.05;
   font-weight: 800;
   margin-top: 0;
@@ -122,14 +155,13 @@ a {
   }
 
   .hero-title {
-    max-width: 16ch !important;
-    font-size: clamp(1.42rem, 6.7vw, 2.02rem) !important;
-    line-height: 1.12;
-    letter-spacing: -0.008em;
+    font-size: clamp(1.28rem, 5.9vw, 1.84rem) !important;
+    line-height: 1.08;
+    letter-spacing: -0.012em;
   }
 
   .hero-subline {
-    font-size: 0.75em !important;
+    font-size: 0.77em !important;
     display: inline;
     margin-left: 0.18em;
   }
@@ -143,12 +175,11 @@ a {
 
 @media (max-width: 420px) {
   .hero-title {
-    max-width: 15ch !important;
-    font-size: clamp(1.34rem, 6.3vw, 1.85rem) !important;
+    font-size: clamp(1.2rem, 5.4vw, 1.65rem) !important;
   }
 
   .hero-subline {
-    font-size: 0.73em !important;
+    font-size: 0.76em !important;
   }
 }
 

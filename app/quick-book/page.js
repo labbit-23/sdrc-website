@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
 import { CART_UPDATED_EVENT, readCartItems } from "@/lib/cart";
+import { trackEvent } from "@/lib/analytics";
 import VisitDateTimeSelector from "@/components/booking/VisitDateTimeSelector";
 
 function formatDateIso(dateObj) {
@@ -32,6 +33,9 @@ function getNextDays(count = 5) {
     dt.setDate(base.getDate() + i + 1);
     days.push({
       iso: formatDateIso(dt),
+      day: dt.getDate(),
+      month: dt.toLocaleString("en-US", { month: "short" }).toUpperCase(),
+      weekday: dt.toLocaleString("en-US", { weekday: "short" }),
       label: `${dt.getDate()} ${dt.toLocaleString("en-US", { month: "short" })} (${dt.toLocaleString("en-US", { weekday: "short" })})`
     });
   }
@@ -52,7 +56,7 @@ function formatInr(amount) {
 
 export default function QuickBookPage() {
   const whatsappQuickbookHref = `https://wa.me/${siteConfig.whatsappNumber}?text=${encodeURIComponent("Home visit")}`;
-  const dayOptions = useMemo(() => getNextDays(5), []);
+  const dayOptions = useMemo(() => getNextDays(7), []);
   const [selectedDate, setSelectedDate] = useState(dayOptions[0]?.iso || "");
   const [selectedSlot, setSelectedSlot] = useState("");
   const [slots, setSlots] = useState([]);
@@ -107,6 +111,10 @@ export default function QuickBookPage() {
   }, []);
 
   useEffect(() => {
+    trackEvent("page_view", { page_type: "quick_book" }, { pagePath: "/quick-book" });
+  }, []);
+
+  useEffect(() => {
     const syncCart = () => setCartItems(readCartItems());
     syncCart();
     window.addEventListener(CART_UPDATED_EVENT, syncCart);
@@ -128,6 +136,7 @@ export default function QuickBookPage() {
   }
 
   async function handleSubmit() {
+    trackEvent("submit_request_click", { source: "/quick-book" }, { pagePath: "/quick-book", phone: form.phone });
     setError("");
     setSuccess("");
 
@@ -183,12 +192,14 @@ export default function QuickBookPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || "Quick booking failed");
+      trackEvent("submit_request_success", { source: "/quick-book" }, { pagePath: "/quick-book", phone });
       setSuccess("Booking request submitted. Our team will contact you shortly.");
       setSelectedSlot("");
       setPrescriptionFile(null);
       setPrescriptionMeta(null);
       setForm((prev) => ({ ...prev, patientName: "", phone: "", area: "" }));
     } catch (e) {
+      trackEvent("submit_request_fail", { source: "/quick-book", error: String(e?.message || "Quick booking failed") }, { pagePath: "/quick-book", phone });
       setError(e.message || "Quick booking failed");
     } finally {
       setUploadingPrescription(false);

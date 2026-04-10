@@ -29,7 +29,7 @@ const policySections = [
       "Health and Medical Data: Medical history, diagnostic test results, prescriptions, sample data, clinical notes, and treatment-related information shared with us.",
       "Demographic Information: Age, sex, location, occupation, and other relevant demographics.",
       "Financial Data: Billing details, payment information, and insurance-related data where applicable.",
-      "Technical and Usage Data: IP address, browser information, device identifiers and usage logs when you use our website, client portal, or online report access."
+      "Technical and Usage Data: IP address, browser information, device identifiers, session identifiers and usage logs when you use our website, client portal, or online report access."
     ],
     closing:
       "All such data relating to health, financials and medical records is treated as Sensitive Personal Data or Information (SPDI) in line with Rule 3 of the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011."
@@ -118,7 +118,19 @@ const policySections = [
     ]
   },
   {
-    title: "12. Updates to This Policy",
+    title: "12. Website Analytics and Session Tracking",
+    paragraphs: [
+      "To improve website performance, booking flow, and user experience, SDRC may collect website interaction events such as pages visited, search actions, add-to-cart actions, and session duration."
+    ],
+    bullets: [
+      "We may use first-party browser storage (for example localStorage/sessionStorage) to assign an anonymous session identifier for analytics continuity during and across visits on the same browser.",
+      "Such analytics may be linked to patient contact details only when you voluntarily submit booking/request forms.",
+      "Analytics data is used for service optimisation, fraud/risk checks, troubleshooting, campaign effectiveness, and operational quality monitoring.",
+      "Where legally required, SDRC will obtain appropriate consent and provide opt-out controls for non-essential analytics or marketing tracking."
+    ]
+  },
+  {
+    title: "13. Updates to This Policy",
     paragraphs: [
       "SDRC reserves the right to modify, amend or update this Privacy Policy from time to time to reflect changes in law, regulatory guidance, technology or operational practices. Updated versions will be made available at sdrc.in/privacy-policy.",
       "Continued use of SDRC services after such updates will be deemed as acceptance of the revised terms, to the extent permitted by applicable law."
@@ -163,7 +175,7 @@ export default function PrivacyPolicyPage() {
             <Box as="span" color="teal.700" className="hero-subline">Data Protection and Patient Rights</Box>
           </Heading>
           <Text mt={3} color="gray.600" fontSize="sm">
-            Last updated: 2024. This Privacy Policy applies to SDRC Diagnostics LLP and all services offered through our main centre and collection centres, websites and digital platforms.
+            Last updated: 2026. This Privacy Policy applies to SDRC Diagnostics LLP and all services offered through our main centre and collection centres, websites and digital platforms.
           </Text>
         </Container>
       </Box>

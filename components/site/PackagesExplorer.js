@@ -22,6 +22,7 @@ import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
 import packagesData from "@/data/health-packages.json";
 import { siteConfig } from "@/data/siteConfig";
 import { readCartItems, saveCartItems } from "@/lib/cart";
+import { trackEvent } from "@/lib/analytics";
 import { sortPackages, sortPackageVariants } from "@/lib/packageOrdering";
 
 function getVariantKey(pkgName, variantName) {
@@ -94,6 +95,15 @@ export default function PackagesExplorer() {
     const ids = new Set(readCartItems().map((item) => item.id));
     setCartIds(ids);
   }, []);
+
+  useEffect(() => {
+    trackEvent("page_view", { page_type: "packages" }, { pagePath: "/packages" });
+  }, []);
+
+  useEffect(() => {
+    if (!search.trim()) return;
+    trackEvent("search_packages", { query: search.trim() }, { pagePath: "/packages" });
+  }, [search]);
 
 
   const filteredPackages = useMemo(() => {
@@ -175,6 +185,11 @@ export default function PackagesExplorer() {
   };
 
   const addVariantToCart = (pkg, variant) => {
+    trackEvent(
+      "add_to_cart",
+      { item_type: "package", package_name: pkg.name, variant_name: variant.name, price: variant.price },
+      { pagePath: "/packages" }
+    );
     const cartId = `pkg_${slugify(pkg.name)}_${slugify(variant.name)}`;
     const cartItems = readCartItems();
     if (cartItems.some((item) => item.id === cartId)) {
@@ -203,6 +218,7 @@ export default function PackagesExplorer() {
   };
 
   const toggleCompare = (pkgName, variant) => {
+    trackEvent("toggle_compare", { package_name: pkgName, variant_name: variant.name }, { pagePath: "/packages" });
     const key = getVariantKey(pkgName, variant.name);
     setSelected((prev) => {
       const next = { ...prev };
@@ -576,7 +592,10 @@ export default function PackagesExplorer() {
                         <Box
                           as="button"
                           type="button"
-                          onClick={() => setActiveVariant({ pkgName: pkg.name, variant, description })}
+                          onClick={() => {
+                            trackEvent("view_package_details", { package_name: pkg.name, variant_name: variant.name }, { pagePath: "/packages" });
+                            setActiveVariant({ pkgName: pkg.name, variant, description });
+                          }}
                           fontSize="xs"
                           fontWeight="700"
                           color="teal.700"
@@ -609,6 +628,13 @@ export default function PackagesExplorer() {
                       target="_blank"
                       rel="noopener noreferrer"
                       textAlign="center"
+                      onClick={() =>
+                        trackEvent(
+                          "package_enquire_click",
+                          { package_name: pkg.name, variant_name: variant.name, price: variant.price },
+                          { pagePath: "/packages" }
+                        )
+                      }
                     >
                       Enquire / Book
                     </Button>
@@ -645,7 +671,10 @@ export default function PackagesExplorer() {
             <Button
               size="sm"
               disabled={selectedVariants.length < 2}
-              onClick={() => setShowCompare(true)}
+              onClick={() => {
+                trackEvent("open_compare_modal", { selected_count: selectedVariants.length }, { pagePath: "/packages" });
+                setShowCompare(true);
+              }}
             >
               Compare now
             </Button>

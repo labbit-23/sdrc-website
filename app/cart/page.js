@@ -2,20 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Badge, Box, Button, Container, Heading, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
-import { FiTrash2 } from "react-icons/fi";
+import { Box, Button, Container, Heading, HStack, Text, VStack } from "@chakra-ui/react";
 import CartRequestPanel from "@/components/cart/CartRequestPanel";
 import { readCartItems, saveCartItems } from "@/lib/cart";
-
-function formatInr(amount) {
-  if (amount == null || Number.isNaN(Number(amount))) return "INR 0.00";
-  return `INR ${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function formatLinePrice(amount) {
-  if (amount == null || Number.isNaN(Number(amount))) return "0.00";
-  return Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+import { trackEvent } from "@/lib/analytics";
 
 export default function CartPage() {
   const [items, setItems] = useState([]);
@@ -24,6 +14,10 @@ export default function CartPage() {
   useEffect(() => {
     setItems(readCartItems());
     setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    trackEvent("page_view", { page_type: "cart" }, { pagePath: "/cart" });
   }, []);
 
   useEffect(() => {
@@ -41,6 +35,7 @@ export default function CartPage() {
   );
 
   function removeItem(itemId) {
+    trackEvent("remove_from_cart", { item_id: itemId }, { pagePath: "/cart" });
     setItems((prev) => prev.filter((item) => item.id !== itemId));
   }
 
@@ -67,38 +62,21 @@ export default function CartPage() {
         ) : (
           <VStack align="stretch" gap={4}>
             <Box className="soft-card" p={5}>
-              <Heading size="md" mb={3}>Selected Items ({items.length})</Heading>
-              <VStack align="stretch" gap={2}>
-                {items.map((item) => (
-                  <Box key={item.id} borderWidth="1px" borderColor="gray.100" borderRadius="md" p={3} bg={{ base: "teal.50", md: "white" }}>
-                    <VStack align="stretch" gap={1}>
-                      <HStack justify="space-between" align="start" gap={2}>
-                        <HStack spacing={2} mb={1} flexWrap="wrap" pr={2}>
-                          <Badge colorPalette={item.item_type === "package" ? "orange" : "teal"} variant="subtle">
-                            {item.item_type === "package" ? "Package" : "Test"}
-                          </Badge>
-                          {item.department ? <Text fontSize="xs" color="gray.500">{item.department}</Text> : null}
-                        </HStack>
-                        <IconButton size="xs" variant="ghost" color="gray.500" aria-label="Remove item" onClick={() => removeItem(item.id)}>
-                          <FiTrash2 />
-                        </IconButton>
-                      </HStack>
-                      <Text fontWeight="700" color="gray.800">{item.name}</Text>
-                      <HStack justify="space-between" mt={0.5}>
-                        <Text fontSize="xs" color="gray.500">
-                          {item.internal_code ? item.internal_code : item.tests_count ? `Includes ${item.tests_count} tests` : ""}
-                        </Text>
-                        <Text fontWeight="700" color="orange.500">{formatLinePrice(item.price)}</Text>
-                      </HStack>
-                    </VStack>
-                  </Box>
-                ))}
-              </VStack>
-
               <HStack mt={5} spacing={2} flexWrap="wrap">
                 <Button as={Link} href="/tests" size="sm">Continue Adding</Button>
                 <Button as={Link} href="/packages" variant="outline" size="sm">Browse Packages</Button>
-                <Button variant="outline" color="gray.700" borderColor="gray.300" size="sm" onClick={() => setItems([])}>Clear Cart</Button>
+                <Button
+                  variant="outline"
+                  color="gray.700"
+                  borderColor="gray.300"
+                  size="sm"
+                  onClick={() => {
+                    trackEvent("clear_cart", { item_count: items.length }, { pagePath: "/cart" });
+                    setItems([]);
+                  }}
+                >
+                  Clear Cart
+                </Button>
               </HStack>
 
               <CartRequestPanel
@@ -107,6 +85,8 @@ export default function CartPage() {
                 hasCenterOnlyItems={hasCenterOnlyItems}
                 source="/cart page"
                 onRequestSuccess={() => setItems([])}
+                onRemoveItem={removeItem}
+                onClearCart={() => setItems([])}
               />
             </Box>
           </VStack>
