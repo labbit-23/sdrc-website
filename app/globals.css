@@ -93,11 +93,12 @@ a {
 
 .hero-title {
   display: block;
-  max-width: 14ch !important;
+  max-width: 18ch !important;
   font-size: clamp(1.72rem, 3.5vw, 3.45rem) !important;
   line-height: 1.1;
   font-weight: 800;
   letter-spacing: -0.01em;
+  text-wrap: balance;
 }
 
 .hero-subline {
@@ -121,7 +122,7 @@ a {
   }
 
   .hero-title {
-    max-width: 11ch !important;
+    max-width: 16ch !important;
     font-size: clamp(1.42rem, 6.7vw, 2.02rem) !important;
     line-height: 1.12;
     letter-spacing: -0.008em;
@@ -142,7 +143,7 @@ a {
 
 @media (max-width: 420px) {
   .hero-title {
-    max-width: 10.5ch !important;
+    max-width: 15ch !important;
     font-size: clamp(1.34rem, 6.3vw, 1.85rem) !important;
   }
 

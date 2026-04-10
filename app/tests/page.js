@@ -876,6 +876,9 @@ export default function TestsPage() {
             <Text fontSize="xs" color="gray.600" fontWeight="700">{itemCount} item(s)</Text>
           </HStack>
           <Text fontSize="sm" color="gray.600" mb={4}>Selected tests and packages for booking request.</Text>
+          <Text fontSize="xs" color="gray.600" mb={4}>
+            * Prices shown are indicative for planning. Final pricing and test availability are confirmed by the lab team after request review, including sample requirements and any legacy/repeat test mappings.
+          </Text>
 
           {cartItems.length === 0 ? (
             <Box borderWidth="1px" borderStyle="dashed" borderColor="gray.300" borderRadius="md" p={4} bg="gray.50">
