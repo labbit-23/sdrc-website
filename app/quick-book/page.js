@@ -10,13 +10,12 @@ import {
   Heading,
   HStack,
   Input,
-  SimpleGrid,
-  Spinner,
   Text,
   VStack
 } from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
 import { CART_UPDATED_EVENT, readCartItems } from "@/lib/cart";
+import VisitDateTimeSelector from "@/components/booking/VisitDateTimeSelector";
 
 function formatDateIso(dateObj) {
   const y = dateObj.getFullYear();
@@ -33,9 +32,7 @@ function getNextDays(count = 5) {
     dt.setDate(base.getDate() + i + 1);
     days.push({
       iso: formatDateIso(dt),
-      day: dt.getDate(),
-      month: dt.toLocaleString("en-US", { month: "short" }).toUpperCase(),
-      label: dt.toLocaleString("en-US", { weekday: "short" })
+      label: `${dt.getDate()} ${dt.toLocaleString("en-US", { month: "short" })} (${dt.toLocaleString("en-US", { weekday: "short" })})`
     });
   }
   return days;
@@ -51,19 +48,6 @@ function normalizePhone(rawPhone) {
 function formatInr(amount) {
   if (amount == null || Number.isNaN(Number(amount))) return "INR 0.00";
   return `INR ${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function parseSlotHour(slot) {
-  const candidate = String(slot?.start_time || slot?.slot_name || "");
-  const m24 = candidate.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/);
-  if (m24) return Number(m24[1]);
-  const m12 = candidate.match(/\b(1[0-2]|0?[1-9])(?::[0-5]\d)?\s*(AM|PM)\b/i);
-  if (!m12) return null;
-  let h = Number(m12[1]);
-  const mer = String(m12[2]).toUpperCase();
-  if (mer === "PM" && h !== 12) h += 12;
-  if (mer === "AM" && h === 12) h = 0;
-  return h;
 }
 
 export default function QuickBookPage() {
@@ -91,16 +75,6 @@ export default function QuickBookPage() {
     whatsapp: true,
     agree: true
   });
-  const slotGroups = useMemo(() => {
-    const groups = { Morning: [], Afternoon: [], Evening: [] };
-    slots.forEach((slot) => {
-      const hour = parseSlotHour(slot);
-      if (hour == null || hour < 12) groups.Morning.push(slot);
-      else if (hour < 17) groups.Afternoon.push(slot);
-      else groups.Evening.push(slot);
-    });
-    return groups;
-  }, [slots]);
   const cartSubtotal = useMemo(
     () => cartItems.reduce((sum, item) => sum + (Number(item?.price) || 0), 0),
     [cartItems]
@@ -242,73 +216,18 @@ export default function QuickBookPage() {
             <Heading size="md" mb={1}>Collection Date & Time</Heading>
             <Text fontSize="sm" color="gray.600" mb={4}>Choose preferred date and slot.</Text>
 
-            <SimpleGrid columns={{ base: 5, md: 7 }} gap={2} mb={4}>
-              {dayOptions.map((day) => {
-                const active = selectedDate === day.iso;
-                return (
-                  <Button
-                    key={day.iso}
-                    variant={active ? "solid" : "outline"}
-                    h={{ base: "74px", md: "84px" }}
-                    borderRadius={{ base: "lg", md: "xl" }}
-                    onClick={() => setSelectedDate(day.iso)}
-                    px={{ base: 1, md: 2 }}
-                  >
-                    <VStack gap={0}>
-                      <Text fontSize="10px" opacity={0.9}>{day.month}</Text>
-                      <Text fontSize={{ base: "xl", md: "2xl" }} lineHeight="1" fontWeight="800">{day.day}</Text>
-                      <Text fontSize="11px">{day.label}</Text>
-                    </VStack>
-                  </Button>
-                );
-              })}
-            </SimpleGrid>
-
-            {loadingSlots ? (
-              <HStack py={8} justify="center">
-                <Spinner color="teal.500" />
-                <Text color="gray.600" fontSize="sm">Loading time slots...</Text>
-              </HStack>
-            ) : (
-              <VStack align="stretch" gap={4}>
-                {Object.entries(slotGroups).map(([groupName, groupSlots]) => (
-                  <Box
-                    key={groupName}
-                    p={2.5}
-                    borderRadius="xl"
-                    bg={
-                      groupName === "Morning"
-                        ? "teal.50"
-                        : groupName === "Afternoon"
-                          ? "orange.50"
-                          : "orange.100"
-                    }
-                  >
-                    <Text fontSize="xs" fontWeight="700" color="teal.700" mb={2}>{groupName}</Text>
-                    <SimpleGrid columns={{ base: 2, md: 3 }} gap={2}>
-                      {groupSlots.map((slot) => {
-                        const active = selectedSlot === slot.id;
-                        return (
-                          <Button
-                            key={slot.id}
-                            variant={active ? "solid" : "outline"}
-                            h="42px"
-                            borderRadius="lg"
-                            onClick={() => setSelectedSlot(slot.id)}
-                            whiteSpace="nowrap"
-                            overflow="hidden"
-                            textOverflow="ellipsis"
-                            fontSize="sm"
-                          >
-                            {slot.slot_name || `${slot.start_time || ""} - ${slot.end_time || ""}`}
-                          </Button>
-                        );
-                      })}
-                    </SimpleGrid>
-                  </Box>
-                ))}
-              </VStack>
-            )}
+            <VisitDateTimeSelector
+              allowVisitTypeToggle={false}
+              homeVisitRequested
+              dateOptions={dayOptions}
+              preferredDate={selectedDate}
+              onDateChange={setSelectedDate}
+              loadingSlots={loadingSlots}
+              slots={slots}
+              preferredSlot={selectedSlot}
+              onSlotChange={setSelectedSlot}
+              formBusy={formBusy}
+            />
           </Box>
 
           <Box className="soft-card no-hover-lift" p={{ base: 4, md: 6 }}>

@@ -58,6 +58,8 @@ export default function SiteFooter() {
               <Link href="/accreditation">NABL Accredited Laboratory</Link>
               <Text>•</Text>
               <Link href="/privacy-policy">Privacy Policy</Link>
+              <Text>•</Text>
+              <Link href="/tnc">Reporting T&amp;C</Link>
             </HStack>
           </VStack>
 

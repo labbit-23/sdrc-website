@@ -32,6 +32,7 @@
           "name": "Total Value Pack",
           "parameters": 75,
           "price": 2100,
+          "is_most_booked": true,
           "description": "Health check for young professionals covering key organs including ECG (AI Report) and Chest X-Ray",
           "tests": [
             "CBC (Complete Blood Count)",
@@ -65,6 +66,7 @@
           "name": "Home Value Pack",
           "parameters": 77,
           "price": 3600,
+          "is_most_booked": true,
           "tests": [
             "CBC (Complete Blood Count)",
             "ESR",
@@ -92,6 +94,7 @@
           "name": "Total Value Pack",
           "parameters": 80,
           "price": 4700,
+          "is_most_booked": true,
           "description": "In-depth full-body health evaluation with essential vitamins including imaging like Ultrasound and ECG (AI Report)",
           "tests": [
             "CBC (Complete Blood Count)",
@@ -130,6 +133,7 @@
           "name": "Specialised Male",
           "parameters": 82,
           "price": 6900,
+          "is_most_booked": true,
           "description": "Advanced health check with cardiac, hormonal checks and prostate cancer marker",
           "tests": [
             "CBC (Complete Blood Count)",
@@ -210,6 +214,7 @@
           "name": "Stress Profile",
           "parameters": 36,
           "price": 2345,
+          "is_most_booked": true,
           "tests": [
             "CBC (Complete Blood Count)",
             "Lipid Profile*",
@@ -280,6 +285,7 @@
           "name": "Hair Fall Basic",
           "parameters": 33,
           "price": 3900,
+          "is_most_booked": true,
           "image": "/assets/ads/hairfall.jpg",
           "image_focus": "50% 25%",
           "image_alt": "Hair Fall Profile",
@@ -347,6 +353,7 @@
           "name": "Diabetic Basic",
           "parameters": 65,
           "price": 3100,
+          "is_most_booked": true,
           "description": "Focused for managing & monitoring diabetes complications",
           "tests": [
             "Fasting Blood Sugar",
@@ -456,6 +463,7 @@
           "name": "Cardiac Comprehensive",
           "parameters": 50,
           "price": 5500,
+          "is_most_booked": true,
           "description": "In-depth evaluation of cardiac health along with advanced cardiac inflamation markers and a treadmill test.",
           "tests": [
             "Lipid Profile*",
@@ -522,6 +530,7 @@
           "name": "Women's Comprehensive",
           "parameters": 75,
           "price": 8500,
+          "is_most_booked": true,
           "description": "Specially curated for women’s preventive care including ovarian cancer screening, bone density and Mammogram.",
           "tests": [
             "CBC (Complete Blood Count)",

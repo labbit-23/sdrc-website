@@ -160,8 +160,21 @@ export default function SiteHeader() {
             >
               Download Reports
             </Button>
-            <Button as={Link} href="/tests" size="sm" variant="outline" display={{ base: "none", md: "inline-flex" }}>
-              Book A Test
+            <Button
+              as={Link}
+              href="/tests"
+              size="sm"
+              display={{ base: "none", md: "inline-flex" }}
+              bg="linear-gradient(135deg, #f97316 0%, #fb923c 100%)"
+              color="white"
+              _hover={{ bg: "linear-gradient(135deg, #ea580c 0%, #f97316 100%)" }}
+            >
+              <HStack spacing={1.5}>
+                <Text>Book A Test</Text>
+                <Box as="span" bg="whiteAlpha.350" color="white" px={1.5} py={0.5} borderRadius="full" fontSize="9px" lineHeight="1" fontWeight="800">
+                  New!
+                </Box>
+              </HStack>
             </Button>
             <Button
               onClick={() => setMobileOpen((v) => !v)}
@@ -240,8 +253,13 @@ export default function SiteHeader() {
                     </Box>
                   ) : null}
                 </Box>
-                <Button as={Link} href="/tests" size="sm" variant="outline">
-                  Book A Test
+                <Button as={Link} href="/tests" size="sm" bg="linear-gradient(135deg, #f97316 0%, #fb923c 100%)" color="white" _hover={{ bg: "linear-gradient(135deg, #ea580c 0%, #f97316 100%)" }}>
+                  <HStack spacing={1.5}>
+                    <Text>Book A Test</Text>
+                    <Box as="span" bg="whiteAlpha.350" color="white" px={1.5} py={0.5} borderRadius="full" fontSize="9px" lineHeight="1" fontWeight="800">
+                      New!
+                    </Box>
+                  </HStack>
                 </Button>
                 <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} target="_blank" rel="noopener noreferrer" variant="outline" size="sm">
                   WhatsApp

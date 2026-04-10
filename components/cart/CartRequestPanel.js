@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Box, Button, Grid, HStack, Input, SimpleGrid, Spinner, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Grid, HStack, Input, Text, VStack } from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
+import VisitDateTimeSelector from "@/components/booking/VisitDateTimeSelector";
 
 function normalizePhone(rawPhone) {
   const digits = String(rawPhone || "").replace(/\D/g, "");
@@ -37,19 +38,6 @@ function getNextDays(count = 5) {
   return out;
 }
 
-function parseSlotHour(slot) {
-  const candidate = String(slot?.start_time || slot?.slot_name || "");
-  const m24 = candidate.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/);
-  if (m24) return Number(m24[1]);
-  const m12 = candidate.match(/\b(1[0-2]|0?[1-9])(?::[0-5]\d)?\s*(AM|PM)\b/i);
-  if (!m12) return null;
-  let h = Number(m12[1]);
-  const mer = String(m12[2]).toUpperCase();
-  if (mer === "PM" && h !== 12) h += 12;
-  if (mer === "AM" && h === 12) h = 0;
-  return h;
-}
-
 export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyItems, source = "cart", onRequestSuccess }) {
   const [patientName, setPatientName] = useState("");
   const [patientPhone, setPatientPhone] = useState("");
@@ -65,16 +53,6 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
   const [preferredDate, setPreferredDate] = useState(dateOptions[0]?.iso || "");
   const [preferredSlot, setPreferredSlot] = useState("");
   const formBusy = isSubmitting || loadingSlots;
-  const slotGroups = useMemo(() => {
-    const groups = { Morning: [], Afternoon: [], Evening: [] };
-    slots.forEach((slot) => {
-      const hour = parseSlotHour(slot);
-      if (hour == null || hour < 12) groups.Morning.push(slot);
-      else if (hour < 17) groups.Afternoon.push(slot);
-      else groups.Evening.push(slot);
-    });
-    return groups;
-  }, [slots]);
   const preferredDateLabel = useMemo(
     () => dateOptions.find((d) => d.iso === preferredDate)?.label || preferredDate,
     [dateOptions, preferredDate]
@@ -148,8 +126,8 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
       patient_notes: patientNotes.trim(),
       patient_area: patientArea.trim(),
       home_visit_required: homeVisitRequested,
-      preferred_date: homeVisitRequested ? preferredDate : null,
-      preferred_timeslot: homeVisitRequested ? preferredSlot : null,
+      preferred_date: preferredDate || null,
+      preferred_timeslot: preferredSlot || null,
       subtotal,
       collection_fee: null,
       total: subtotal,
@@ -254,90 +232,19 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
           onChange={(e) => setPatientNotes(e.target.value)}
         />
 
-        <HStack spacing={2} mt={1} align="start">
-          <Box
-            as="input"
-            type="checkbox"
-            checked={homeVisitRequested}
-            disabled={formBusy}
-            onChange={(e) => setHomeVisitRequested(e.target.checked)}
-            style={{ accentColor: "#008f82", marginTop: "2px" }}
-          />
-          <VStack align="start" gap={0}>
-            <Text fontSize="sm" color="gray.700" fontWeight="600">Request Home Visit</Text>
-            <Text fontSize="xs" color="gray.500">Uncheck if you plan to visit the center.</Text>
-          </VStack>
-        </HStack>
-
-        <Text fontSize="xs" color="gray.600">
-          {homeVisitRequested
-            ? "Select preferred home-visit date and time."
-            : "Select tentative center-visit date and time. Our team may adjust and confirm."}
-        </Text>
-        <SimpleGrid columns={{ base: 5, md: 5 }} gap={1.5}>
-          {dateOptions.map((day) => {
-            const active = preferredDate === day.iso;
-            const [dayNum] = day.label.split(" ");
-            const meta = day.label.slice(dayNum.length + 1);
-            return (
-              <Button
-                key={day.iso}
-                variant={active ? "solid" : "outline"}
-                h="64px"
-                px={1}
-                borderRadius="lg"
-                disabled={formBusy}
-                onClick={() => setPreferredDate(day.iso)}
-              >
-                <VStack gap={0}>
-                  <Text fontSize="lg" lineHeight="1" fontWeight="800">{dayNum}</Text>
-                  <Text fontSize="10px" color={active ? "white" : "gray.600"}>{meta}</Text>
-                </VStack>
-              </Button>
-            );
-          })}
-        </SimpleGrid>
-        {loadingSlots ? (
-          <HStack>
-            <Spinner size="sm" color="teal.500" />
-            <Text fontSize="xs" color="gray.600">Loading time slots...</Text>
-          </HStack>
-        ) : (
-          <VStack align="stretch" gap={2}>
-            {Object.entries(slotGroups).map(([groupName, groupSlots]) => (
-              <Box
-                key={groupName}
-                p={2}
-                borderRadius="lg"
-                bg={groupName === "Morning" ? "teal.50" : groupName === "Afternoon" ? "orange.50" : "orange.100"}
-              >
-                <Text fontSize="xs" fontWeight="700" color="teal.700" mb={1.5}>{groupName}</Text>
-                <SimpleGrid columns={{ base: 2, md: 3 }} gap={1.5}>
-                  {groupSlots.map((slot) => {
-                    const active = preferredSlot === slot.id;
-                    return (
-                      <Button
-                        key={slot.id}
-                        variant={active ? "solid" : "outline"}
-                        h="34px"
-                        px={2}
-                        borderRadius="md"
-                        fontSize="xs"
-                        whiteSpace="nowrap"
-                        overflow="hidden"
-                        textOverflow="ellipsis"
-                        disabled={formBusy}
-                        onClick={() => setPreferredSlot(slot.id)}
-                      >
-                        {slot.slot_name || `${slot.start_time || ""} - ${slot.end_time || ""}`}
-                      </Button>
-                    );
-                  })}
-                </SimpleGrid>
-              </Box>
-            ))}
-          </VStack>
-        )}
+        <VisitDateTimeSelector
+          allowVisitTypeToggle
+          homeVisitRequested={homeVisitRequested}
+          onHomeVisitChange={setHomeVisitRequested}
+          dateOptions={dateOptions}
+          preferredDate={preferredDate}
+          onDateChange={setPreferredDate}
+          loadingSlots={loadingSlots}
+          slots={slots}
+          preferredSlot={preferredSlot}
+          onSlotChange={setPreferredSlot}
+          formBusy={formBusy}
+        />
 
         {homeVisitRequested && hasCenterOnlyItems ? (
           <Text fontSize="xs" color="orange.600">

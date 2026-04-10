@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text } from "@chakra-ui/react";
+import { FiSearch } from "react-icons/fi";
 import { siteConfig } from "@/data/siteConfig";
 
 const facilityChips = [
@@ -144,8 +145,22 @@ export default function HomePage() {
                 <Button as={Link} href="/packages" size="lg">
                   View Health Packages
                 </Button>
-                <Button as={Link} href={siteConfig.bookingUrl} variant="outline" size="lg" target="_blank">
-                  Book a Test
+                <Button
+                  as={Link}
+                  href={siteConfig.bookingUrl}
+                  size="lg"
+                  target="_blank"
+                  leftIcon={<FiSearch />}
+                  bg="linear-gradient(135deg, #f97316 0%, #fb923c 100%)"
+                  color="white"
+                  _hover={{ bg: "linear-gradient(135deg, #ea580c 0%, #f97316 100%)" }}
+                >
+                  <HStack spacing={2}>
+                    <Text>Book a Test</Text>
+                    <Box as="span" bg="whiteAlpha.350" color="white" px={2} py={0.5} borderRadius="full" fontSize="10px" lineHeight="1" fontWeight="800">
+                      New!
+                    </Box>
+                  </HStack>
                 </Button>
               </HStack>
 
@@ -166,7 +181,7 @@ export default function HomePage() {
                   </Text>
                 </Box>
                 <Box as={Link} href={siteConfig.quickBookingUrl} className="soft-card no-hover-lift" p={3}>
-                  <Text fontSize="xs" color="gray.500">Need only date and time slot booking?</Text>
+                  <Text fontSize="xs" color="gray.500">Prefer to reserve just a collection slot?</Text>
                   <Text fontSize="sm" color="teal.700" fontWeight="700">Home Visit Request</Text>
                 </Box>
               </SimpleGrid>

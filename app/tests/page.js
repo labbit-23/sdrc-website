@@ -54,6 +54,7 @@ function flattenPackageVariants(data) {
         parameters: variant.parameters ?? null,
         tests_count: Array.isArray(variant.tests) ? variant.tests.length : null,
         home_collection: typeof variant.home_collection === "boolean" ? variant.home_collection : true,
+        is_most_booked: Boolean(variant.is_most_booked),
         tests: Array.isArray(variant.tests) ? variant.tests : []
       });
     });
@@ -470,9 +471,27 @@ export default function TestsPage() {
                 const added = isInCart(pkg.id);
                 return (
                   <Box key={pkg.id} minW="220px" borderWidth="1px" borderColor="gray.100" borderRadius="xl" p={3} bg="white">
-                    <Text fontSize="xs" color="gray.500">{pkg.package_name}</Text>
-                    <Text fontWeight="800" color="gray.800" lineHeight="1.2" mt={0.5} noOfLines={2}>{pkg.name}</Text>
+                    <Text fontSize="sm" fontWeight="700" color="gray.800" lineHeight="1.2" noOfLines={2}>{pkg.package_name}</Text>
+                    <Text fontSize="xs" color="gray.500" mt={0.5}>{pkg.name}</Text>
                     <Text fontSize="xs" color="gray.600" mt={1} noOfLines={2}>{pkg.short_description}</Text>
+                    <HStack spacing={1.5} mt={2} flexWrap="wrap">
+                      {pkg.is_most_booked ? (
+                        <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="orange.50" color="orange.700" title="Most booked package variant">
+                          <Text fontSize="10px" fontWeight="700">Most booked</Text>
+                        </HStack>
+                      ) : null}
+                      {pkg.home_collection ? (
+                        <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="green.50" color="green.700" title="Home sample collection available for this package">
+                          <FiHome size={11} />
+                          <Text fontSize="10px" fontWeight="700">Home</Text>
+                        </HStack>
+                      ) : (
+                        <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="gray.100" color="gray.700" title="Center visit required">
+                          <BsBuilding size={11} />
+                          <Text fontSize="10px" fontWeight="700">Center</Text>
+                        </HStack>
+                      )}
+                    </HStack>
                     <HStack justify="space-between" mt={3}>
                       <Text fontSize="sm" fontWeight="800" color="orange.500">{formatInr(pkg.price)}</Text>
                       <IconButton
@@ -712,7 +731,7 @@ export default function TestsPage() {
                               ) : null}
                               {test.is_most_popular ? (
                                 <Text fontSize="10px" px={2} py={0.5} borderRadius="full" bg="teal.100" color="teal.700" fontWeight="700">
-                                  Most Popular
+                                  Most booked
                                 </Text>
                               ) : null}
                               {test.home_collection === true ? (
@@ -818,6 +837,11 @@ export default function TestsPage() {
                                     <Text fontSize="10px" fontWeight="700">Center Visit</Text>
                                   </HStack>
                                 )}
+                                {pkg.is_most_booked ? (
+                                  <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="orange.50" color="orange.700" title="Most booked package variant">
+                                    <Text fontSize="10px" fontWeight="700">Most booked</Text>
+                                  </HStack>
+                                ) : null}
                               </HStack>
                             </Box>
                             <VStack align="end" gap={2}>
