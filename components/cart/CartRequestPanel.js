@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Box, Button, Grid, HStack, Input, SimpleGrid, Spinner, Text, VStack, useToast } from "@chakra-ui/react";
+import { Box, Button, Grid, HStack, Input, SimpleGrid, Spinner, Text, VStack } from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
 
 function normalizePhone(rawPhone) {
@@ -51,13 +51,13 @@ function parseSlotHour(slot) {
 }
 
 export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyItems, source = "cart", onRequestSuccess }) {
-  const toast = useToast();
   const [patientName, setPatientName] = useState("");
   const [patientPhone, setPatientPhone] = useState("");
   const [patientArea, setPatientArea] = useState("");
   const [patientNotes, setPatientNotes] = useState("");
   const [homeVisitRequested, setHomeVisitRequested] = useState(false);
   const [leadError, setLeadError] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [slots, setSlots] = useState([]);
@@ -175,14 +175,8 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
       const quickbookStatus = data?.quickbooking?.attempted
         ? " Home visit booking has been queued."
         : "";
-      toast({
-        title: "Request received successfully",
-        description: `Our team will connect shortly.${quickbookStatus}`,
-        status: "success",
-        duration: 2600,
-        isClosable: true,
-        position: "top"
-      });
+      setToastMessage(`Request received successfully. Our team will connect shortly.${quickbookStatus}`);
+      window.setTimeout(() => setToastMessage(""), 2600);
       if (typeof onRequestSuccess === "function") {
         onRequestSuccess();
       }
@@ -199,8 +193,9 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
   }
 
   return (
-    <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} mt={4}>
-      <Box>
+    <>
+      <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} mt={4}>
+        <Box>
         <HStack justify="space-between" mb={1}>
           <Text fontSize="sm" color="gray.600">Subtotal</Text>
           <Text fontSize="sm" color="gray.600">{formatInr(subtotal)}</Text>
@@ -215,9 +210,9 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
           <Text fontWeight="700">Estimated Total</Text>
           <Text fontWeight="700" color="teal.700">{homeVisitRequested ? `${formatInr(subtotal)} + TBA` : formatInr(subtotal)}</Text>
         </HStack>
-      </Box>
+        </Box>
 
-      <VStack align="stretch" gap={2}>
+        <VStack align="stretch" gap={2}>
         <Input
           bg="white"
           size="sm"
@@ -393,7 +388,26 @@ export default function CartRequestPanel({ cartItems, subtotal, hasCenterOnlyIte
             Download Reports
           </Button>
         </HStack>
-      </VStack>
-    </Grid>
+        </VStack>
+      </Grid>
+      {toastMessage ? (
+        <Box
+          position="fixed"
+          right={{ base: 4, md: 6 }}
+          bottom={{ base: 4, md: 6 }}
+          bg="teal.600"
+          color="white"
+          px={4}
+          py={2}
+          borderRadius="md"
+          boxShadow="lg"
+          zIndex={30}
+          fontSize="sm"
+          maxW={{ base: "84vw", md: "420px" }}
+        >
+          {toastMessage}
+        </Box>
+      ) : null}
+    </>
   );
 }
