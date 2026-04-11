@@ -98,8 +98,8 @@ export default function PhysiotherapyPage() {
               </Text>
 
               <Grid templateColumns={{ base: "1fr", sm: "repeat(2, minmax(0,1fr))" }} gap={3} mt={7} maxW="560px">
-                <Button as={Link} href="https://wa.me/919963432132" target="_blank" size="lg">
-                  Talk to an Expert (WhatsApp)
+                <Button as={Link} href={"https://wa.me/919963432132?text=" + encodeURIComponent("I wanted to know more about Recure Physiotherapy at SDRC") } target="_blank" size="lg">
+                  Chat with an Expert
                 </Button>
                 <Button as={Link} href="tel:+919963432132" variant="outline" size="lg">
                   Call +91 99634 32132
