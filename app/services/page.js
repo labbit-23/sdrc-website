@@ -161,7 +161,7 @@ export default function ServicesPage() {
                 Imaging • Cardio & Neuro • Pathology
               </Text>
 
-              <Heading mt={4} size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="14ch" className="hero-title">
+              <Heading mt={4} size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
                 A New Centre backed by
                 <Box as="span" color="teal.700" className="hero-subline">
                   40 Years of Trusted Care

@@ -86,7 +86,7 @@ export default function PhysiotherapyPage() {
                 Physiotherapy at SDRC
               </Text>
 
-              <Heading mt={4} size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="13ch" className="hero-title">
+              <Heading mt={4} size={{ base: "2xl", md: "5xl" }} color="gray.800"  className="hero-title">
                 Evidence-based Physiotherapy
                 <Box as="span" color="orange.500" className="hero-subline">
                   with Recure

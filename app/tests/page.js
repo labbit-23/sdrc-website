@@ -388,7 +388,7 @@ export default function TestsPage() {
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr" }} gap={6} alignItems="center">
             <Box>
-              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="16ch" className="hero-title">
+              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
                 Test Selection
                 <Box as="span" color="teal.700" className="hero-subline">
                   Search, Compare, Add to Cart

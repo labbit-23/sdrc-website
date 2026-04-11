@@ -40,7 +40,7 @@ export default function AccreditationPage() {
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={10} alignItems="center">
             <Box>
-              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="13ch" className="hero-title">
+              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
                 Quality and
                 <Box as="span" color="teal.700" className="hero-subline">NABL Accreditation</Box>
               </Heading>

@@ -121,11 +121,11 @@ export default function HomePage() {
                 Secunderabad Diagnostic and Research Centre
               </Text>
 
-              <Heading mt={4} size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW={{ base: "14ch", md: "15.5ch" }} className="hero-title">
+              <Heading mt={4} size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
                 Advanced Diagnostic Care
                 <Box as="span" color="orange.500" className="hero-subline">
                   at{" "}
-                  <Box as="span" whiteSpace={{ base: "normal", md: "nowrap" }}>
+                  <Box as="span">
                     Jade Arcade, Paradise
                   </Box>
                 </Box>

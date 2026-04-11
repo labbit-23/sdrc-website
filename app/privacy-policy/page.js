@@ -170,7 +170,7 @@ export default function PrivacyPolicyPage() {
     <>
       <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
         <Container maxW="1200px">
-          <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="14ch" className="hero-title">
+          <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
             SDRC Privacy Policy
             <Box as="span" color="teal.700" className="hero-subline">Data Protection and Patient Rights</Box>
           </Heading>

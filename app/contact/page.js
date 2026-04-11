@@ -57,43 +57,43 @@ export default function ContactPage() {
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr", lg: "1.2fr 1fr" }} gap={8}>
             <Box>
-              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="14ch" className="hero-title">
+              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
                 Contact SDRC Diagnostics
                 <Box as="span" color="teal.700" className="hero-subline">
                   Main Centre and Collection Centres
                 </Box>
               </Heading>
-              <Text mt={3} color="gray.700" fontSize={{ base: "md", md: "lg" }} display={{ base: "none", md: "block" }}>
+              <Text mt={3} color="gray.700" fontSize={{ base: "md", md: "lg" }} display="block">
                 Reach us for appointments, health packages, home sample collection or report-related queries.
               </Text>
 
-              <SimpleGrid mt={6} columns={{ base: 1, sm: 3 }} spacing={4}>
-                <Box className="soft-card" p={4} display={{ base: "none", sm: "block" }}>
+              <SimpleGrid mt={6} columns={{ base: 1, sm: 2, lg: 3 }} spacing={4} alignItems="stretch">
+                <Box className="soft-card" p={4} display={{ base: "none", sm: "flex" }} flexDirection="column" h="full">
                   <Text fontWeight="700" mb={1}>
                     Call
                   </Text>
-                  <Link href={"tel:" + siteConfig.phoneTel}>{siteConfig.phoneDisplay}</Link>
-                  <Text fontSize="xs" color="gray.500" mt={1}>
+                  <Box as={Link} href={"tel:" + siteConfig.phoneTel} fontWeight="600" whiteSpace="nowrap" display="block" maxW="100%" overflow="hidden" textOverflow="ellipsis">{siteConfig.phoneDisplay}</Box>
+                  <Text fontSize="xs" color="gray.500" mt={1} flex="1">
                     Centre timings apply.
                   </Text>
                 </Box>
 
-                <Box className="soft-card" p={4}>
+                <Box className="soft-card" p={4} display="flex" flexDirection="column" h="full">
                   <Text fontWeight="700" mb={1}>
                     WhatsApp
                   </Text>
-                  <Link href={"https://wa.me/" + siteConfig.whatsappNumber}>{whatsappDisplay}</Link>
-                  <Text fontSize="xs" color="gray.500" mt={1}>
+                  <Box as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} fontWeight="600" whiteSpace="nowrap" display="block" maxW="100%" overflow="hidden" textOverflow="ellipsis">{whatsappDisplay}</Box>
+                  <Text fontSize="xs" color="gray.500" mt={1} flex="1">
                     Share prescriptions or booking queries.
                   </Text>
                 </Box>
 
-                <Box className="soft-card" p={4}>
+                <Box className="soft-card" p={4} display="flex" flexDirection="column" h="full">
                   <Text fontWeight="700" mb={1}>
                     Email
                   </Text>
                   <Link href="mailto:info@sdrc.in">info@sdrc.in</Link>
-                  <Text fontSize="xs" color="gray.500" mt={1}>
+                  <Text fontSize="xs" color="gray.500" mt={1} flex="1">
                     For formal communication.
                   </Text>
                 </Box>
@@ -125,29 +125,31 @@ export default function ContactPage() {
 
       <Container maxW="1200px" py={12}>
         <VStack align="stretch" gap={12}>
-          <Box display={{ base: "none", md: "block" }}>
+          <Box display="block">
             <Heading size="xl" mb={4}>
               Main centre - Jade Arcade, Paradise
             </Heading>
-            <Grid templateColumns={{ base: "1fr", md: "1.5fr 1fr" }} gap={6}>
+            <Grid templateColumns={{ base: "1fr", lg: "1.5fr 1fr" }} gap={6}>
               <Box className="soft-card" p={6}>
                 <Text fontWeight="700" mb={2}>
                   Address
                 </Text>
                 <Text color="gray.700" fontSize="sm">
-                  101, Jade Arcade (Corporate Block), Paradise, MG Road
+                  101, Jade Arcade (Corporate Block), Paradise,
+                  <br />
+                  MG Road (Next to Dadus)
                   <br />
                   Secunderabad - 500003, Telangana, India
                 </Text>
 
                 <Text color="gray.700" fontSize="sm" mt={4}>
                   <strong>Phone:</strong>{" "}
-                  <Link href={"tel:" + siteConfig.phoneTel}>{siteConfig.phoneDisplay}</Link>
+                  <Box as={Link} href={"tel:" + siteConfig.phoneTel} fontWeight="600" whiteSpace="nowrap" display="block" maxW="100%" overflow="hidden" textOverflow="ellipsis">{siteConfig.phoneDisplay}</Box>
                   <br />
                   <strong>Email:</strong> <Link href="mailto:info@sdrc.in">info@sdrc.in</Link>
                   <br />
                   <strong>WhatsApp:</strong>{" "}
-                  <Link href={"https://wa.me/" + siteConfig.whatsappNumber}>{whatsappDisplay}</Link>
+                  <Box as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} fontWeight="600" whiteSpace="nowrap" display="block" maxW="100%" overflow="hidden" textOverflow="ellipsis">{whatsappDisplay}</Box>
                 </Text>
 
                 <Text fontWeight="700" mt={4} mb={1}>
@@ -169,7 +171,7 @@ export default function ContactPage() {
                 <Text fontWeight="700" mb={2}>
                   Location map
                 </Text>
-                <Box borderRadius="md" overflow="hidden" h="220px" mb={3}>
+                <Box borderRadius="md" overflow="hidden" h={{ base: "200px", md: "220px" }} mb={3}>
                   <iframe
                     title="SDRC Main Centre map"
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13401.644712873018!2d78.4691960871582!3d17.441311199999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9a10b7ee2ab1%3A0xf08c95962eaf6b5b!2sSDRC%20-%20The%20Secunderabad%20Diagnostic%20and%20Research%20Centre!5e1!3m2!1sen!2sin!4v1764932257326!5m2!1sen!2sin"

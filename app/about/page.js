@@ -28,7 +28,7 @@ export default function AboutPage() {
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr", lg: "1.05fr .95fr" }} gap={10} alignItems="center">
             <Box>
-              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="13ch" className="hero-title">
+              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
                 SDRC Diagnostics
                 <Box as="span" color="teal.700" className="hero-subline">
                   40 Years of Service

@@ -43,7 +43,7 @@ export default function CartPage() {
     <>
       <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
         <Container maxW="1100px">
-          <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" maxW="12ch" className="hero-title">
+          <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
             Your Cart
             <Box as="span" color="teal.700" className="hero-subline">Review Tests and Packages</Box>
           </Heading>
