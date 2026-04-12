@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react";
@@ -137,8 +137,19 @@ const gallery = [
 
 export default function ServicesPage() {
   const [activeIndex, setActiveIndex] = useState(2);
+  const [touchStartX, setTouchStartX] = useState(null);
 
   const activeImage = useMemo(() => gallery[activeIndex] || gallery[0], [activeIndex]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const media = window.matchMedia("(max-width: 767px)");
+    if (!media.matches) return undefined;
+    const timer = window.setInterval(() => {
+      setActiveIndex((idx) => (idx + 1) % gallery.length);
+    }, 3600);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
     <>
@@ -195,7 +206,21 @@ export default function ServicesPage() {
             </Box>
 
             <Box className="soft-card" p={{ base: 3, md: 4 }}>
-              <Box borderRadius="xl" overflow="hidden" bg="gray.50" position="relative">
+              <Box
+                borderRadius="xl"
+                overflow="hidden"
+                bg="gray.50"
+                position="relative"
+                onTouchStart={(event) => setTouchStartX(event.touches[0]?.clientX ?? null)}
+                onTouchEnd={(event) => {
+                  const endX = event.changedTouches[0]?.clientX ?? null;
+                  if (touchStartX == null || endX == null) return;
+                  const delta = endX - touchStartX;
+                  if (Math.abs(delta) < 40) return;
+                  if (delta < 0) setActiveIndex((idx) => (idx + 1) % gallery.length);
+                  if (delta > 0) setActiveIndex((idx) => (idx - 1 + gallery.length) % gallery.length);
+                }}
+              >
                 <Box position="relative" w="full" h={{ base: "240px", sm: "300px", md: "340px" }}>
                   <Image
                     src={activeImage.src}
@@ -212,6 +237,26 @@ export default function ServicesPage() {
                   </Text>
                 </Box>
               </Box>
+
+              <HStack mt={2} justify="center" spacing={2} display={{ base: "flex", md: "none" }}>
+                {gallery.map((img, idx) => (
+                  <Box
+                    key={img.src}
+                    as="button"
+                    type="button"
+                    aria-label={"Show " + img.caption}
+                    onClick={() => setActiveIndex(idx)}
+                    w={idx === activeIndex ? "22px" : "8px"}
+                    h="8px"
+                    borderRadius="full"
+                    bg={idx === activeIndex ? "teal.600" : "teal.200"}
+                    transition="all .2s ease"
+                  />
+                ))}
+              </HStack>
+              <Text mt={1} fontSize="xs" color="gray.500" textAlign="center" display={{ base: "block", md: "none" }}>
+                Swipe to view more images
+              </Text>
 
               <SimpleGrid columns={4} spacing={2} mt={3} display={{ base: "none", md: "grid" }}>
                 {gallery.map((img, idx) => (

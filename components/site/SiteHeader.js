@@ -89,7 +89,7 @@ export default function SiteHeader() {
       >
         <Flex maxW="1200px" mx="auto" px={{ base: 3, md: 4 }} py={{ base: 2.5, md: 3 }} align="center" justify="space-between" gap={4}>
           <Link href="/" aria-label="SDRC Home" style={{ display: "inline-flex", alignItems: "center", flexShrink: 0 }}>
-            <Image src="/assets/sdrc-logo.png" alt="SDRC Diagnostics" width={132} height={44} style={{ width: "auto", height: 40 }} />
+            <Image src="/assets/sdrc-logo-full.png" alt="SDRC Diagnostics" width={148} height={48} style={{ width: "auto", height: 44 }} />
           </Link>
 
           <HStack spacing={1} display={{ base: "none", xl: "flex" }} fontSize="14px" color="gray.700" flex={1} justify="center">
