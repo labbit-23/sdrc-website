@@ -243,6 +243,7 @@ export default function ContactPage() {
                   target="_blank"
                   variant="outline"
                   mt={3}
+                 
                   title="Get our bot to send your reports. Chat using your registered mobile number."
                 >
                   Download Reports

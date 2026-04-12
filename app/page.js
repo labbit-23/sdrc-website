@@ -178,12 +178,10 @@ export default function HomePage() {
                     Download Reports
                   </Text>
                 </Box>
-                <Box as={Link} href={siteConfig.quickBookingUrl} className="soft-card no-hover-lift" p={3}>
+                <Box as={Link} href={siteConfig.quickBookingUrl} className="soft-card no-hover-lift home-visit-card-cta" p={3} position="relative">
                   <Text fontSize="xs" color="gray.500">Want to book a home visit?</Text>
-                  <HStack spacing={2}>
-                    <Text fontSize="sm" color="teal.700" fontWeight="700">Request Home Visit</Text>
-                    <Box as="span" px={2} py={0.5} borderRadius="full" bg="orange.500" color="white" fontSize="10px" fontWeight="800" lineHeight="1">NEW</Box>
-                  </HStack>
+                  <Text fontSize="sm" color="teal.700" fontWeight="700">Request Home Visit</Text>
+                  <Box as="span" className="book-test-ribbon">NEW</Box>
                 </Box>
               </SimpleGrid>
 

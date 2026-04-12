@@ -206,3 +206,17 @@ a {
     transform: translateY(-8px);
   }
 }
+
+.home-visit-card-cta {
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, #008f82 0%, #f97316 100%) border-box !important;
+  border: 2px solid transparent !important;
+  overflow: visible !important;
+}
+
+.home-visit-card-cta:hover {
+  background:
+    linear-gradient(#fff7f2, #fff7f2) padding-box,
+    linear-gradient(135deg, #007a6f 0%, #ea580c 100%) border-box !important;
+}

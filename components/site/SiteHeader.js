@@ -157,6 +157,7 @@ export default function SiteHeader() {
               variant="outline"
               display={{ base: "none", lg: "inline-flex" }}
               title="Get our bot to send your reports. Chat using your registered mobile number."
+             
             >
               Download Reports
             </Button>
@@ -262,7 +263,8 @@ export default function SiteHeader() {
                   variant="outline"
                   size="sm"
                   title="Get our bot to send your reports. Chat using your registered mobile number."
-                >
+             
+            >
                   Download Reports
                 </Button>
               </HStack>

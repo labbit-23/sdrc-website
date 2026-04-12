@@ -12,7 +12,7 @@ export default function SiteFooter() {
         <Grid templateColumns={{ base: "1fr", md: "2fr 1fr 1fr" }} gap={8}>
           <VStack align="start" spacing={3}>
             <Link href="/" style={{ display: "inline-flex" }}>
-              <Image src="/assets/sdrc-logo-full.png" alt="SDRC Diagnostics" width={148} height={48} style={{ width: "auto", height: 44 }} />
+              <Image src="/assets/sdrc-logo-full.png" alt="SDRC Diagnostics" width={188} height={60} style={{ width: "auto", height: 56 }} />
             </Link>
             <Text color="gray.300" fontSize="sm" maxW="520px">
               SDRC Diagnostics LLP is a multi-modality diagnostic centre at Jade Arcade, Paradise, offering imaging, cardio-pulmonary, neurology and a full-service NABL accredited laboratory.

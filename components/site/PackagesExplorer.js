@@ -524,7 +524,7 @@ export default function PackagesExplorer() {
                       boxShadow="0 1px 0 rgba(0,0,0,0.06)"
                     />
                     <Box position="absolute" top={3} right={3} opacity={0.9}>
-                      <Image src="/assets/sdrc-logo-full.png" alt="SDRC" width={74} height={22} />
+                      <Image src="/assets/sdrc-logo.png" alt="SDRC" width={62} height={18} />
                     </Box>
                     <Heading size="sm" color="teal.700" noOfLines={2}>
                       {variant.name}
@@ -706,7 +706,7 @@ export default function PackagesExplorer() {
           >
             <Flex justify="space-between" align="center" px={4} py={3} borderBottom="1px solid" borderColor="gray.200">
               <HStack spacing={3}>
-                <img src="/assets/sdrc-logo-full.png" alt="SDRC" width="112" height="34" />
+                <img src="/assets/sdrc-logo.png" alt="SDRC" width="94" height="28" />
                 <Box>
                   <Text fontSize="11px" color="gray.500">{activeVariant.pkgName}</Text>
                   <Heading size="sm">{activeVariant.variant.name}</Heading>
@@ -849,7 +849,7 @@ export default function PackagesExplorer() {
 
             <Box id="compare-capture">
               <HStack spacing={3} mb={3}>
-                <img src="/assets/sdrc-logo-full.png" alt="SDRC" width="126" height="38" />
+                <img src="/assets/sdrc-logo.png" alt="SDRC" width="110" height="32" />
                 <Text fontWeight="700" color="gray.700">Package Comparison</Text>
               </HStack>
               <Box overflowX="auto">

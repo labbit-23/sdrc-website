@@ -419,6 +419,7 @@ export default function CartRequestPanel({
               size="sm"
               variant="outline"
               title="Need help deciding tests?"
+             
               leftIcon={<FiMessageCircle />}
             >
               Chat on WhatsApp
@@ -430,6 +431,7 @@ export default function CartRequestPanel({
               size="sm"
               variant="outline"
               title="Get our bot to send your reports. Chat using your registered mobile number."
+             
               leftIcon={<FiDownload />}
             >
               Download Reports
