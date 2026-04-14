@@ -13,7 +13,7 @@ export const siteConfig = {
   bookingUrl: "/tests",
   quickBookingUrl: "/home-visit",
   reportsUrl: env.reportsUrl || "http://120.138.8.37:9999/shivam/onlinereporting/index.jsp",
-  feedbackUrl: "https://sdrc.in/feedback",
+  feedbackUrl: "/feedback",
   social: {
     facebook: "https://facebook.com/sdrc.in",
     instagram: "https://instagram.com/sdrc.in",

@@ -31,7 +31,7 @@ export default function SiteFooter() {
             <Link href="/packages">Health Packages</Link>
             <Link href="/about">About SDRC</Link>
             <Link href="/contact">Contact</Link>
-            <Link href={siteConfig.feedbackUrl} target="_blank">
+            <Link href={siteConfig.feedbackUrl}>
               Feedback form
             </Link>
           </VStack>

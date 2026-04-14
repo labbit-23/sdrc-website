@@ -98,6 +98,12 @@ export default function ContactPage() {
                   </Text>
                 </Box>
               </SimpleGrid>
+
+              <HStack mt={4} spacing={3} flexWrap="wrap">
+                <Button as={Link} href="/feedback" variant="outline" size="sm">
+                  Share Feedback
+                </Button>
+              </HStack>
             </Box>
 
             <Box className="soft-card" p={6} display={{ base: "none", lg: "block" }}>
