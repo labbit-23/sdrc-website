@@ -158,7 +158,7 @@ export default function HomePage() {
                   className="book-test-cta"
                 >
                   <Text>Book a Test</Text>
-                  <Box as="span" className="book-test-ribbon">NEW</Box>
+                  <Box as="span" className="book-test-ribbon" display={{ base: "inline-block", md: "none" }}>NEW</Box>
                 </Button>
               </HStack>
 
@@ -181,7 +181,6 @@ export default function HomePage() {
                 <Box as={Link} href={siteConfig.quickBookingUrl} className="soft-card no-hover-lift home-visit-card-cta" p={3} position="relative">
                   <Text fontSize="xs" color="gray.500">Want to book a home visit?</Text>
                   <Text fontSize="sm" color="teal.700" fontWeight="700">Request Home Visit</Text>
-                  <Box as="span" className="book-test-ribbon">NEW</Box>
                 </Box>
               </SimpleGrid>
 
