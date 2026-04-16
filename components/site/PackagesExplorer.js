@@ -579,6 +579,8 @@ export default function PackagesExplorer() {
                         fontWeight="700"
                         color="teal.700"
                         textDecoration="underline"
+                        cursor="pointer"
+                        _hover={{ color: "teal.800" }}
                         onClick={() => {
                           trackEvent("view_package_details", { package_name: pkg.name, variant_name: variant.name }, { pagePath: "/packages" });
                           setActiveVariant({ pkgName: pkg.name, variant, description });
@@ -592,14 +594,24 @@ export default function PackagesExplorer() {
 
                     <Box mt="auto">
                       <HStack mt={4} justify="space-between" align="center">
-                        <HStack spacing={2}>
+                        <HStack
+                          as="label"
+                          htmlFor={`compare-${getVariantKey(pkg.name, variant.name)}`}
+                          spacing={2}
+                          cursor="pointer"
+                          userSelect="none"
+                          title="Select to compare this package variant"
+                        >
                           <input
+                            id={`compare-${getVariantKey(pkg.name, variant.name)}`}
                             type="checkbox"
                             checked={checked}
                             onChange={() => toggleCompare(pkg.name, variant)}
                             style={{ accentColor: "#008f82" }}
                           />
-                          <Text fontSize="xs" color="gray.600">Compare</Text>
+                          <Text fontSize="xs" color="gray.600" _hover={{ color: "teal.800" }}>
+                            Compare
+                          </Text>
                         </HStack>
                         <Button
                           size="sm"
