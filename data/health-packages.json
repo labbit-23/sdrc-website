@@ -2,13 +2,13 @@
   "packages": [
     {
       "name": "Executive Wellness Checkup",
-      "display_order": 6,
+      "display_order": 1,
       "description": "Health check for young professionals covering key organs",
       "variants": [
         {
-          "name": "Home Value Pack",
+          "name": "Executive Home",
           "parameters": 62,
-          "price": 1800,
+          "price": 1799,
           "tests": [
             "CBC (Complete Blood Count)",
             "ESR",
@@ -29,9 +29,9 @@
           ]
         },
         {
-          "name": "Total Value Pack",
+          "name": "Executive Total",
           "parameters": 75,
-          "price": 2100,
+          "price": 2099,
           "is_most_booked": true,
           "description": "Health check for young professionals covering key organs including ECG (AI Report) and Chest X-Ray",
           "tests": [
@@ -54,18 +54,43 @@
             "ECG - Electrocardiogram",
             "X-Ray Chest PA View"
           ]
+        },
+        {
+          "name": "Executive Plus",
+          "parameters": 62,
+          "price": 2499,
+          "tests": [
+            "CBC (Complete Blood Count)",
+            "ESR",
+            "Fasting Blood Sugar",
+            "HbA1c",
+            "Lipid Profile*",
+            "Liver Function Tests*",
+            "Creatinine",
+            "Thyroid Stimulating Hormone (TSH)",
+            "Urinalysis",
+            "HIV 1/2 Antibody & Antigen",
+            "Thyroid Function Tests (T3 T4 TSH)"
+          ],
+          "home_collection": true,
+          "key_inclusions": [
+            "HbA1c",
+            "Lipid Profile*",
+            "Liver Function Tests*",
+            "Thyroid Stimulating Hormone (TSH)"
+          ]
         }
       ]
     },
     {
       "name": "Master Wellness Checkup",
-      "display_order": 1,
+      "display_order": 2,
       "description": "In-depth full-body health evaluation with essential vitamins",
       "variants": [
         {
-          "name": "Home Value Pack",
+          "name": "Master Home",
           "parameters": 77,
-          "price": 3600,
+          "price": 3599,
           "is_most_booked": true,
           "tests": [
             "CBC (Complete Blood Count)",
@@ -91,9 +116,9 @@
           ]
         },
         {
-          "name": "Total Value Pack",
+          "name": "Master Total",
           "parameters": 80,
-          "price": 4700,
+          "price": 4699,
           "is_most_booked": true,
           "description": "In-depth full-body health evaluation with essential vitamins including imaging like Ultrasound and ECG (AI Report)",
           "tests": [
@@ -132,7 +157,7 @@
         {
           "name": "Specialised Male",
           "parameters": 82,
-          "price": 6900,
+          "price": 6899,
           "is_most_booked": true,
           "description": "Advanced health check with cardiac, hormonal checks and prostate cancer marker",
           "tests": [
@@ -169,7 +194,7 @@
         {
           "name": "Specialised Female",
           "parameters": 83,
-          "price": 6900,
+          "price": 6899,
           "description": "Advanced health check with cardiac, hormonal checks and PAP Smear",
           "tests": [
             "CBC (Complete Blood Count)",
@@ -216,6 +241,7 @@
           "price": 2345,
           "is_most_booked": true,
           "tests": [
+            "Fasting Blood Sugar",
             "CBC (Complete Blood Count)",
             "Lipid Profile*",
             "Thyroid Stimulating Hormone (TSH)",
@@ -241,9 +267,9 @@
       "description": "Ideal for athletes and fitness enthusiasts including stress level monitoring.",
       "variants": [
         {
-          "name": "Fitness Basic",
+          "name": "Fitness (Male)",
           "parameters": 32,
-          "price": 4300,
+          "price": 4299,
           "tests": [
             "CBC (Complete Blood Count)",
             "Fasting Blood Sugar",
@@ -272,6 +298,40 @@
             "Testosterone",
             "Urine Protein Creatinine Ratio"
           ]
+        },
+        {
+          "name": "Fitness (Female)",
+          "parameters": 32,
+          "price": 4299,
+          "tests": [
+            "CBC (Complete Blood Count)",
+            "Fasting Blood Sugar",
+            "HbA1c",
+            "Lipid Profile*",
+            "Liver Function Tests*",
+            "Creatinine",
+            "Urea",
+            "Electrolytes",
+            "Iron, Total Iron Binding Capacity",
+            "Calcium",
+            "Magnesium",
+            "Urine Protein Creatinine Ratio",
+            "Cortisol - Stress Hormone",
+            "Insulin Resistance - Fasting (HOMA)",
+            "CPK - Creatinine Kinase",
+            "Vitamin D (25-OH)",
+            "Vitamin B12",
+            "Urinalysis",
+            "Ferritin",
+            "Thyroid Stimulating Hormone (TSH)"
+          ],
+          "home_collection": true,
+          "key_inclusions": [
+            "Insulin Resistance - Fasting (HOMA)",
+            "CPK - Creatinine Kinase",
+            "Testosterone",
+            "Urine Protein Creatinine Ratio"
+          ]
         }
       ]
     },
@@ -284,7 +344,7 @@
         {
           "name": "Hair Fall Basic",
           "parameters": 33,
-          "price": 3900,
+          "price": 3899,
           "is_most_booked": true,
           "image": "/assets/ads/hairfall.jpg",
           "image_focus": "50% 25%",
@@ -321,7 +381,7 @@
         {
           "name": "Hair Fall Advanced",
           "parameters": 34,
-          "price": 5900,
+          "price": 5899,
           "description": "Investigates nutritional deficiencies and causes of hair loss including essential trace mineral Zinc.",
           "tests": [
             "CBC (Complete Blood Count)",
@@ -346,13 +406,13 @@
     },
     {
       "name": "Diabetic Profile",
-      "display_order": 2,
+      "display_order": 3,
       "description": "Focused for managing & monitoring diabetes complications",
       "variants": [
         {
           "name": "Diabetic Basic",
           "parameters": 65,
-          "price": 3100,
+          "price": 3099,
           "is_most_booked": true,
           "description": "Focused for managing & monitoring diabetes complications",
           "tests": [
@@ -380,7 +440,7 @@
         {
           "name": "Diabetic Advanced",
           "parameters": 70,
-          "price": 5100,
+          "price": 5099,
           "description": "Focused for managing & monitoring diabetes complications including advanced cardiac and insulin resistance tracking",
           "tests": [
             "Fasting Blood Sugar",
@@ -431,13 +491,13 @@
     },
     {
       "name": "Cardiac Wellness",
-      "display_order": 3,
+      "display_order": 4,
       "description": "In-depth evaluation of cardiac health.",
       "variants": [
         {
           "name": "Cardiac Basic",
           "parameters": 38,
-          "price": 3100,
+          "price": 3099,
           "tests": [
             "Lipid Profile*",
             "CBC (Complete Blood Count)",
@@ -462,7 +522,7 @@
         {
           "name": "Cardiac Comprehensive",
           "parameters": 50,
-          "price": 5500,
+          "price": 5499,
           "is_most_booked": true,
           "description": "In-depth evaluation of cardiac health along with advanced cardiac inflamation markers and a treadmill test.",
           "tests": [
@@ -495,13 +555,13 @@
     },
     {
       "name": "Women's Health Checkup",
-      "display_order": 4,
+      "display_order": 5,
       "description": "Specially curated for women’s preventive care.",
       "variants": [
         {
           "name": "Women's Basic",
           "parameters": 60,
-          "price": 3800,
+          "price": 3799,
           "tests": [
             "CBC (Complete Blood Count)",
             "ESR",
@@ -529,7 +589,7 @@
         {
           "name": "Women's Comprehensive",
           "parameters": 75,
-          "price": 8500,
+          "price": 8499,
           "is_most_booked": true,
           "description": "Specially curated for women’s preventive care including ovarian cancer screening, bone density and Mammogram.",
           "tests": [
@@ -568,7 +628,7 @@
     },
     {
       "name": "Wellness Special Health Checkup",
-      "display_order": 5,
+      "display_order": 6,
       "description": "Specially curated for those looking for wellness oriented packages for inflammation, cardiac and lifestyle risks",
       "variants": [
         {
@@ -645,7 +705,7 @@
         {
           "name": "STD Basic",
           "parameters": 5,
-          "price": 1500,
+          "price": 1499,
           "tests": [
             "HIV 1/2 Antibody & Antigen",
             "Hepatitis B Surface Antigen",
@@ -664,7 +724,7 @@
         {
           "name": "STD Advanced",
           "parameters": 7,
-          "price": 4400,
+          "price": 4399,
           "tests": [
             "HIV 1/2 Antibody & Antigen",
             "Hepatitis B Surface Antigen",
