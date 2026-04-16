@@ -14,15 +14,10 @@ import {
   IconButton,
   HStack,
   Input,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
   Text,
   VStack
 } from "@chakra-ui/react";
-import { FiDownload, FiHome, FiInfo, FiShare2, FiX } from "react-icons/fi";
+import { FiDownload, FiHome, FiShare2, FiX } from "react-icons/fi";
 import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
 import packagesData from "@/data/health-packages.json";
 import { siteConfig } from "@/data/siteConfig";
@@ -554,33 +549,17 @@ export default function PackagesExplorer() {
                         borderRadius="full"
                         bg={variant.home_collection ? "green.50" : "gray.100"}
                         color={variant.home_collection ? "green.700" : "gray.700"}
+                        title={
+                          variant.home_collection
+                            ? "Home collection possible for this package."
+                            : "This package requires a centre visit."
+                        }
                       >
                         {variant.home_collection ? <FiHome size={11} /> : <BsBuilding size={11} />}
                         <Text fontSize="10px" fontWeight="700">
                           {variant.home_collection ? "Home Collection" : "Center Visit"}
                         </Text>
                       </HStack>
-                      <Popover placement="top" trigger="click">
-                        <PopoverTrigger>
-                          <IconButton
-                            aria-label="Visit type info"
-                            icon={<FiInfo size={12} />}
-                            size="xs"
-                            variant="ghost"
-                            color={variant.home_collection ? "green.700" : "gray.700"}
-                            minW="20px"
-                            h="20px"
-                          />
-                        </PopoverTrigger>
-                        <PopoverContent w="260px">
-                          <PopoverArrow />
-                          <PopoverBody fontSize="xs">
-                            {variant.home_collection
-                              ? "Home collection possible for this package."
-                              : "This package requires a centre visit."}
-                          </PopoverBody>
-                        </PopoverContent>
-                      </Popover>
                     </HStack>
 
                     <Box mt={3} bg="gray.50" borderRadius="md" p={2}>
