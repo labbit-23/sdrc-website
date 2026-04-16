@@ -571,11 +571,23 @@ export default function PackagesExplorer() {
                           • {test}
                         </Text>
                       ))}
-                      {(variant.tests || []).length > 4 ? (
-                        <Text fontSize="xs" color="gray.500" mt={1}>
-                          + {(variant.tests || []).length - 4} more tests
-                        </Text>
-                      ) : null}
+                      <Box
+                        as="button"
+                        type="button"
+                        mt={1}
+                        fontSize="xs"
+                        fontWeight="700"
+                        color="teal.700"
+                        textDecoration="underline"
+                        onClick={() => {
+                          trackEvent("view_package_details", { package_name: pkg.name, variant_name: variant.name }, { pagePath: "/packages" });
+                          setActiveVariant({ pkgName: pkg.name, variant, description });
+                        }}
+                      >
+                        {(variant.tests || []).length > 4
+                          ? `+ ${(variant.tests || []).length - 4} more tests`
+                          : "+ View included tests"}
+                      </Box>
                     </Box>
 
                     <Box mt="auto">
@@ -589,20 +601,6 @@ export default function PackagesExplorer() {
                           />
                           <Text fontSize="xs" color="gray.600">Compare</Text>
                         </HStack>
-                        <Box
-                          as="button"
-                          type="button"
-                          onClick={() => {
-                            trackEvent("view_package_details", { package_name: pkg.name, variant_name: variant.name }, { pagePath: "/packages" });
-                            setActiveVariant({ pkgName: pkg.name, variant, description });
-                          }}
-                          fontSize="xs"
-                          fontWeight="700"
-                          color="teal.700"
-                          textDecoration="underline"
-                        >
-                          View included tests
-                        </Box>
                         <Button
                           size="sm"
                           variant="outline"
