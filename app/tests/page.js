@@ -38,8 +38,18 @@ function formatInr(amount) {
 function normalizeTestName(value) {
   return String(value || "")
     .toLowerCase()
+    .replace(/\bapolipoproteins\b/g, "apolipoprotein")
+    .replace(/\bapo\b/g, "apolipoprotein")
+    .replace(/\ba[\s-]?1\b/g, "a1")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+}
+
+function testTokens(value) {
+  return normalizeTestName(value)
+    .split(" ")
+    .map((t) => (t.endsWith("s") && t.length > 3 ? t.slice(0, -1) : t))
+    .filter(Boolean);
 }
 
 function isLikelySameTest(a, b) {
@@ -48,7 +58,17 @@ function isLikelySameTest(a, b) {
   if (!na || !nb) return false;
   if (na === nb) return true;
   const [shorter, longer] = na.length < nb.length ? [na, nb] : [nb, na];
-  return shorter.length >= 8 && longer.includes(shorter);
+  if (shorter.length >= 8 && longer.includes(shorter)) return true;
+
+  const ta = new Set(testTokens(a));
+  const tb = new Set(testTokens(b));
+  if (!ta.size || !tb.size) return false;
+  let overlap = 0;
+  ta.forEach((tok) => {
+    if (tb.has(tok)) overlap += 1;
+  });
+  const score = overlap / Math.max(ta.size, tb.size);
+  return score >= 0.55;
 }
 
 function flattenPackageVariants(data) {
@@ -129,13 +149,35 @@ export default function TestsPage() {
   const [showFullTestsMobile, setShowFullTestsMobile] = useState(false);
 
   const packageVariants = useMemo(() => flattenPackageVariants(healthPackagesData), []);
+  const panelExpansionMap = useMemo(() => {
+    const map = new Map();
+    (healthPackagesData.globalNotes || []).forEach((note) => {
+      const m = String(note).match(/^\*([^:]+):\s*(.+)$/);
+      if (!m) return;
+      const panel = m[1].trim();
+      const expanded = m[2]
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean);
+      map.set(panel.toLowerCase(), expanded);
+    });
+    return map;
+  }, []);
   const packageTestsById = useMemo(() => {
     const map = new Map();
     packageVariants.forEach((pkg) => {
-      map.set(pkg.id, Array.isArray(pkg.tests) ? pkg.tests : []);
+      const tests = Array.isArray(pkg.tests) ? pkg.tests : [];
+      const expanded = [];
+      tests.forEach((testName) => {
+        expanded.push(testName);
+        const bare = String(testName).replace(/\*+$/g, "").trim().toLowerCase();
+        const extra = panelExpansionMap.get(bare);
+        if (extra?.length) expanded.push(...extra);
+      });
+      map.set(pkg.id, expanded);
     });
     return map;
-  }, [packageVariants]);
+  }, [packageVariants, panelExpansionMap]);
   const filteredPackageVariants = useMemo(() => {
     const q = debouncedQuery.trim().toLowerCase();
     const base = homeCollectionFilter ? packageVariants.filter((pkg) => pkg.home_collection) : packageVariants;
