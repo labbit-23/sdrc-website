@@ -35,6 +35,22 @@ function formatInr(amount) {
   return `INR ${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function normalizeTestName(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function isLikelySameTest(a, b) {
+  const na = normalizeTestName(a);
+  const nb = normalizeTestName(b);
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  const [shorter, longer] = na.length < nb.length ? [na, nb] : [nb, na];
+  return shorter.length >= 8 && longer.includes(shorter);
+}
+
 function flattenPackageVariants(data) {
   const out = [];
   const packages = sortPackages(data?.packages || []);
@@ -106,12 +122,20 @@ export default function TestsPage() {
   const [pagination, setPagination] = useState(defaultPagination);
 
   const [cartItems, setCartItems] = useState([]);
+  const [cartWarning, setCartWarning] = useState("");
 
   const [openPackageIncludesId, setOpenPackageIncludesId] = useState(null);
   const [showDepartmentFilters, setShowDepartmentFilters] = useState(false);
   const [showFullTestsMobile, setShowFullTestsMobile] = useState(false);
 
   const packageVariants = useMemo(() => flattenPackageVariants(healthPackagesData), []);
+  const packageTestsById = useMemo(() => {
+    const map = new Map();
+    packageVariants.forEach((pkg) => {
+      map.set(pkg.id, Array.isArray(pkg.tests) ? pkg.tests : []);
+    });
+    return map;
+  }, [packageVariants]);
   const filteredPackageVariants = useMemo(() => {
     const q = debouncedQuery.trim().toLowerCase();
     const base = homeCollectionFilter ? packageVariants.filter((pkg) => pkg.home_collection) : packageVariants;
@@ -168,6 +192,11 @@ export default function TestsPage() {
   );
   const itemCount = cartItems.length;
   const hasCenterOnlyItems = cartItems.some((item) => item.home_collection === false);
+
+  function showCartWarning(message) {
+    setCartWarning(message);
+    window.setTimeout(() => setCartWarning(""), 3200);
+  }
 
   useEffect(() => {
     const parsed = readCartItems();
@@ -319,6 +348,19 @@ export default function TestsPage() {
 
   function addTestToCart(test) {
     trackEvent("add_to_cart", { item_type: "test", test_id: test.id, name: test.name }, { pagePath: "/tests" });
+    const overlapPackages = cartItems.filter((item) => {
+      if (item.item_type !== "package") return false;
+      const tests = packageTestsById.get(item.id) || [];
+      return tests.some((pkgTest) => isLikelySameTest(pkgTest, test.name));
+    });
+    if (overlapPackages.length > 0) {
+      const top = overlapPackages
+        .slice(0, 2)
+        .map((item) => (item.package_name ? `${item.package_name} (${item.name})` : item.name))
+        .join(", ");
+      const suffix = overlapPackages.length > 2 ? ` +${overlapPackages.length - 2} more` : "";
+      showCartWarning(`Heads up: ${test.name} is likely already included in ${top}${suffix}.`);
+    }
     setCartItems((prev) => {
       if (prev.some((item) => item.id === test.id)) return prev;
       return [
@@ -340,6 +382,18 @@ export default function TestsPage() {
 
   function addPackageToCart(pkg) {
     trackEvent("add_to_cart", { item_type: "package", package_id: pkg.id, name: pkg.name }, { pagePath: "/tests" });
+    const overlapTests = cartItems.filter((item) => {
+      if (item.item_type !== "test") return false;
+      return (pkg.tests || []).some((pkgTest) => isLikelySameTest(pkgTest, item.name));
+    });
+    if (overlapTests.length > 0) {
+      const top = overlapTests
+        .slice(0, 3)
+        .map((item) => item.name)
+        .join(", ");
+      const suffix = overlapTests.length > 3 ? ` +${overlapTests.length - 3} more` : "";
+      showCartWarning(`Heads up: ${pkg.name} already includes ${top}${suffix}.`);
+    }
     setCartItems((prev) => {
       if (prev.some((item) => item.id === pkg.id)) return prev;
       return [
@@ -962,6 +1016,27 @@ export default function TestsPage() {
           />
         </Box>
       </Container>
+
+      {cartWarning ? (
+        <Box
+          position="fixed"
+          bottom={{ base: 3, md: 5 }}
+          left="50%"
+          transform="translateX(-50%)"
+          zIndex={50}
+          px={4}
+          py={2.5}
+          borderRadius="md"
+          bg="orange.50"
+          borderWidth="1px"
+          borderColor="orange.200"
+          color="orange.800"
+          boxShadow="md"
+          maxW={{ base: "92vw", md: "620px" }}
+        >
+          <Text fontSize="sm" fontWeight="600">{cartWarning}</Text>
+        </Box>
+      ) : null}
     </>
   );
 }
