@@ -69,7 +69,9 @@
             "Creatinine",
             "Urinalysis",
             "HIV 1/2 Antibody & Antigen",
-            "Thyroid Function Tests (T3 T4 TSH)"
+            "Thyroid Stimulating Hormone (TSH)",
+            "Electrolytes",
+            "Serum Uric Acid"
           ],
           "home_collection": true,
           "key_inclusions": [
@@ -77,7 +79,9 @@
             "Lipid Profile*",
             "Liver Function Tests*",
             "HIV 1/2 Antibody & Antigen",
-            "Thyroid Function Tests (T3 T4 TSH)"
+            "Thyroid Stimulating Hormone (TSH)",
+            "Electrolytes",
+            "Serum Uric Acid"
           ]
         }
       ]
