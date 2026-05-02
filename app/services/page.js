@@ -114,6 +114,11 @@ const chips = [
 
 const gallery = [
   {
+    src: "/assets/sdrc-banner.png",
+    alt: "Our New Centre - Paradise, Secunderabad",
+    caption: "Our New Centre - Paradise, Secunderabad"
+  },
+  {
     src: "/assets/sdrc-exterior.jpg",
     alt: "SDRC exterior - Jade Arcade, Paradise",
     caption: "SDRC Exterior - Jade Arcade, Paradise"
@@ -136,8 +141,9 @@ const gallery = [
 ];
 
 export default function ServicesPage() {
-  const [activeIndex, setActiveIndex] = useState(2);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const activeImage = useMemo(() => gallery[activeIndex] || gallery[0], [activeIndex]);
 
@@ -211,6 +217,8 @@ export default function ServicesPage() {
                 overflow="hidden"
                 bg="gray.50"
                 position="relative"
+                cursor="zoom-in"
+                onClick={() => setLightboxOpen(true)}
                 onTouchStart={(event) => setTouchStartX(event.touches[0]?.clientX ?? null)}
                 onTouchEnd={(event) => {
                   const endX = event.changedTouches[0]?.clientX ?? null;
@@ -256,6 +264,9 @@ export default function ServicesPage() {
               </HStack>
               <Text mt={1} fontSize="xs" color="gray.500" textAlign="center" display={{ base: "block", md: "none" }}>
                 Swipe to view more images
+              </Text>
+              <Text mt={1} fontSize="xs" color="gray.500" textAlign="center" display={{ base: "none", md: "block" }}>
+                Click image to open gallery
               </Text>
 
               <SimpleGrid columns={4} spacing={2} mt={3} display={{ base: "none", md: "grid" }}>
@@ -337,6 +348,93 @@ export default function ServicesPage() {
           </HStack>
         </Box>
       </Container>
+
+      {lightboxOpen ? (
+        <Box
+          position="fixed"
+          inset={0}
+          zIndex={60}
+          bg="blackAlpha.800"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          p={{ base: 2, md: 4 }}
+          onClick={() => setLightboxOpen(false)}
+        >
+          <Box
+            className="soft-card no-hover-lift"
+            w={{ base: "100%", md: "min(1080px, 96vw)" }}
+            maxH={{ base: "92vh", md: "94vh" }}
+            p={{ base: 2, md: 3 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <HStack justify="space-between" mb={2}>
+              <Text fontSize={{ base: "sm", md: "md" }} fontWeight="700" color="gray.800">
+                {activeImage.caption}
+              </Text>
+              <Button size="sm" variant="outline" onClick={() => setLightboxOpen(false)}>
+                Close
+              </Button>
+            </HStack>
+
+            <HStack justify="space-between" align="center" gap={2}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setActiveIndex((idx) => (idx - 1 + gallery.length) % gallery.length)}
+              >
+                Prev
+              </Button>
+
+              <Box position="relative" flex="1" h={{ base: "54vh", md: "70vh" }} borderRadius="lg" overflow="hidden" bg="gray.100">
+                <Image
+                  src={activeImage.src}
+                  alt={activeImage.alt}
+                  fill
+                  style={{ objectFit: "contain" }}
+                  sizes="(max-width: 768px) 100vw, 1000px"
+                />
+              </Box>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setActiveIndex((idx) => (idx + 1) % gallery.length)}
+              >
+                Next
+              </Button>
+            </HStack>
+
+            <HStack mt={3} gap={2} overflowX="auto" pb={1}>
+              {gallery.map((img, idx) => (
+                <Box
+                  key={img.src}
+                  as="button"
+                  type="button"
+                  minW="88px"
+                  w="88px"
+                  h="56px"
+                  borderRadius="md"
+                  overflow="hidden"
+                  borderWidth={idx === activeIndex ? "2px" : "1px"}
+                  borderColor={idx === activeIndex ? "teal.500" : "gray.200"}
+                  onClick={() => setActiveIndex(idx)}
+                >
+                  <Box position="relative" w="full" h="full" bg="gray.50">
+                    <Image
+                      src={img.src}
+                      alt={img.alt}
+                      fill
+                      style={{ objectFit: "cover" }}
+                      sizes="88px"
+                    />
+                  </Box>
+                </Box>
+              ))}
+            </HStack>
+          </Box>
+        </Box>
+      ) : null}
     </>
   );
 }
