@@ -50,6 +50,58 @@ a {
   background-position: center center;
 }
 
+.home-hero-cover {
+  background-image:
+    linear-gradient(90deg, rgba(247, 250, 252, 0.68) 0%, rgba(247, 250, 252, 0.5) 38%, rgba(247, 250, 252, 0.6) 100%),
+    radial-gradient(circle at 85% 12%, rgba(242, 105, 57, 0.2), transparent 42%),
+    radial-gradient(circle at 12% 90%, rgba(0, 143, 130, 0.2), transparent 46%),
+    linear-gradient(90deg, rgba(0, 143, 130, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(0, 143, 130, 0.08) 1px, transparent 1px),
+    url("/assets/sdrc-banner.png");
+  background-size: auto, auto, auto, 28px 28px, 28px 28px, 120% auto;
+  background-position: center center, center center, center center, center center, center center, center center;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat, no-repeat;
+}
+
+.functional-hero-cover {
+  background-image:
+    linear-gradient(90deg, rgba(247, 250, 252, 0.8) 0%, rgba(247, 250, 252, 0.68) 42%, rgba(247, 250, 252, 0.76) 100%),
+    radial-gradient(circle at 85% 12%, rgba(242, 105, 57, 0.18), transparent 42%),
+    radial-gradient(circle at 12% 90%, rgba(0, 143, 130, 0.18), transparent 46%),
+    linear-gradient(90deg, rgba(0, 143, 130, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(0, 143, 130, 0.08) 1px, transparent 1px),
+    url("/assets/sdrc-banner.png");
+  background-size: auto, auto, auto, 28px 28px, 28px 28px, 118% auto;
+  background-position: center center, center center, center center, center center, center center, 92% center;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat, no-repeat;
+}
+
+@media (max-width: 767px) {
+  .home-hero-cover {
+    background-image:
+      linear-gradient(180deg, rgba(247, 250, 252, 0.76) 0%, rgba(247, 250, 252, 0.66) 52%, rgba(247, 250, 252, 0.72) 100%),
+      radial-gradient(circle at 85% 12%, rgba(242, 105, 57, 0.2), transparent 42%),
+      radial-gradient(circle at 12% 90%, rgba(0, 143, 130, 0.2), transparent 46%),
+      linear-gradient(90deg, rgba(0, 143, 130, 0.08) 1px, transparent 1px),
+      linear-gradient(rgba(0, 143, 130, 0.08) 1px, transparent 1px),
+      url("/assets/sdrc-banner.png");
+    background-size: auto, auto, auto, 24px 24px, 24px 24px, 140% auto;
+    background-position: center center, center center, center center, center center, center center, center center;
+  }
+
+  .functional-hero-cover {
+    background-image:
+      linear-gradient(180deg, rgba(247, 250, 252, 0.84) 0%, rgba(247, 250, 252, 0.76) 52%, rgba(247, 250, 252, 0.8) 100%),
+      radial-gradient(circle at 85% 12%, rgba(242, 105, 57, 0.18), transparent 42%),
+      radial-gradient(circle at 12% 90%, rgba(0, 143, 130, 0.18), transparent 46%),
+      linear-gradient(90deg, rgba(0, 143, 130, 0.08) 1px, transparent 1px),
+      linear-gradient(rgba(0, 143, 130, 0.08) 1px, transparent 1px),
+      url("/assets/sdrc-banner.png");
+    background-size: auto, auto, auto, 24px 24px, 24px 24px, 136% auto;
+    background-position: center center, center center, center center, center center, center center, 94% center;
+  }
+}
+
 .page-hero {
   background:
     radial-gradient(circle at 85% 25%, rgba(0, 143, 130, 0.14), transparent 40%),
@@ -119,6 +171,10 @@ a {
 
 .rise-in {
   animation: rise-in 560ms ease both;
+}
+
+.hero-visual-reveal {
+  animation: hero-visual-reveal 10s ease-out both;
 }
 
 .float-slow {
@@ -204,6 +260,17 @@ a {
   }
   50% {
     transform: translateY(-8px);
+  }
+}
+
+@keyframes hero-visual-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(72px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 

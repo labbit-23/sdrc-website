@@ -113,7 +113,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
+      <Box className="brochure-bg home-hero-cover" py={{ base: 10, md: 14 }}>
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr", lg: "1.05fr .95fr" }} gap={{ base: 8, lg: 10 }} alignItems="center">
             <Box className="rise-in">
@@ -131,7 +131,7 @@ export default function HomePage() {
                 </Box>
               </Heading>
 
-              <Text mt={4} fontSize={{ base: "md", md: "lg" }} color="gray.700" maxW="2xl" display={{ base: "none", md: "block" }}>
+              <Text mt={4} fontSize={{ base: "md", md: "lg" }} color="gray.800" fontWeight="500" maxW="2xl" display={{ base: "none", md: "block" }}>
                 Ultrasound and Doppler, CT, Digital X-Ray, Mammography, DEXA, ECG/2D-Echo,
                 EEG/ENMG, TMT, Spirometry and a full-service pathology lab with preventive health packages.
               </Text>
@@ -204,7 +204,7 @@ export default function HomePage() {
               </SimpleGrid>
             </Box>
 
-            <Box position="relative" className="rise-in" style={{ animationDelay: "120ms" }}>
+            <Box position="relative" className="hero-visual-reveal" style={{ animationDelay: "220ms" }}>
               <Box className="float-slow" position="absolute" top="-24px" right="-24px" w="260px" h="260px" bg="teal.200" borderRadius="full" filter="blur(46px)" opacity={0.35} />
               <Box className="float-slow" position="absolute" bottom="-24px" left="-20px" w="280px" h="280px" bg="orange.200" borderRadius="full" filter="blur(52px)" opacity={0.35} style={{ animationDelay: "1.2s" }} />
               <Box className="soft-card" p={3} position="relative" zIndex={2}>

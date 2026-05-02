@@ -390,21 +390,21 @@ export default function TestsPage() {
 
   function addTestToCart(test) {
     trackEvent("add_to_cart", { item_type: "test", test_id: test.id, name: test.name }, { pagePath: "/tests" });
-    const overlapPackages = cartItems.filter((item) => {
-      if (item.item_type !== "package") return false;
-      const tests = packageTestsById.get(item.id) || [];
-      return tests.some((pkgTest) => isLikelySameTest(pkgTest, test.name));
-    });
-    if (overlapPackages.length > 0) {
-      const top = overlapPackages
-        .slice(0, 2)
-        .map((item) => (item.package_name ? `${item.package_name} (${item.name})` : item.name))
-        .join(", ");
-      const suffix = overlapPackages.length > 2 ? ` +${overlapPackages.length - 2} more` : "";
-      showCartWarning(`Heads up: ${test.name} is likely already included in ${top}${suffix}.`);
-    }
     setCartItems((prev) => {
       if (prev.some((item) => item.id === test.id)) return prev;
+      const overlapPackages = prev.filter((item) => {
+        if (item.item_type !== "package") return false;
+        const tests = packageTestsById.get(item.id) || [];
+        return tests.some((pkgTest) => isLikelySameTest(pkgTest, test.name));
+      });
+      if (overlapPackages.length > 0) {
+        const top = overlapPackages
+          .slice(0, 2)
+          .map((item) => (item.package_name ? `${item.package_name} (${item.name})` : item.name))
+          .join(", ");
+        const suffix = overlapPackages.length > 2 ? ` +${overlapPackages.length - 2} more` : "";
+        showCartWarning(`Heads up: ${test.name} is likely already included in ${top}${suffix}.`);
+      }
       return [
         ...prev,
         {
@@ -424,20 +424,20 @@ export default function TestsPage() {
 
   function addPackageToCart(pkg) {
     trackEvent("add_to_cart", { item_type: "package", package_id: pkg.id, name: pkg.name }, { pagePath: "/tests" });
-    const overlapTests = cartItems.filter((item) => {
-      if (item.item_type !== "test") return false;
-      return (pkg.tests || []).some((pkgTest) => isLikelySameTest(pkgTest, item.name));
-    });
-    if (overlapTests.length > 0) {
-      const top = overlapTests
-        .slice(0, 3)
-        .map((item) => item.name)
-        .join(", ");
-      const suffix = overlapTests.length > 3 ? ` +${overlapTests.length - 3} more` : "";
-      showCartWarning(`Heads up: ${pkg.name} already includes ${top}${suffix}.`);
-    }
     setCartItems((prev) => {
       if (prev.some((item) => item.id === pkg.id)) return prev;
+      const overlapTests = prev.filter((item) => {
+        if (item.item_type !== "test") return false;
+        return (pkg.tests || []).some((pkgTest) => isLikelySameTest(pkgTest, item.name));
+      });
+      if (overlapTests.length > 0) {
+        const top = overlapTests
+          .slice(0, 3)
+          .map((item) => item.name)
+          .join(", ");
+        const suffix = overlapTests.length > 3 ? ` +${overlapTests.length - 3} more` : "";
+        showCartWarning(`Heads up: ${pkg.name} already includes ${top}${suffix}.`);
+      }
       return [
         ...prev,
         {
@@ -480,14 +480,14 @@ export default function TestsPage() {
 
   return (
     <>
-      <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
+      <Box className="brochure-bg functional-hero-cover" py={{ base: 10, md: 14 }}>
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr" }} gap={6} alignItems="center">
             <Box>
               <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
                 Test Selection
                 <Box as="span" color="teal.700" className="hero-subline">
-                  Search, Compare, Add to Cart
+                  Search, Compare, <Box as="span" color="orange.500">Add to Cart</Box>
                 </Box>
               </Heading>
               <Text mt={3} color="gray.700" fontSize={{ base: "md", md: "lg" }}>
@@ -714,8 +714,10 @@ export default function TestsPage() {
                           <Text fontSize="xs" color="gray.500">{test.internal_code || "No code"} {test.department ? `• ${test.department}` : ""}</Text>
                           <Text fontSize="sm" fontWeight="700" color="gray.800">{test.name}</Text>
                         </Box>
-                        <VStack align="end" gap={1}>
-                          <Text fontSize="xs" fontWeight="700" color="orange.500">{test.price == null ? "Price N/A" : formatInr(test.price)}</Text>
+                        <HStack align="center" spacing={2}>
+                          <Text fontSize="xs" fontWeight="700" color="orange.500" whiteSpace="nowrap">
+                            {test.price == null ? "Price N/A" : formatInr(test.price)}
+                          </Text>
                           <IconButton
                             size="xs"
                             variant={added ? "solid" : "outline"}
@@ -728,7 +730,7 @@ export default function TestsPage() {
                           >
                             {added ? <BsCartCheck /> : <BsCartPlus />}
                           </IconButton>
-                        </VStack>
+                        </HStack>
                       </HStack>
                     </Box>
                   );
@@ -892,7 +894,7 @@ export default function TestsPage() {
                               )}
                             </HStack>
                           </Box>
-                          <VStack align="end" gap={2}>
+                          <HStack align="center" spacing={2}>
                             <Text fontSize="md" fontWeight="700" color="orange.500" whiteSpace="nowrap">{test.price == null ? "Price N/A" : formatInr(test.price)}</Text>
                             <IconButton
                               size="sm"
@@ -906,7 +908,7 @@ export default function TestsPage() {
                             >
                               {added ? <BsCartCheck /> : <BsCartPlus />}
                             </IconButton>
-                          </VStack>
+                          </HStack>
                         </HStack>
                       </Box>
                     );
@@ -989,7 +991,7 @@ export default function TestsPage() {
                                 ) : null}
                               </HStack>
                             </Box>
-                            <VStack align="end" gap={2}>
+                            <HStack align="center" spacing={2}>
                               <Text fontSize="md" fontWeight="700" color="orange.500" whiteSpace="nowrap">{formatInr(pkg.price)}</Text>
                               <IconButton
                                 size="sm"
@@ -1003,7 +1005,7 @@ export default function TestsPage() {
                               >
                                 {added ? <BsCartCheck /> : <BsCartPlus />}
                               </IconButton>
-                            </VStack>
+                            </HStack>
                           </HStack>
 
                           {showIncludes ? (

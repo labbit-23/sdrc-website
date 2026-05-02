@@ -10,7 +10,7 @@ import { siteConfig } from "@/data/siteConfig";
 export default function PackagesPage() {
   return (
     <>
-      <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
+      <Box className="brochure-bg functional-hero-cover" py={{ base: 10, md: 14 }}>
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr", lg: "1.05fr .95fr" }} gap={10} alignItems="center">
             <Box>

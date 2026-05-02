@@ -617,8 +617,8 @@ export default function PackagesExplorer() {
                           size="sm"
                           variant="outline"
                           bg={added ? "teal.600" : "white"}
-                          color={added ? "white" : "teal.700"}
-                          borderColor={added ? "teal.600" : "teal.300"}
+                          color={added ? "white" : "orange.600"}
+                          borderColor={added ? "teal.600" : "orange.300"}
                           onClick={() => addVariantToCart(pkg, variant)}
                           disabled={added}
                           px={showAddLabel && !added ? 3 : 0}
