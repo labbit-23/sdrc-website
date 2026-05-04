@@ -762,6 +762,7 @@
   "testCategoryMap": {
     "Thyroid Stimulating Hormone (TSH)": "Thyroid",
     "Thyroid Function Tests (T3 T4 TSH)": "Thyroid",
+    "Thyroid Function Tests (Advanced)*": "Thyroid",
     "Fasting Blood Sugar": "Diabetes",
     "Fasting Blood Glucose": "Diabetes",
     "Random Blood Sugar": "Diabetes",
