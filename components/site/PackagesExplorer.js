@@ -571,25 +571,27 @@ export default function PackagesExplorer() {
                           • {test}
                         </Text>
                       ))}
-                      <Box
-                        as="button"
-                        type="button"
-                        mt={1}
-                        fontSize="xs"
-                        fontWeight="700"
-                        color="teal.700"
-                        textDecoration="underline"
-                        cursor="pointer"
-                        _hover={{ color: "teal.800" }}
-                        onClick={() => {
-                          trackEvent("view_package_details", { package_name: pkg.name, variant_name: variant.name }, { pagePath: "/packages" });
-                          setActiveVariant({ pkgName: pkg.name, variant, description });
-                        }}
-                      >
-                        {(variant.tests || []).length > 4
-                          ? `+ ${(variant.tests || []).length - 4} more tests`
-                          : "+ View included tests"}
-                      </Box>
+                      {(variant.tests || []).length > 0 ? (
+                        <Box
+                          as="button"
+                          type="button"
+                          mt={1}
+                          fontSize="xs"
+                          fontWeight="700"
+                          color="teal.700"
+                          textDecoration="underline"
+                          cursor="pointer"
+                          _hover={{ color: "teal.800" }}
+                          onClick={() => {
+                            trackEvent("view_package_details", { package_name: pkg.name, variant_name: variant.name }, { pagePath: "/packages" });
+                            setActiveVariant({ pkgName: pkg.name, variant, description });
+                          }}
+                        >
+                          {(variant.tests || []).length > 4
+                            ? `+ ${(variant.tests || []).length - 4} more tests`
+                            : "+ View included tests"}
+                        </Box>
+                      ) : null}
                     </Box>
 
                     <Box mt="auto">
@@ -711,10 +713,12 @@ export default function PackagesExplorer() {
             w="full"
             p={0}
             maxH="88vh"
-            overflowY="auto"
+            overflow="hidden"
+            display="flex"
+            flexDirection="column"
             onClick={(e) => e.stopPropagation()}
           >
-            <Flex justify="space-between" align="center" px={4} py={3} borderBottom="1px solid" borderColor="gray.200">
+            <Flex justify="space-between" align="center" px={4} py={3} borderBottom="1px solid" borderColor="gray.200" flexShrink={0}>
               <HStack spacing={3}>
                 <img src="/assets/sdrc-logo.png" alt="SDRC" width="94" height="28" />
                 <Box>
@@ -753,7 +757,7 @@ export default function PackagesExplorer() {
               </HStack>
             </Flex>
 
-            <Box px={4} py={3} borderBottom="1px solid" borderColor="gray.100" bg="gray.50">
+            <Box px={4} py={3} borderBottom="1px solid" borderColor="gray.100" bg="gray.50" flexShrink={0}>
               <HStack spacing={2} flexWrap="wrap">
                 <Text fontSize="11px" px={2.5} py={1} borderRadius="full" bg="white" color="teal.700">
                   {activeVariant.variant.parameters} parameters
@@ -765,39 +769,41 @@ export default function PackagesExplorer() {
               <Text color="gray.600" fontSize="xs" mt={2}>{activeVariant.description}</Text>
             </Box>
 
-            <VStack align="stretch" px={4} py={3} gap={2}>
-              {activeGrouped.map((group) => (
-                <Box key={group.category}>
-                  <HStack mb={1.5} spacing={2}>
-                    {packagesData.categoryIconMap?.[group.category] ? (
-                      <img src={packagesData.categoryIconMap[group.category]} alt={group.category} width={16} height={16} />
-                    ) : null}
-                    <Text fontSize="12px" fontWeight="700" color="teal.700">{group.category}</Text>
-                  </HStack>
-                  <VStack align="stretch" gap={1}>
-                    {group.tests.map((test) => (
-                      <Text key={test} fontSize="sm" color="gray.800" lineHeight="1.25">
-                        • {test}
-                      </Text>
+            <Box flex="1" minH={0} overflowY="auto">
+              <VStack align="stretch" px={4} py={3} gap={2}>
+                {activeGrouped.map((group) => (
+                  <Box key={group.category}>
+                    <HStack mb={1.5} spacing={2}>
+                      {packagesData.categoryIconMap?.[group.category] ? (
+                        <img src={packagesData.categoryIconMap[group.category]} alt={group.category} width={16} height={16} />
+                      ) : null}
+                      <Text fontSize="12px" fontWeight="700" color="teal.700">{group.category}</Text>
+                    </HStack>
+                    <VStack align="stretch" gap={1}>
+                      {group.tests.map((test) => (
+                        <Text key={test} fontSize="sm" color="gray.800" lineHeight="1.25">
+                          • {test}
+                        </Text>
+                      ))}
+                    </VStack>
+                  </Box>
+                ))}
+              </VStack>
+
+              <Box px={4} py={3} borderTop="1px solid" borderColor="gray.200" bg="white">
+                {activeNotes.length > 0 ? (
+                  <Box mb={3} data-export-hide="true">
+                    <Text fontSize="11px" color="gray.500" fontWeight="700" mb={1}>Important notes</Text>
+                    {activeNotes.map((note) => (
+                      <Text key={note} fontSize="11px" color="gray.500">{note}</Text>
                     ))}
-                  </VStack>
-                </Box>
-              ))}
-            </VStack>
+                  </Box>
+                ) : null}
 
-            <Box px={4} py={3} borderTop="1px solid" borderColor="gray.200" bg="white">
-              {activeNotes.length > 0 ? (
-                <Box mb={3}>
-                  <Text fontSize="11px" color="gray.500" fontWeight="700" mb={1}>Important notes</Text>
-                  {activeNotes.map((note) => (
-                    <Text key={note} fontSize="11px" color="gray.500">{note}</Text>
-                  ))}
-                </Box>
-              ) : null}
-
-              <Text fontSize="11px" color="gray.500" data-export-hide="true">
-                Use the top-right icons to share on mobile or download on desktop.
-              </Text>
+                <Text fontSize="11px" color="gray.500" data-export-hide="true">
+                  Use the top-right icons to share on mobile or download on desktop.
+                </Text>
+              </Box>
             </Box>
           </Box>
         </Box>
@@ -904,7 +910,7 @@ export default function PackagesExplorer() {
                 </table>
               </Box>
               {compareNotes.length > 0 ? (
-                <Box mt={3}>
+                <Box mt={3} data-export-hide="true">
                 <Text fontSize="11px" color="gray.500" fontWeight="700" mb={1}>Important notes</Text>
                 {compareNotes.map((note) => (
                   <Text key={note} fontSize="11px" color="gray.500">{note}</Text>

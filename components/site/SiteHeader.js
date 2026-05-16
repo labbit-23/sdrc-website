@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Box, Button, Flex, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
 import { FiShoppingCart } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
 import { navItems, siteConfig } from "@/data/siteConfig";
 import { CART_UPDATED_EVENT, getCartCount } from "@/lib/cart";
 
@@ -72,6 +73,8 @@ export default function SiteHeader() {
             alignItems="center"
             justifyContent="center"
             ml="auto"
+          
+            leftIcon={<FaWhatsapp />}
           >
             WhatsApp
           </Button>
@@ -158,6 +161,8 @@ export default function SiteHeader() {
               display={{ base: "none", lg: "inline-flex" }}
               title="Get our bot to send your reports. Chat using your registered mobile number."
              
+            
+              leftIcon={<FaWhatsapp />}
             >
               Download Reports
             </Button>
@@ -252,9 +257,11 @@ export default function SiteHeader() {
                   <Text>Book A Test</Text>
                   <Box as="span" className="book-test-ribbon">NEW</Box>
                 </Button>
-                <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} target="_blank" rel="noopener noreferrer" variant="outline" size="sm">
-                  WhatsApp
-                </Button>
+                <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} target="_blank" rel="noopener noreferrer" variant="outline" size="sm"
+            leftIcon={<FaWhatsapp />}
+          >
+            WhatsApp
+          </Button>
                 <Button
                   as={Link}
                   href={siteConfig.reportsUrl}
@@ -264,9 +271,11 @@ export default function SiteHeader() {
                   size="sm"
                   title="Get our bot to send your reports. Chat using your registered mobile number."
              
+            
+              leftIcon={<FaWhatsapp />}
             >
-                  Download Reports
-                </Button>
+              Download Reports
+            </Button>
               </HStack>
             </VStack>
           </Box>

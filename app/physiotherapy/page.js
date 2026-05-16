@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import Image from "next/image";
 import Link from "next/link";
+import { FaWhatsapp } from "react-icons/fa";
 import { Box, Button, Container, Grid, Heading, SimpleGrid, Text } from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
 
@@ -98,7 +99,7 @@ export default function PhysiotherapyPage() {
               </Text>
 
               <Grid templateColumns={{ base: "1fr", sm: "repeat(2, minmax(0,1fr))" }} gap={3} mt={7} maxW="560px">
-                <Button as={Link} href={"https://wa.me/919963432132?text=" + encodeURIComponent("I wanted to know more about Recure Physiotherapy at SDRC") } target="_blank" size="lg">
+                <Button as={Link} href={"https://wa.me/919963432132?text=" + encodeURIComponent("I wanted to know more about Recure Physiotherapy at SDRC") } target="_blank" size="lg" leftIcon={<FaWhatsapp />}>
                   Chat with an Expert
                 </Button>
                 <Button as={Link} href="tel:+919963432132" variant="outline" size="lg">

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { FaWhatsapp } from "react-icons/fa";
 import {
   Box,
   Button,
@@ -359,7 +360,7 @@ export default function QuickBookPage() {
               <Button as={Link} href="/tests" variant="outline">
                 Search Tests Instead
               </Button>
-              <Button as="a" href={whatsappQuickbookHref} target="_blank" rel="noopener noreferrer" variant="outline">
+              <Button as="a" href={whatsappQuickbookHref} target="_blank" rel="noopener noreferrer" variant="outline" leftIcon={<FaWhatsapp />}>
                 Book Home Visit on WhatsApp
               </Button>
             </VStack>

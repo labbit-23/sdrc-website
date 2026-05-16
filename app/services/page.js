@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { FaWhatsapp } from "react-icons/fa";
 import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
 
@@ -342,7 +343,7 @@ export default function ServicesPage() {
             <Button as={Link} href={"tel:" + siteConfig.phoneTel}>
               Call {siteConfig.phoneDisplay}
             </Button>
-            <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} variant="outline">
+            <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} variant="outline" leftIcon={<FaWhatsapp />}>
               WhatsApp Us
             </Button>
           </HStack>

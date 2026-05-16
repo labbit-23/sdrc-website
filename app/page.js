@@ -7,7 +7,9 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text } from "@chakra-ui/react";
 import { FiSearch } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
 import { siteConfig } from "@/data/siteConfig";
+import healthPackagesData from "@/data/health-packages.json";
 
 const facilityChips = [
   "CT",
@@ -52,44 +54,57 @@ const reviews = [
   }
 ];
 
-const packagePreviewCards = [
-  {
-    title: "Executive Wellness Checkup",
-    desc: "For young professionals and busy executives.",
-    params: "62-75 parameters",
-    price: "From INR 1,800",
-    points: [
-      "CBC, ESR, fasting sugar, HbA1c",
-      "Lipid and liver profile",
-      "Creatinine, TSH, urine analysis"
-    ],
-    href: "/packages#executive-wellness-checkup"
-  },
-  {
-    title: "Master Wellness Checkup",
-    desc: "Comprehensive annual health check with vitamins.",
-    params: "77-80 parameters",
-    price: "From INR 3,600",
-    points: [
-      "Full blood and metabolic profile",
-      "Thyroid, Vitamin D and B12",
-      "Ultrasound, X-Ray and ECG (Total pack)"
-    ],
-    href: "/packages#master-wellness-checkup"
-  },
-  {
-    title: "Cardiac Wellness",
-    desc: "For those with cardiac risk factors or family history.",
-    params: "38-50 parameters",
-    price: "From INR 3,100",
-    points: [
-      "Lipid profile, sugars, CBC",
-      "2D Echo, TMT (Comprehensive)",
-      "CPK, cardiac risk markers"
-    ],
-    href: "/packages#cardiac-wellness"
-  }
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function formatInrFrom(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "Price on request";
+  return `From INR ${amount.toLocaleString("en-IN")}`;
+}
+
+function getParameterRange(variants) {
+  const params = (variants || [])
+    .map((v) => Number(v.parameters))
+    .filter((v) => Number.isFinite(v));
+  if (params.length === 0) return "Parameters vary";
+  const min = Math.min(...params);
+  const max = Math.max(...params);
+  return min === max ? `${min} parameters` : `${min}-${max} parameters`;
+}
+
+const homepagePreviewPackageNames = [
+  "Executive Wellness Checkup",
+  "Master Wellness Checkup",
+  "Cardiac Wellness"
 ];
+
+const packagePreviewCards = homepagePreviewPackageNames
+  .map((name) => (healthPackagesData.packages || []).find((pkg) => pkg.name === name))
+  .filter(Boolean)
+  .map((pkg) => {
+    const variants = Array.isArray(pkg.variants) ? pkg.variants : [];
+    const minPrice = Math.min(
+      ...variants.map((v) => Number(v.price)).filter((v) => Number.isFinite(v))
+    );
+    const firstVariant = variants[0] || {};
+    const keyInclusions = Array.isArray(firstVariant.key_inclusions) && firstVariant.key_inclusions.length > 0
+      ? firstVariant.key_inclusions
+      : (firstVariant.tests || []).slice(0, 3);
+
+    return {
+      title: pkg.name,
+      desc: pkg.description || "",
+      params: getParameterRange(variants),
+      price: formatInrFrom(minPrice),
+      points: keyInclusions.slice(0, 3),
+      href: `/packages#${slugify(pkg.name)}`
+    };
+  });
 
 export default function HomePage() {
   const [reportCount, setReportCount] = useState(0);
@@ -165,18 +180,24 @@ export default function HomePage() {
               <SimpleGrid mt={4} columns={{ base: 1, sm: 3 }} spacing={3} maxW="760px">
                 <Box as={Link} href={"https://wa.me/" + siteConfig.internalNotifyNumber} target="_blank" className="soft-card no-hover-lift" p={3}>
                   <Text fontSize="xs" color="gray.500">Need help selecting tests?</Text>
-                  <Text fontSize="sm" color="teal.700" fontWeight="700">Chat with lab team</Text>
+                  <HStack spacing={1.5}>
+                    <FaWhatsapp />
+                    <Text fontSize="sm" color="teal.700" fontWeight="700">Chat with lab team</Text>
+                  </HStack>
                 </Box>
                 <Box as={Link} href={siteConfig.reportsUrl} target="_blank" className="soft-card no-hover-lift" p={3}>
                   <Text fontSize="xs" color="gray.500">Already tested with SDRC?</Text>
-                  <Text
-                    fontSize="sm"
-                    color="teal.700"
-                    fontWeight="700"
-                    title="Get our bot to send your reports. Chat using your registered mobile number."
-                  >
-                    Download Reports
-                  </Text>
+                  <HStack spacing={1.5}>
+                    <FaWhatsapp />
+                    <Text
+                      fontSize="sm"
+                      color="teal.700"
+                      fontWeight="700"
+                      title="Get our bot to send your reports. Chat using your registered mobile number."
+                    >
+                      Download Reports
+                    </Text>
+                  </HStack>
                 </Box>
                 <Box as={Link} href={siteConfig.quickBookingUrl} className="soft-card no-hover-lift home-visit-card-cta" p={3} position="relative">
                   <Text fontSize="xs" color="gray.500">Want to book a home visit?</Text>
@@ -283,6 +304,7 @@ export default function HomePage() {
               as={Link}
               href={"https://wa.me/" + siteConfig.whatsappNumber}
               variant="light"
+              leftIcon={<FaWhatsapp />}
               size="lg"
               lineHeight="1"
               alignItems="center"

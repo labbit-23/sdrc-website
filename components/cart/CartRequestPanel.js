@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Badge, Box, Button, Grid, HStack, IconButton, Input, Text, VStack } from "@chakra-ui/react";
-import { FiDownload, FiHome, FiMessageCircle, FiTrash2 } from "react-icons/fi";
+import { FiDownload, FiHome, FiTrash2 } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
 import { BsBuilding } from "react-icons/bs";
 import { siteConfig } from "@/data/siteConfig";
 import VisitDateTimeSelector from "@/components/booking/VisitDateTimeSelector";
@@ -420,7 +421,7 @@ export default function CartRequestPanel({
               variant="outline"
               title="Need help deciding tests?"
              
-              leftIcon={<FiMessageCircle />}
+              leftIcon={<FaWhatsapp />}
             >
               Chat on WhatsApp
             </Button>
@@ -432,7 +433,7 @@ export default function CartRequestPanel({
               variant="outline"
               title="Get our bot to send your reports. Chat using your registered mobile number."
              
-              leftIcon={<FiDownload />}
+              leftIcon={<FaWhatsapp />}
             >
               Download Reports
             </Button>

@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
+import { FaWhatsapp } from "react-icons/fa";
 import {
   Box,
   Button,
@@ -234,7 +235,7 @@ export default function ContactPage() {
                 <Text fontSize="sm" color="gray.700">
                   For package or test selection help, chat with our team on WhatsApp.
                 </Text>
-                <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} target="_blank" mt={3}>
+                <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} target="_blank" mt={3} leftIcon={<FaWhatsapp />}>
                   Chat on WhatsApp
                 </Button>
               </Box>
@@ -246,6 +247,7 @@ export default function ContactPage() {
                 <Button
                   as={Link}
                   href={siteConfig.reportsUrl}
+                  leftIcon={<FaWhatsapp />}
                   target="_blank"
                   variant="outline"
                   mt={3}

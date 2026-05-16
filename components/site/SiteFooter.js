@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Box, Container, Grid, HStack, Text, VStack } from "@chakra-ui/react";
+import { FaWhatsapp } from "react-icons/fa";
 import { siteConfig } from "@/data/siteConfig";
 
 export default function SiteFooter() {
@@ -67,7 +68,7 @@ export default function SiteFooter() {
             <HStack spacing={3} fontSize="xs" color="gray.300" flexWrap="wrap" justify={{ md: "flex-end" }}>
               <Link href={"tel:" + siteConfig.phoneTel}>Call: {siteConfig.phoneDisplay}</Link>
               <Text>•</Text>
-              <Link href={"https://wa.me/" + siteConfig.whatsappNumber}>WhatsApp</Link>
+              <Link href={"https://wa.me/" + siteConfig.whatsappNumber}><HStack spacing={1}><FaWhatsapp /><Text as="span" fontSize="xs">WhatsApp</Text></HStack></Link>
               <Text>•</Text>
               <Link href={siteConfig.social.linktree} target="_blank">All links</Link>
             </HStack>

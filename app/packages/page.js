@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
+import { FaWhatsapp } from "react-icons/fa";
 import { Box, Button, Container, Grid, Heading, HStack, Text } from "@chakra-ui/react";
 import PackagesExplorer from "@/components/site/PackagesExplorer";
 import { siteConfig } from "@/data/siteConfig";
@@ -28,7 +29,7 @@ export default function PackagesPage() {
               <HStack mt={5} spacing={3} flexWrap="wrap">
                 <Button as={Link} href={siteConfig.bookingUrl}>Book a package online</Button>
                 <Button as={Link} href="/tests" variant="outline">Book A Test</Button>
-                <Button as={Link} href={"https://wa.me/" + siteConfig.internalNotifyNumber} variant="outline" target="_blank">Talk to us on WhatsApp</Button>
+                <Button as={Link} href={"https://wa.me/" + siteConfig.internalNotifyNumber} variant="outline" target="_blank" leftIcon={<FaWhatsapp />}>Talk to us on WhatsApp</Button>
               </HStack>
               <HStack mt={4} spacing={2} flexWrap="wrap" display={{ base: "none", md: "flex" }}>
                 <Text px={3} py={1} borderRadius="full" bg="white" className="shadow-soft" fontSize="11px" color="teal.700">
