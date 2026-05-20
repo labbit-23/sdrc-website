@@ -33,6 +33,7 @@ body {
   color: var(--sdrc-ink);
   background: var(--sdrc-bg);
   font-family: "Inter", "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+  overflow-x: hidden;
 }
 
 a {

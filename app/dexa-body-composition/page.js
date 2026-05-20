@@ -17,11 +17,66 @@ const bigStats = [
 ];
 
 const reportPages = [
-  { n: "01", color: "#f26939", bg: "rgba(242,105,57,0.07)",   title: "Body Composition Summary",      q: "What is my body actually made of?",           tags: ["Body fat %", "Lean mass", "Bone mineral content", "BMI · FMI · LMI", "Resting metabolic rate"], why: "Baseline snapshot beyond scale weight." },
-  { n: "02", color: "#e11d48", bg: "rgba(225,29,72,0.06)",    title: "Fat Distribution Analysis",     q: "Where does my fat sit — and does it matter?", tags: ["Android vs gynoid fat", "A/G ratio", "Age-matched fat centile", "Fat Mass Index zones"],  why: "Central fat drives metabolic risk — location matters." },
-  { n: "03", color: "#008f82", bg: "rgba(0,143,130,0.07)",    title: "Regional Composition & Symmetry", q: "How balanced is my body left to right?",    tags: ["Arms · trunk · legs breakdown", "Appendicular Lean Mass", "ALMI vs muscle norms", "Left-right symmetry"], why: "Detects imbalance, tracks training over time." },
-  { n: "04", color: "#7c3aed", bg: "rgba(124,58,237,0.06)",   title: "Bone Health & Density",         q: "Am I at risk for osteoporosis?",              tags: ["Total body BMD", "T-score & Z-score", "Regional BMD by zone", "WHO classification"], why: "Identifies bone loss before fractures happen." },
-  { n: "05", color: "#0369a1", bg: "rgba(3,105,161,0.06)",    title: "Clinical Summary",               q: "What should I actually do with all of this?", tags: ["Plain-language summary", "Priority action items", "Daily calorie targets", "Re-scan guidance"], why: "Converts numbers into practical direction." },
+  {
+    n: "01", color: "#f26939", bg: "rgba(242,105,57,0.07)",
+    title: "Body Composition Summary",
+    q: "What is my body actually made of?",
+    tags: ["Body fat %", "Lean mass", "Bone mineral content", "BMI · FMI · LMI", "Resting metabolic rate"],
+    why: "Baseline snapshot beyond scale weight.",
+    highlights: [
+      { label: "Body Fat", value: "29.8%", sub: "Centile 80" },
+      { label: "Lean Mass", value: "48.3 kg", sub: "Total" },
+      { label: "Est. RMR", value: "1,413 kcal", sub: "At rest" },
+    ],
+  },
+  {
+    n: "02", color: "#e11d48", bg: "rgba(225,29,72,0.06)",
+    title: "Fat Distribution Analysis",
+    q: "Where does my fat sit — and does it matter?",
+    tags: ["Android vs gynoid fat", "A/G ratio", "Age-matched fat centile", "Fat Mass Index zones"],
+    why: "Central fat drives metabolic risk — location matters.",
+    highlights: [
+      { label: "Android Fat", value: "32.1%", sub: "High risk" },
+      { label: "Gynoid Fat", value: "27.4%", sub: "Reference" },
+      { label: "A/G Ratio", value: "1.17", sub: "Obese risk" },
+    ],
+  },
+  {
+    n: "03", color: "#008f82", bg: "rgba(0,143,130,0.07)",
+    title: "Regional Composition & Symmetry",
+    q: "How balanced is my body left to right?",
+    tags: ["Arms · trunk · legs breakdown", "Appendicular Lean Mass", "ALMI vs muscle norms", "Left-right symmetry"],
+    why: "Detects imbalance, tracks training over time.",
+    highlights: [
+      { label: "Trunk Lean", value: "27.2 kg", sub: "Largest region" },
+      { label: "ALMI", value: "8.12 kg/m²", sub: "Normal" },
+      { label: "L/R Arms", value: "49 / 51%", sub: "Symmetry" },
+    ],
+  },
+  {
+    n: "04", color: "#7c3aed", bg: "rgba(124,58,237,0.06)",
+    title: "Bone Health & Density",
+    q: "Am I at risk for osteoporosis?",
+    tags: ["Total body BMD", "T-score & Z-score", "Regional BMD by zone", "WHO classification"],
+    why: "Identifies bone loss before fractures happen.",
+    highlights: [
+      { label: "Total BMD", value: "1.178", sub: "g/cm²" },
+      { label: "T-Score", value: "−0.5", sub: "Normal" },
+      { label: "Z-Score", value: "+0.8", sub: "Age-matched" },
+    ],
+  },
+  {
+    n: "05", color: "#0369a1", bg: "rgba(3,105,161,0.06)",
+    title: "Clinical Summary",
+    q: "What should I actually do with all of this?",
+    tags: ["Plain-language summary", "Priority action items", "Daily calorie targets", "Re-scan guidance"],
+    why: "Converts numbers into practical direction.",
+    highlights: [
+      { label: "Priority", value: "↓ Android fat", sub: "Top action" },
+      { label: "Target", value: "~1,900 kcal", sub: "Daily intake" },
+      { label: "Re-scan", value: "6 months", sub: "Suggested" },
+    ],
+  },
 ];
 
 const comparisons = [
@@ -117,7 +172,7 @@ export default function DexaBodyCompositionPage() {
                 ))}
               </SimpleGrid>
               <HStack mt={8} spacing={3} flexWrap="wrap">
-                <Button as={Link} href="/tests" size="lg"
+                <Button as={Link} href="/tests?q=DEXA" size="lg"
                   style={{ background: "linear-gradient(135deg, #008f82, #00b3a4)", color: "white", borderRadius: 99, fontWeight: 700 }}>
                   Book DEXA Scan
                 </Button>
@@ -245,7 +300,7 @@ export default function DexaBodyCompositionPage() {
       </Box>
 
       {/* ════════════ GLP-1 / SEMAGLUTIDE SECTION ════════════ */}
-      <Box style={{ background: "#0f172a" }} py={{ base: 10, md: 16 }}>
+      <Box style={{ background: "#0f172a", position: "relative", overflow: "hidden" }} py={{ base: 10, md: 16 }}>
         {/* subtle orb */}
         <Box style={{ position: "absolute", top: "50%", left: "60%", transform: "translate(-50%,-50%)", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(242,105,57,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
         <Container maxW="1200px" position="relative" zIndex={1}>
@@ -332,84 +387,128 @@ export default function DexaBodyCompositionPage() {
         </Container>
       </Box>
 
-      {/* ════════════ BMD REGIMEN — SPINE & FEMUR ════════════ */}
+      {/* ════════════ TWO SCAN TYPES ════════════ */}
       <Box bg="white" py={{ base: 10, md: 14 }}>
         <Container maxW="1200px">
           <FadeIn>
-            <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={10} alignItems="start">
-              {/* image */}
-              <Box display={{ base: "none", lg: "block" }}>
-                <Box className="soft-card" p={3} style={{ borderTop: "3px solid #7c3aed", maxWidth: 340 }}>
-                  <Text style={{ fontSize: 11, fontWeight: 700, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
-                    Full skeletal BMD view
-                  </Text>
-                  <Box borderRadius="10px" overflow="hidden">
-                    <Image
-                      src="/assets/dexa/bone-scan.webp"
-                      alt="DEXA bone density full skeletal scan"
-                      width={919}
-                      height={2962}
-                      style={{ width: "100%", height: "auto" }}
-                    />
+            <span className="chip chip-purple" style={{ marginBottom: 16, display: "inline-flex" }}>BMD monitoring</span>
+            <Heading size={{ base: "lg", md: "xl" }} color="gray.900" fontWeight="800" lineHeight="1.2" mt={2}>
+              Two scan types.
+              <Box as="span" color="purple.700"> Different clinical goals.</Box>
+            </Heading>
+            <Text mt={3} color="gray.500" fontSize="sm" lineHeight="1.8" maxW="640px">
+              Total Body DEXA and dedicated Spine + Hip DEXA are separate scans with different purposes.
+              Knowing which one you need — or whether you need both — is important before you book.
+            </Text>
+
+            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6} mt={8}>
+              {/* Card 1: Total Body */}
+              <Box style={{ background: "#e6f6f4", border: "1px solid rgba(0,143,130,0.2)", borderRadius: 18, padding: "24px", borderTop: "4px solid #008f82" }}>
+                <HStack spacing={3} mb={4}>
+                  <Box style={{ width: 40, height: 40, borderRadius: "50%", background: "#008f82", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Text style={{ color: "white", fontSize: 18 }}>⚖️</Text>
                   </Box>
+                  <Box>
+                    <Text style={{ fontSize: 11, color: "#008f82", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>Scan type 1</Text>
+                    <Text style={{ fontSize: 15, fontWeight: 800, color: "#0f172a" }}>Total Body DEXA</Text>
+                  </Box>
+                </HStack>
+                <Text style={{ fontSize: 13, color: "#475569", lineHeight: 1.7, marginBottom: 12 }}>
+                  <strong>Primary purpose: body composition.</strong> Measures fat %, lean mass and regional breakdown across the whole body. Also includes a total body BMD overview on page 4 of the report — but this is not the clinical gold standard for osteoporosis diagnosis.
+                </Text>
+                <VStack align="stretch" spacing={1.5}>
+                  {[
+                    "Body fat % and lean mass (total and by region)",
+                    "Android / gynoid fat split and A/G ratio",
+                    "Resting metabolic rate estimate",
+                    "Total body BMD overview — page 4 (not site-specific)",
+                    "Left-right symmetry comparison",
+                  ].map(item => (
+                    <HStack key={item} spacing={2} align="start">
+                      <Box style={{ width: 5, height: 5, borderRadius: "50%", background: "#008f82", marginTop: 6, flexShrink: 0 }} />
+                      <Text style={{ fontSize: 12, color: "#334155" }}>{item}</Text>
+                    </HStack>
+                  ))}
+                </VStack>
+                <Box mt={4} style={{ background: "rgba(0,143,130,0.08)", borderRadius: 10, padding: "10px 14px" }}>
+                  <Text style={{ fontSize: 11, fontWeight: 700, color: "#008f82" }}>Best for</Text>
+                  <Text style={{ fontSize: 12, color: "#475569", marginTop: 2 }}>
+                    Weight management, body recomposition, GLP-1 monitoring, sports performance, metabolic conditions, annual health baseline.
+                  </Text>
                 </Box>
               </Box>
 
-              {/* right: regimen */}
-              <Box>
-                <span className="chip chip-purple" style={{ marginBottom: 16, display: "inline-flex" }}>
-                  BMD monitoring regimen
-                </span>
-                <Heading size={{ base: "lg", md: "xl" }} color="gray.900" fontWeight="800" lineHeight="1.2" mt={2}>
-                  Spine, hip and full body —
-                  <Box as="span" color="purple.700"> one scan covers all</Box>
-                </Heading>
-                <Text mt={3} color="gray.500" fontSize="sm" lineHeight="1.8">
-                  The clinical gold standard for osteoporosis assessment is dedicated BMD of the lumbar spine
-                  (L1–L4) and femoral neck. Our full-body DEXA captures total body BMD across all regions —
-                  spine, pelvis, ribs, arms and legs — in a single 15-minute scan.
+              {/* Card 2: Spine + Hip */}
+              <Box style={{ background: "#f3f0ff", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 18, padding: "24px", borderTop: "4px solid #7c3aed" }}>
+                <HStack spacing={3} mb={4}>
+                  <Box style={{ width: 40, height: 40, borderRadius: "50%", background: "#7c3aed", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Text style={{ color: "white", fontSize: 18 }}>🦴</Text>
+                  </Box>
+                  <Box>
+                    <Text style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>Scan type 2</Text>
+                    <Text style={{ fontSize: 15, fontWeight: 800, color: "#0f172a" }}>Dedicated Spine + Hip DEXA</Text>
+                  </Box>
+                </HStack>
+                <Text style={{ fontSize: 13, color: "#475569", lineHeight: 1.7, marginBottom: 12 }}>
+                  <strong>Primary purpose: bone density.</strong> Targeted BMD measurement of the lumbar spine (L1–L4) and femoral neck — the two sites required for WHO osteoporosis classification. Also provides some body composition estimates, but that is not its primary use.
                 </Text>
-
-                <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4} mt={5}>
+                <VStack align="stretch" spacing={1.5}>
                   {[
-                    { zone: "Lumbar Spine (L1–L4)", why: "Most sensitive site for early BMD loss. The WHO osteoporosis criteria are anchored here.", color: "#7c3aed", bg: "#f3f0ff" },
-                    { zone: "Femoral Neck / Hip",   why: "Primary fracture risk site. Hip fracture in the elderly is the fracture that matters most clinically.", color: "#e11d48", bg: "#fff0f3" },
-                    { zone: "Total Body BMD",       why: "Overall trend indicator. Useful for monitoring response to treatment or lifestyle intervention over time.", color: "#008f82", bg: "#e6f6f4" },
-                    { zone: "Regional BMD",         why: "Arms, trunk, ribs, legs — useful for asymmetric conditions, radiation history, or monitoring post-fracture.", color: "#0369a1", bg: "#eff6ff" },
-                  ].map(z => (
-                    <Box key={z.zone} style={{ background: z.bg, border: `1px solid ${z.color}20`, borderRadius: 14, padding: "16px", borderLeft: `3px solid ${z.color}` }}>
-                      <Text style={{ fontSize: 13, fontWeight: 700, color: z.color, marginBottom: 4 }}>{z.zone}</Text>
-                      <Text style={{ fontSize: 12, color: "#64748b", lineHeight: 1.6 }}>{z.why}</Text>
-                    </Box>
+                    "L1–L4 lumbar spine BMD (T-score, Z-score)",
+                    "Femoral neck and total hip BMD",
+                    "WHO classification: normal / osteopenia / osteoporosis",
+                    "Fracture risk context",
+                    "Monitoring response to treatment or supplementation",
+                  ].map(item => (
+                    <HStack key={item} spacing={2} align="start">
+                      <Box style={{ width: 5, height: 5, borderRadius: "50%", background: "#7c3aed", marginTop: 6, flexShrink: 0 }} />
+                      <Text style={{ fontSize: 12, color: "#334155" }}>{item}</Text>
+                    </HStack>
                   ))}
-                </SimpleGrid>
-
-                {/* recommended schedule */}
-                <Box mt={5} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 14, padding: "18px" }}>
-                  <Text style={{ fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                    Recommended BMD scan schedule
-                  </Text>
-                  <VStack align="stretch" spacing={2}>
-                    {[
-                      { who: "GLP-1 / semaglutide users",    freq: "Baseline, then every 6 months" },
-                      { who: "Post-menopausal women",         freq: "Annually or every 2 years" },
-                      { who: "Men over 50",                   freq: "Every 2–3 years, annually if at risk" },
-                      { who: "Long-term corticosteroid use",  freq: "Baseline, then every 12 months" },
-                      { who: "Athletes / body recomposition", freq: "Annually for bone trend tracking" },
-                      { who: "Osteopenia (T-score −1 to −2.5)", freq: "Every 12–18 months" },
-                    ].map(row => (
-                      <HStack key={row.who} justify="space-between" align="start" gap={3} pb={2} style={{ borderBottom: "1px solid #f0f2f5" }}>
-                        <Text style={{ fontSize: 12, color: "#64748b" }}>{row.who}</Text>
-                        <Text style={{ fontSize: 12, fontWeight: 700, color: "#008f82", textAlign: "right", flexShrink: 0 }}>{row.freq}</Text>
-                      </HStack>
-                    ))}
-                  </VStack>
-                  <Text style={{ fontSize: 11, color: "#94a3b8", marginTop: 8 }}>
-                    Schedule guidance only. Follow your clinician&apos;s specific recommendation.
+                </VStack>
+                <Box mt={4} style={{ background: "rgba(124,58,237,0.07)", borderRadius: 10, padding: "10px 14px" }}>
+                  <Text style={{ fontSize: 11, fontWeight: 700, color: "#7c3aed" }}>Best for</Text>
+                  <Text style={{ fontSize: 12, color: "#475569", marginTop: 2 }}>
+                    Post-menopausal women, men 50+, long-term corticosteroid use, GLP-1 users (bone monitoring), osteopenia follow-up.
                   </Text>
                 </Box>
               </Box>
             </Grid>
+
+            <Box mt={5} style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 14, padding: "16px 20px" }}>
+              <HStack spacing={2} align="start">
+                <Text style={{ fontSize: "1.1rem", flexShrink: 0 }}>💡</Text>
+                <Text style={{ fontSize: 13, color: "#92400e", lineHeight: 1.7 }}>
+                  <strong>Many clinicians recommend both.</strong> The Total Body scan tracks composition over time; the Spine + Hip scan provides the clinically validated BMD numbers for osteoporosis assessment.
+                  If you&apos;re on a GLP-1 or managing bone health, ask about doing both scans in the same visit.
+                </Text>
+              </HStack>
+            </Box>
+
+            {/* recommended schedule */}
+            <Box mt={8} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 14, padding: "18px" }}>
+              <Text style={{ fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Recommended scan schedule by profile
+              </Text>
+              <VStack align="stretch" spacing={2}>
+                {[
+                  { who: "GLP-1 / semaglutide users",       freq: "Total Body: every 6 months · Spine+Hip: annually" },
+                  { who: "Post-menopausal women",            freq: "Spine+Hip: annually or every 2 years" },
+                  { who: "Men over 50",                      freq: "Spine+Hip: every 2–3 years, annually if at risk" },
+                  { who: "Long-term corticosteroid use",     freq: "Spine+Hip: baseline then every 12 months" },
+                  { who: "Athletes / body recomposition",    freq: "Total Body: annually for composition trend" },
+                  { who: "Osteopenia (T-score −1 to −2.5)", freq: "Spine+Hip: every 12–18 months" },
+                ].map(row => (
+                  <HStack key={row.who} justify="space-between" align="start" gap={3} pb={2} style={{ borderBottom: "1px solid #f0f2f5" }}>
+                    <Text style={{ fontSize: 12, color: "#64748b" }}>{row.who}</Text>
+                    <Text style={{ fontSize: 12, fontWeight: 700, color: "#008f82", textAlign: "right", flexShrink: 0 }}>{row.freq}</Text>
+                  </HStack>
+                ))}
+              </VStack>
+              <Text style={{ fontSize: 11, color: "#94a3b8", marginTop: 8 }}>
+                Schedule guidance only. Follow your clinician&apos;s specific recommendation.
+              </Text>
+            </Box>
           </FadeIn>
         </Container>
       </Box>
@@ -465,30 +564,50 @@ export default function DexaBodyCompositionPage() {
             </Box>
           </FadeIn>
 
-          <VStack spacing={3} align="stretch">
+          <VStack spacing={4} align="stretch">
             {reportPages.map((page, i) => (
               <FadeIn key={page.n} delay={i * 55}>
                 <Box
                   _hover={{ boxShadow: "0 8px 32px rgba(15,23,42,0.09)", transform: "translateY(-1px)" }}
-                  style={{ border: "1px solid #f0f2f5", borderRadius: 16, overflow: "hidden", transition: "box-shadow 200ms ease, transform 200ms ease" }}>
-                  <Grid templateColumns={{ base: "1fr", md: "68px 1fr auto" }}>
-                    <Box style={{ background: page.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-                      <Text style={{ fontSize: "clamp(1.4rem,3vw,2rem)", fontWeight: 900, color: page.color, letterSpacing: "-0.03em" }}>{page.n}</Text>
+                  style={{ border: `1px solid ${page.color}22`, borderRadius: 18, overflow: "hidden", transition: "box-shadow 200ms ease, transform 200ms ease", borderLeft: `4px solid ${page.color}` }}>
+
+                  {/* header row */}
+                  <Box style={{ background: page.bg, padding: "14px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+                    <Box style={{ width: 38, height: 38, borderRadius: "50%", background: page.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <Text style={{ fontSize: 14, fontWeight: 900, color: "white", letterSpacing: "-0.02em" }}>{page.n}</Text>
                     </Box>
-                    <Box px={{ base: 4, md: 6 }} py={5}>
-                      <Text style={{ fontSize: 11, color: "#94a3b8", fontStyle: "italic", marginBottom: 4 }}>{page.q}</Text>
-                      <Text fontWeight="800" color="gray.900" fontSize="md" mb={3}>{page.title}</Text>
-                      <HStack spacing={2} flexWrap="wrap">
-                        {page.tags.map(tag => (
-                          <Box key={tag} style={{ display: "inline-flex", padding: "3px 10px", borderRadius: 99, fontSize: 12, background: page.bg, color: page.color, fontWeight: 500 }}>{tag}</Box>
-                        ))}
-                      </HStack>
+                    <Box>
+                      <Text style={{ fontSize: 10, color: page.color, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>Page {page.n}</Text>
+                      <Text style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", lineHeight: 1.2 }}>{page.title}</Text>
                     </Box>
-                    <Box px={{ base: 4, md: 5 }} py={5} display="flex" alignItems="center"
-                      style={{ borderLeft: "1px solid #f0f2f5", background: page.bg, minWidth: "clamp(150px,18%,210px)" }}>
-                      <Text style={{ fontSize: 12, color: page.color, fontWeight: 700, lineHeight: 1.5 }}>{page.why}</Text>
-                    </Box>
-                  </Grid>
+                  </Box>
+
+                  <Box px={5} py={4}>
+                    <Text style={{ fontSize: 12, color: "#94a3b8", fontStyle: "italic", marginBottom: 14 }}>{page.q}</Text>
+
+                    {/* sample highlights from the report */}
+                    <SimpleGrid columns={3} spacing={3} mb={4}>
+                      {page.highlights.map(h => (
+                        <Box key={h.label} style={{ background: page.bg, borderRadius: 10, padding: "10px 12px", textAlign: "center" }}>
+                          <Text style={{ fontSize: 10, color: "#94a3b8", marginBottom: 2 }}>{h.label}</Text>
+                          <Text style={{ fontSize: 15, fontWeight: 900, color: page.color, lineHeight: 1.1 }}>{h.value}</Text>
+                          <Text style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>{h.sub}</Text>
+                        </Box>
+                      ))}
+                    </SimpleGrid>
+
+                    {/* tags */}
+                    <HStack spacing={1.5} flexWrap="wrap" mb={3}>
+                      {page.tags.map(tag => (
+                        <Box key={tag} style={{ display: "inline-flex", padding: "3px 9px", borderRadius: 99, fontSize: 11, background: page.bg, color: page.color, fontWeight: 600, border: `1px solid ${page.color}30` }}>{tag}</Box>
+                      ))}
+                    </HStack>
+
+                    {/* why */}
+                    <Text style={{ fontSize: 12, color: page.color, fontWeight: 700, borderTop: `1px solid ${page.color}15`, paddingTop: 10 }}>
+                      → {page.why}
+                    </Text>
+                  </Box>
                 </Box>
               </FadeIn>
             ))}
@@ -618,7 +737,7 @@ export default function DexaBodyCompositionPage() {
               Book a DEXA scan online or send your prescription on WhatsApp. Reports typically ready the same day.
             </Text>
             <HStack mt={8} spacing={4} justify="center" flexWrap="wrap">
-              <Button as={Link} href="/tests" size="lg"
+              <Button as={Link} href="/tests?q=DEXA" size="lg"
                 style={{ background: "linear-gradient(135deg, #008f82, #00b3a4)", color: "white", borderRadius: 99, fontWeight: 700, padding: "0 32px" }}>
                 Book DEXA Scan
               </Button>

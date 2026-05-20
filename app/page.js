@@ -228,7 +228,7 @@ export default function HomePage() {
               </SimpleGrid>
             </Box>
 
-            <Box position="relative" className="hero-visual-reveal" style={{ animationDelay: "220ms" }}>
+            <Box position="relative" overflow="hidden" className="hero-visual-reveal" style={{ animationDelay: "220ms" }}>
               <Box className="float-slow" position="absolute" top="-24px" right="-24px" w="260px" h="260px" bg="teal.200" borderRadius="full" filter="blur(46px)" opacity={0.35} />
               <Box className="float-slow" position="absolute" bottom="-24px" left="-20px" w="280px" h="280px" bg="orange.200" borderRadius="full" filter="blur(52px)" opacity={0.35} style={{ animationDelay: "1.2s" }} />
               <Box className="soft-card" p={3} position="relative" zIndex={2}>

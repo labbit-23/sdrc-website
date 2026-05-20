@@ -262,6 +262,12 @@ export default function TestsPage() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    if (q) setQuery(q);
+  }, []);
+
+  useEffect(() => {
     saveCartItems(cartItems);
   }, [cartItems]);
 
