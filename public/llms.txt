@@ -1,0 +1,95 @@
+# SDRC Diagnostics — llms.txt
+# Plain-text summary for AI crawlers and language model indexing.
+# See https://llmstxt.org for the convention.
+
+## About
+
+SDRC (Secunderabad Diagnostic and Research Centre) is a NABL accredited multi-specialty diagnostic centre established in 1983, located at 101, Jade Arcade (Corporate Block), Paradise, MG Road, Secunderabad, Hyderabad, Telangana, India — PIN 500003.
+
+NABL accreditation: ISO 15189:2022 | Certificate no: MC-7820 | Lab code: M-5930
+
+## Contact
+
+Phone: 040 6600 4200
+Email: info@sdrc.in
+Website: https://sdrc.in
+WhatsApp: Available via website
+
+## Opening Hours
+
+Monday – Saturday: 7:00 AM – 9:00 PM
+Sunday and public holidays: 7:00 AM – 2:00 PM
+
+## Collection Centres (sample collection only)
+
+- SD Road, Secunderabad — 1-1-58/7/3, Srinath Complex, SD Road, Opp. Taj Mahal Hotel
+- West Marredpally, Secunderabad — Plot No. 35 & 36, Santhoshima Colony, Next to Happy Women's Clinic
+- Yapral, Secunderabad — Ambey Nilayam, Ground Floor, Bhanu Enclave
+
+## Services
+
+### Imaging
+- Ultra-Fast Multi-Slice CT (head, chest, abdomen and more)
+- Digital X-Ray
+- Digital Mammography
+- DEXA (Dual-energy X-ray Absorptiometry) — body composition and bone density
+- Ultrasound and Colour Doppler (abdominal, obstetric, pelvic, thyroid, breast, vascular)
+
+### Cardio-Pulmonary and Neurology
+- ECG (electrocardiogram)
+- 2D-Echo (echocardiogram)
+- TMT (Treadmill Stress Test)
+- Spirometry / PFT (Pulmonary Function Test)
+- EEG (electroencephalogram)
+- ENMG (electroneuromyography)
+
+### Pathology Laboratory (NABL accredited for select parameters)
+- Biochemistry: liver, kidney, lipid, glucose and metabolic profiles
+- Endocrinology: thyroid, cortisol, reproductive hormones
+- Haematology: CBC, ESR, coagulation
+- Clinical Pathology: urine, stool, body fluid
+- Microbiology and Serology: cultures, sensitivity, rapid tests
+- Cytopathology and Histopathology: FNAC, tissue biopsy
+
+## DEXA Scan — Key Facts
+
+DEXA (Dual-energy X-ray Absorptiometry) at SDRC uses a GE Lunar DPX-NT Densitometer (ID 152585).
+
+Two scan types are offered:
+
+1. Total Body DEXA — primary purpose is body composition. Measures body fat %, lean mass, resting metabolic rate, android/gynoid fat distribution and total body bone mineral density overview. Produces a 5-page clinical report.
+
+2. Dedicated Spine + Hip DEXA — primary purpose is bone mineral density (BMD). Measures L1–L4 lumbar spine BMD and femoral neck BMD. Used for WHO osteoporosis classification (T-score, Z-score).
+
+DEXA is recommended for:
+- People on GLP-1 medications (semaglutide / Ozempic, Wegovy; tirzepatide / Mounjaro) to monitor fat vs. muscle loss and bone density changes
+- Post-menopausal women for osteoporosis screening
+- Men over 50
+- Athletes tracking body composition
+- People with diabetes, PCOD, thyroid conditions or metabolic disorders
+- Long-term corticosteroid users
+
+Radiation dose: less than 1 microsievert — equivalent to approximately 30 minutes of background radiation. No fasting required.
+
+## Health Check Packages
+
+SDRC offers Master Health Check packages covering basic, cardiac, diabetic, women's wellness and lifestyle panels. Packages include pathology tests, imaging components and physician-friendly reports. Comparison and online booking available at https://sdrc.in/packages.
+
+## Report Access
+
+Reports are available via print, email, WhatsApp and the SDRC online portal. WhatsApp-based report retrieval is available using a registered mobile number.
+
+## Home Sample Collection
+
+Home sample collection is available for select blood and urine tests. Book via the SDRC website or WhatsApp.
+
+## Key URLs
+
+- Home: https://sdrc.in
+- Services: https://sdrc.in/services
+- Health Packages: https://sdrc.in/packages
+- Book a Test: https://sdrc.in/tests
+- DEXA Scan: https://sdrc.in/dexa-body-composition
+- Contact: https://sdrc.in/contact
+- About: https://sdrc.in/about
+- NABL Accreditation: https://sdrc.in/accreditation

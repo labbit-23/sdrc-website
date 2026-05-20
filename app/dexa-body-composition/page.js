@@ -95,6 +95,89 @@ const forWho = [
   { icon: "💊", label: "Long-term medication",   desc: "Corticosteroids, hormone therapy, and bone-affecting drugs." },
 ];
 
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "MedicalTest",
+    name: "DEXA Body Composition Scan",
+    alternateName: ["Dual-energy X-ray Absorptiometry", "DXA scan", "Body composition scan", "Bone density scan"],
+    description: "DEXA (Dual-energy X-ray Absorptiometry) simultaneously measures body fat percentage, lean muscle mass and bone mineral density by region. The GE Lunar DPX-NT scanner at SDRC Diagnostics delivers a 5-page clinical report in 15–20 minutes.",
+    usedToDiagnose: [
+      { "@type": "MedicalCondition", name: "Osteoporosis" },
+      { "@type": "MedicalCondition", name: "Osteopenia" },
+      { "@type": "MedicalCondition", name: "Sarcopenia" },
+      { "@type": "MedicalCondition", name: "Obesity" }
+    ],
+    relevantSpecialty: ["Endocrinology", "Orthopedics", "Internal Medicine", "Sports Medicine"],
+    availableAt: {
+      "@type": "MedicalClinic",
+      name: "SDRC Diagnostics",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "101, Jade Arcade (Corporate Block), Paradise, MG Road",
+        addressLocality: "Secunderabad",
+        addressRegion: "Telangana",
+        postalCode: "500003",
+        addressCountry: "IN"
+      }
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "What does a DEXA body composition scan measure?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "A DEXA scan simultaneously measures body fat percentage, lean muscle mass and bone mineral density — separated by region (arms, trunk, legs). It also provides the android/gynoid fat ratio, appendicular lean mass index (ALMI), resting metabolic rate estimate and T-score/Z-score for bone health. Results come in a 5-page clinical report."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "How long does a DEXA scan take at SDRC?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "The scan itself takes 15–20 minutes. No fasting is required. You should avoid calcium supplements for 24 hours before the scan. Results are typically available the same day."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "Is DEXA safe? How much radiation does it involve?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "DEXA uses an extremely low dose of radiation — less than 1 microsievert (μSv), which is equivalent to approximately 30 minutes of normal background radiation or a short domestic flight. It is considered safe for routine use."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "Is DEXA recommended for people on Ozempic, Wegovy or Mounjaro (GLP-1 medications)?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Yes. GLP-1 receptor agonists like semaglutide (Ozempic, Wegovy) and tirzepatide (Mounjaro) can cause significant lean muscle and bone density loss alongside fat loss. DEXA is the only tool that precisely tracks these three components simultaneously. A baseline scan before starting and follow-up scans every 3–6 months is recommended."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "What is the difference between Total Body DEXA and Spine + Hip DEXA?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Total Body DEXA is primarily used for body composition — measuring fat %, lean mass and overall bone mineral content. Spine + Hip DEXA is a separate scan focused on bone mineral density at the lumbar spine (L1–L4) and femoral neck — the two sites used by WHO for osteoporosis diagnosis. Both can be performed at SDRC Diagnostics, Secunderabad."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "Where can I get a DEXA scan in Hyderabad or Secunderabad?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "SDRC Diagnostics at 101, Jade Arcade (Corporate Block), Paradise, MG Road, Secunderabad, Telangana offers DEXA body composition scans using a GE Lunar DPX-NT Densitometer. Contact: 040 6600 4200. You can book online at sdrc.in or via WhatsApp."
+        }
+      }
+    ]
+  }
+];
+
 const ranges = [
   {
     title: "Body Fat % — Men (ACE)",
@@ -137,6 +220,9 @@ const glp1Timeline = [
 export default function DexaBodyCompositionPage() {
   return (
     <Box style={{ background: "#f8fafc" }}>
+      {structuredData.map((schema, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      ))}
 
       {/* ════════════ HERO ════════════ */}
       <Box className="dark-hero" py={{ base: 14, md: 20 }}>

@@ -153,6 +153,9 @@ export default function HomePage() {
                 Ultrasound and Doppler, CT, Digital X-Ray, Mammography, DEXA, ECG/2D-Echo,
                 EEG/ENMG, TMT, Spirometry and a full-service pathology lab with preventive health packages.
               </Text>
+              <Text mt={2} fontSize="sm" color="gray.500" maxW="2xl" display={{ base: "none", md: "block" }}>
+                SDRC (Secunderabad Diagnostic and Research Centre) is a NABL accredited multi-specialty diagnostic centre established in 1983, serving Secunderabad, Hyderabad and Telangana from Jade Arcade, Paradise.
+              </Text>
 
               <HStack mt={5} spacing={2} flexWrap="wrap" display={{ base: "none", md: "flex" }}>
                 {facilityChips.map((chip) => (

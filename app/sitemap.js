@@ -3,6 +3,7 @@ const routes = [
   { path: "/services", priority: 0.9, changeFrequency: "weekly" },
   { path: "/packages", priority: 0.9, changeFrequency: "weekly" },
   { path: "/tests", priority: 0.9, changeFrequency: "daily" },
+  { path: "/dexa-body-composition", priority: 0.85, changeFrequency: "monthly" },
   { path: "/home-visit", priority: 0.85, changeFrequency: "daily" },
   { path: "/about", priority: 0.7, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.8, changeFrequency: "monthly" },

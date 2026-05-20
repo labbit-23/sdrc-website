@@ -14,28 +14,28 @@ const sections = [
   {
     id: "imaging",
     title: "Imaging",
-    subtitle: "Multi-modality imaging with clear prep guidance and quick reporting.",
+    subtitle: "Multi-modality imaging with clear prep guidance and quick reporting — available at Jade Arcade, Paradise, Secunderabad.",
     items: [
       {
         title: "Ultra-Fast Multi-Slice CT",
-        desc: "Cross-sectional imaging for head, chest, abdomen and more with low-dose protocols."
+        desc: "CT scan in Secunderabad and Hyderabad — cross-sectional imaging for head, chest, abdomen and more with low-dose protocols."
       },
       {
         title: "Digital X-Ray",
-        desc: "High-resolution radiographs with faster image availability and lower repeat rates."
+        desc: "Digital X-ray in Secunderabad — high-resolution radiographs with faster image availability and lower repeat rates."
       },
       {
         title: "Digital Mammography",
-        desc: "Focused breast imaging, useful for screening and diagnostic evaluation."
+        desc: "Mammography in Secunderabad — focused breast imaging for screening and diagnostic evaluation."
       },
       {
         title: "DEXA (Bone Mineral Densitometry)",
-        desc: "Evaluation of bone mineral density to help assess osteoporosis risk.",
+        desc: "DEXA scan in Hyderabad and Secunderabad — body composition and bone mineral density assessment using GE Lunar DPX-NT. Includes fat %, lean mass and T-score.",
         sample_report_url: "/dexa-body-composition"
       },
       {
         title: "Ultrasound & Colour Doppler",
-        desc: "Abdominal, obstetric, pelvic, thyroid, breast and vascular Doppler studies.",
+        desc: "Ultrasound scan in Secunderabad — abdominal, obstetric, pelvic, thyroid, breast and vascular Doppler studies.",
         notes: ["Fasting 6-8 hrs for upper abdomen scans", "Full bladder for pelvic ultrasound"]
       }
     ]
@@ -43,62 +43,62 @@ const sections = [
   {
     id: "cardio-neuro",
     title: "Cardio-Pulmonary & Neurology",
-    subtitle: "Non-invasive tests for heart, lungs and nervous system.",
+    subtitle: "Non-invasive cardiac, pulmonary and neurological tests in Secunderabad, Hyderabad.",
     items: [
       {
         title: "ECG",
-        desc: "Quick assessment of heart rhythm and basic electrical activity."
+        desc: "ECG test in Secunderabad — quick assessment of heart rhythm and basic electrical activity."
       },
       {
         title: "2D-Echo",
-        desc: "Ultrasound-based evaluation of cardiac structure and function."
+        desc: "2D echocardiogram in Secunderabad and Hyderabad — ultrasound-based evaluation of cardiac structure and function."
       },
       {
         title: "EEG",
-        desc: "Recording of brain electrical activity; commonly used in seizure workup."
+        desc: "EEG test in Secunderabad — recording of brain electrical activity; commonly used in seizure workup."
       },
       {
         title: "ENMG",
-        desc: "Nerve and muscle function studies to evaluate neuropathy and related conditions."
+        desc: "ENMG test in Secunderabad — nerve and muscle function studies to evaluate neuropathy and related conditions."
       },
       {
         title: "TMT (Stress Test)",
-        desc: "Exercise-based evaluation of cardiac performance under monitored load."
+        desc: "TMT stress test in Secunderabad and Hyderabad — exercise-based evaluation of cardiac performance under monitored load."
       },
       {
         title: "Spirometry (PFT)",
-        desc: "Lung function testing for obstructive/restrictive airway assessment."
+        desc: "Spirometry and pulmonary function test in Secunderabad — lung function testing for obstructive and restrictive airway assessment."
       }
     ]
   },
   {
     id: "pathology",
     title: "Pathology Laboratory",
-    subtitle: "Comprehensive laboratory with internal quality checks and participation in external quality programs.",
+    subtitle: "NABL accredited pathology laboratory in Secunderabad, Hyderabad — internal quality checks and external quality assurance participation.",
     items: [
       {
         title: "Biochemistry",
-        desc: "Liver, kidney, lipid, glucose and metabolic profiles."
+        desc: "Liver function test, kidney function test, lipid profile, glucose and metabolic panels — Secunderabad."
       },
       {
         title: "Endocrinology",
-        desc: "Thyroid profile, cortisol, reproductive and other hormones."
+        desc: "Thyroid profile (TSH, T3, T4), cortisol, reproductive and other hormones — NABL accredited lab, Secunderabad."
       },
       {
         title: "Haematology",
-        desc: "CBC, ESR, coagulation studies and related tests."
+        desc: "CBC (complete blood count), ESR, coagulation studies and related tests — Hyderabad and Secunderabad."
       },
       {
         title: "Clinical Pathology",
-        desc: "Urine, stool and body fluid examinations."
+        desc: "Urine routine, stool examination and body fluid analysis — SDRC Diagnostics, Secunderabad."
       },
       {
         title: "Microbiology & Serology",
-        desc: "Cultures, sensitivity testing and rapid serological tests."
+        desc: "Culture and sensitivity testing, rapid serological tests — NABL accredited laboratory, Secunderabad."
       },
       {
         title: "Cytopathology & Histopathology",
-        desc: "FNAC and tissue biopsies, reported by specialists."
+        desc: "FNAC and tissue biopsies reported by specialist pathologists — SDRC Diagnostics, Hyderabad."
       }
     ]
   }
