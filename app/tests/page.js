@@ -14,7 +14,7 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
-import { FiFilter, FiHome, FiShoppingCart } from "react-icons/fi";
+import { FiFilter, FiHome, FiSearch, FiShoppingCart, FiX } from "react-icons/fi";
 import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
 import healthPackagesData from "@/data/health-packages.json";
 import CartRequestPanel from "@/components/cart/CartRequestPanel";
@@ -264,7 +264,14 @@ export default function TestsPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const q = params.get("q");
-    if (q) setQuery(q);
+    if (q) {
+      setQuery(q);
+      setDebouncedQuery(q);
+      setPage(1);
+      setMostPopularOnly(false);
+      setActiveCategory("All");
+      setMostCommonOnly(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -504,6 +511,8 @@ export default function TestsPage() {
                   bg="white"
                   placeholder="Search tests or packages (TSH, HbA1c, Lipid...)"
                   value={query}
+                  inputMode="search"
+                  enterKeyHint="search"
                   onChange={(e) => {
                     const value = e.target.value;
                     setPage(1);
@@ -515,9 +524,32 @@ export default function TestsPage() {
                       setHomeCollectionFilter(false);
                     }
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      setDebouncedQuery(query.trim());
+                    }
+                  }}
                 />
-                <Button size="sm" variant="outline" onClick={clearSearchAndFilters}>
-                  Clear
+                {/* Desktop: X to clear when text present, search icon when empty */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  display={{ base: "none", md: "flex" }}
+                  onClick={query ? clearSearchAndFilters : () => setDebouncedQuery(query.trim())}
+                  aria-label={query ? "Clear search" : "Search"}
+                >
+                  {query ? <FiX /> : <FiSearch />}
+                </Button>
+                {/* Mobile: search icon only — Enter on keyboard does same */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  display={{ base: "flex", md: "none" }}
+                  onClick={() => setDebouncedQuery(query.trim())}
+                  aria-label="Search"
+                >
+                  <FiSearch />
                 </Button>
               </HStack>
               <HStack mt={3} spacing={3} flexWrap="wrap">
