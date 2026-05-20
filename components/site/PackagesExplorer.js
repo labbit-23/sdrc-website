@@ -19,6 +19,7 @@ import {
 } from "@chakra-ui/react";
 import { FiDownload, FiHome, FiShare2, FiX } from "react-icons/fi";
 import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
+import { FaWhatsapp } from "react-icons/fa";
 import packagesData from "@/data/health-packages.json";
 import { siteConfig } from "@/data/siteConfig";
 import { readCartItems, saveCartItems } from "@/lib/cart";
@@ -653,26 +654,45 @@ export default function PackagesExplorer() {
                         </Button>
                       </HStack>
 
-                    <Button
-                      as={Link}
-                      href={buildPackageEnquiryUrl(pkg.name, variant.name, variant.price)}
-                      mt={3}
-                      size="sm"
-                      width="full"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      textAlign="center"
-                      style={{ background: "linear-gradient(135deg, #008f82, #00a896)", color: "white", fontWeight: 700 }}
-                      onClick={() =>
-                        trackEvent(
-                          "package_enquire_click",
-                          { package_name: pkg.name, variant_name: variant.name, price: variant.price },
-                          { pagePath: "/packages" }
-                        )
-                      }
-                    >
-                      Enquire / Book
-                    </Button>
+                    <HStack mt={3} spacing={2}>
+                      <Button
+                        as={Link}
+                        href={`/tests?q=${encodeURIComponent(variant.name)}`}
+                        size="sm"
+                        flex="1"
+                        style={{ background: "linear-gradient(135deg, #008f82, #00a896)", color: "white", fontWeight: 700 }}
+                        onClick={() =>
+                          trackEvent(
+                            "package_book_click",
+                            { package_name: pkg.name, variant_name: variant.name, price: variant.price },
+                            { pagePath: "/packages" }
+                          )
+                        }
+                      >
+                        Book Online
+                      </Button>
+                      <IconButton
+                        as={Link}
+                        href={buildPackageEnquiryUrl(pkg.name, variant.name, variant.price)}
+                        size="sm"
+                        variant="outline"
+                        borderColor="green.300"
+                        color="green.600"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Chat on WhatsApp"
+                        title="Have questions? Chat with us on WhatsApp"
+                        onClick={() =>
+                          trackEvent(
+                            "package_whatsapp_click",
+                            { package_name: pkg.name, variant_name: variant.name },
+                            { pagePath: "/packages" }
+                          )
+                        }
+                      >
+                        <FaWhatsapp />
+                      </IconButton>
+                    </HStack>
                     </Box>
                   </Box>
                 );

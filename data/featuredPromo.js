@@ -18,7 +18,7 @@ const promos = {
     href: "/dexa-body-composition",
     ctaLabel: "Learn about DEXA",
     bookLabel: "Book DEXA Scan",
-    bookHref: "/tests",
+    bookHref: "/tests?q=DEXA",
     accent: "#008f82",          // teal
     accentLight: "#e6f6f4",
     image: "/assets/dexa/fat-heatmap.webp",
