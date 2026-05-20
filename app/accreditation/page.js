@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Box, Container, Grid, Heading, SimpleGrid, Text } from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
+import { FadeIn } from "@/components/site/motionUtils";
 
 const qualityObjectives = [
   "Quality control",
@@ -40,7 +41,8 @@ export default function AccreditationPage() {
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={10} alignItems="center">
             <Box>
-              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
+              <span className="chip chip-teal" style={{ marginBottom: 16, display: "inline-flex" }}>ISO 15189:2022 · NABL Accredited</span>
+              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title" mt={2}>
                 Quality and
                 <Box as="span" color="teal.700" className="hero-subline">NABL Accreditation</Box>
               </Heading>
@@ -67,7 +69,7 @@ export default function AccreditationPage() {
               ) : null}
             </Box>
 
-            <Box className="soft-card" p={6}>
+            <Box className="soft-card-teal" p={6}>
               <Grid templateColumns={{ base: "1fr", sm: "auto 1fr" }} gap={4} alignItems="start">
                 <Image src="/assets/nabl-symbol.png" alt="NABL Accredited" width={68} height={68} />
                 <Box>
@@ -88,65 +90,50 @@ export default function AccreditationPage() {
       </Box>
 
       <Container maxW="1200px" py={12}>
-        <Box>
-          <Heading size="xl" mb={4}>
-            NABL documents
-          </Heading>
-          <Text color="gray.700" fontSize="sm" mb={4}>
-            You can verify accreditation status and scope through the official documents.
-          </Text>
+        <FadeIn>
+          <Box>
+            <Heading size="xl" mb={4}>NABL documents</Heading>
+            <Text color="gray.700" fontSize="sm" mb={4}>
+              You can verify accreditation status and scope through the official documents.
+            </Text>
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+              <Link href={siteConfig.nabl.scopeUrl} target="_blank" rel="noopener noreferrer">
+                <Box className="soft-card-teal" p={4}>
+                  <Text fontWeight="700">Scope of accreditation</Text>
+                  <Text fontSize="xs" color="gray.500" mt={1}>List of accredited parameters and disciplines.</Text>
+                  <Text fontSize="xs" color="teal.600" mt={2} fontWeight="700">View PDF</Text>
+                </Box>
+              </Link>
+              <Link href={siteConfig.nabl.certUrl} target="_blank" rel="noopener noreferrer">
+                <Box className="soft-card-teal" p={4}>
+                  <Text fontWeight="700">Accreditation certificate</Text>
+                  <Text fontSize="xs" color="gray.500" mt={1}>Current NABL certificate issued to SDRC Diagnostics.</Text>
+                  <Text fontSize="xs" color="teal.600" mt={2} fontWeight="700">View PDF</Text>
+                </Box>
+              </Link>
+            </SimpleGrid>
+          </Box>
+        </FadeIn>
 
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-            <Link href={siteConfig.nabl.scopeUrl} target="_blank" rel="noopener noreferrer">
-              <Box className="soft-card" p={4} border="1px solid" borderColor="teal.100">
-                <Text fontWeight="700">Scope of accreditation</Text>
-                <Text fontSize="xs" color="gray.500" mt={1}>
-                  List of accredited parameters and disciplines.
-                </Text>
-                <Text fontSize="xs" color="teal.600" mt={2} fontWeight="700">
-                  View PDF
-                </Text>
-              </Box>
-            </Link>
+        <FadeIn delay={60}>
+          <Box mt={12} display={{ base: "none", md: "block" }}>
+            <Heading size="xl" mb={4}>Laboratory quality systems</Heading>
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
+              {systems.map((item) => (
+                <Box key={item.title} className="soft-card" p={6} style={{ borderTop: "3px solid #008f82" }}>
+                  <Text fontWeight="700" mb={2}>{item.title}</Text>
+                  <Text fontSize="sm" color="gray.700">{item.text}</Text>
+                </Box>
+              ))}
+            </SimpleGrid>
+          </Box>
+        </FadeIn>
 
-            <Link href={siteConfig.nabl.certUrl} target="_blank" rel="noopener noreferrer">
-              <Box className="soft-card" p={4} border="1px solid" borderColor="teal.100">
-                <Text fontWeight="700">Accreditation certificate</Text>
-                <Text fontSize="xs" color="gray.500" mt={1}>
-                  Current NABL certificate issued to SDRC Diagnostics.
-                </Text>
-                <Text fontSize="xs" color="teal.600" mt={2} fontWeight="700">
-                  View PDF
-                </Text>
-              </Box>
-            </Link>
-          </SimpleGrid>
-        </Box>
-
-        <Box mt={12} display={{ base: "none", md: "block" }}>
-          <Heading size="xl" mb={4}>
-            Laboratory quality systems
-          </Heading>
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-            {systems.map((item) => (
-              <Box key={item.title} className="soft-card" p={6}>
-                <Text fontWeight="700" mb={2}>
-                  {item.title}
-                </Text>
-                <Text fontSize="sm" color="gray.700">
-                  {item.text}
-                </Text>
-              </Box>
-            ))}
-          </SimpleGrid>
-        </Box>
-
-        <Box mt={12}>
-          <Heading size="xl" mb={4}>
-            SDRC Quality Policy & Objectives
-          </Heading>
-          <Grid templateColumns={{ base: "1fr", md: "1.4fr 1fr" }} gap={6} alignItems="start">
-            <Box className="soft-card" p={6}>
+        <FadeIn delay={80}>
+          <Box mt={12}>
+            <Heading size="xl" mb={4}>SDRC Quality Policy &amp; Objectives</Heading>
+            <Grid templateColumns={{ base: "1fr", md: "1.4fr 1fr" }} gap={6} alignItems="start">
+              <Box className="soft-card" p={6}>
               <Text fontWeight="700" mb={2}>
                 Quality policy
               </Text>
@@ -180,6 +167,7 @@ export default function AccreditationPage() {
             </Box>
           </Grid>
         </Box>
+        </FadeIn>
       </Container>
     </>
   );

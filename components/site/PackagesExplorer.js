@@ -453,40 +453,53 @@ export default function PackagesExplorer() {
     <Container maxW="1200px" py={10}>
       <Script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" strategy="afterInteractive" />
       <VStack align="stretch" gap={6}>
-        <Box className="soft-card" p={6}>
-          <Heading size="lg" mb={2}>
+        <Box className="soft-card-orange" p={6}>
+          <span className="chip chip-orange" style={{ marginBottom: 14, display: "inline-flex" }}>Health Packages</span>
+          <Heading size="lg" mb={1} color="gray.800">
             Master Health Check Packages
           </Heading>
-          <Text color="gray.600" mb={4}>
+          <Text color="gray.600" mb={4} fontSize="sm">
             Browse, filter and compare package variants by included tests.
           </Text>
           <Input
-            placeholder="Search package/test (example: cardiac, vitamin, thyroid)"
+            placeholder="Search package / test — try: cardiac, vitamin, thyroid…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            bg="white"
+            borderColor="orange.200"
+            _focus={{ borderColor: "orange.400", boxShadow: "0 0 0 1px #f26939" }}
           />
           <HStack mt={4} spacing={2} flexWrap="wrap">
             {filteredPackages.map((pkg) => (
-              <Button
+              <Box
                 as={Link}
                 key={pkg.name}
                 href={`#${slugify(pkg.name)}`}
-                size="xs"
-                variant="outline"
+                px={3}
+                py={1}
+                bg="white"
+                border="1px solid"
+                borderColor="orange.200"
                 borderRadius="full"
+                fontSize="xs"
+                fontWeight="600"
+                color="orange.700"
+                transition="all .15s ease"
+                _hover={{ borderColor: "orange.400", bg: "orange.50" }}
               >
                 {pkg.name}
-              </Button>
+              </Box>
             ))}
           </HStack>
         </Box>
 
         {filteredPackages.map((pkg) => (
           <Box key={pkg.name} id={slugify(pkg.name)} scrollMarginTop="110px">
-            <Heading size="md" mb={1} noOfLines={2}>
+            <span className="chip chip-orange" style={{ marginBottom: 10, display: "inline-flex" }}>{pkg.name}</span>
+            <Heading size="md" mb={1} mt={1} color="gray.800" noOfLines={2}>
               {pkg.name}
             </Heading>
-            <Text color="gray.600" mb={4}>
+            <Text color="gray.600" mb={4} fontSize="sm">
               {pkg.description}
             </Text>
 
@@ -562,8 +575,8 @@ export default function PackagesExplorer() {
                       </HStack>
                     </HStack>
 
-                    <Box mt={3} bg="gray.50" borderRadius="md" p={2}>
-                      <Text fontSize="xs" color="gray.500" mb={1}>
+                    <Box mt={3} bg="teal.50" borderRadius="md" p={2} borderLeft="3px solid" borderLeftColor="teal.400">
+                      <Text fontSize="xs" color="teal.700" fontWeight="700" mb={1}>
                         Key inclusions
                       </Text>
                       {keyInclusions.map((test) => (
@@ -590,6 +603,15 @@ export default function PackagesExplorer() {
                           {(variant.tests || []).length > 4
                             ? `+ ${(variant.tests || []).length - 4} more tests`
                             : "+ View included tests"}
+                        </Box>
+                      ) : null}
+                      {variant.sample_report_url ? (
+                        <Box mt={1}>
+                          <Link href={variant.sample_report_url} target="_blank" rel="noopener noreferrer">
+                            <Text fontSize="xs" fontWeight="700" color="teal.700" textDecoration="underline">
+                              View Sample DEXA Report
+                            </Text>
+                          </Link>
                         </Box>
                       ) : null}
                     </Box>
@@ -640,6 +662,7 @@ export default function PackagesExplorer() {
                       target="_blank"
                       rel="noopener noreferrer"
                       textAlign="center"
+                      style={{ background: "linear-gradient(135deg, #008f82, #00a896)", color: "white", fontWeight: 700 }}
                       onClick={() =>
                         trackEvent(
                           "package_enquire_click",
@@ -791,6 +814,15 @@ export default function PackagesExplorer() {
               </VStack>
 
               <Box px={4} py={3} borderTop="1px solid" borderColor="gray.200" bg="white">
+                {activeVariant.variant.sample_report_url ? (
+                  <Box mb={2}>
+                    <Link href={activeVariant.variant.sample_report_url} target="_blank" rel="noopener noreferrer">
+                      <Text fontSize="12px" fontWeight="700" color="teal.700" textDecoration="underline">
+                        View Sample DEXA Report
+                      </Text>
+                    </Link>
+                  </Box>
+                ) : null}
                 {activeNotes.length > 0 ? (
                   <Box mb={3} data-export-hide="true">
                     <Text fontSize="11px" color="gray.500" fontWeight="700" mb={1}>Important notes</Text>

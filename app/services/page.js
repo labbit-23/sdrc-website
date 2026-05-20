@@ -8,6 +8,7 @@ import Link from "next/link";
 import { FaWhatsapp } from "react-icons/fa";
 import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
+import { FadeIn } from "@/components/site/motionUtils";
 
 const sections = [
   {
@@ -29,7 +30,8 @@ const sections = [
       },
       {
         title: "DEXA (Bone Mineral Densitometry)",
-        desc: "Evaluation of bone mineral density to help assess osteoporosis risk."
+        desc: "Evaluation of bone mineral density to help assess osteoporosis risk.",
+        sample_report_url: "/dexa-body-composition"
       },
       {
         title: "Ultrasound & Colour Doppler",
@@ -297,36 +299,37 @@ export default function ServicesPage() {
       <Container maxW="1200px" py={12}>
         <VStack align="stretch" gap={10}>
           {sections.map((section) => (
-            <Box key={section.id} id={section.id} scrollMarginTop="110px">
-              <Heading size="xl" mb={2}>
-                {section.title}
-              </Heading>
-              <Text color="gray.700" mb={6}>
-                {section.subtitle}
-              </Text>
-
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={5}>
-                {section.items.map((item) => (
-                  <Box key={item.title} className="soft-card" p={5}>
-                    <Text fontWeight="700" color="gray.800">
-                      {item.title}
-                    </Text>
-                    <Text fontSize="sm" color="gray.600" mt={2}>
-                      {item.desc}
-                    </Text>
-                    {Array.isArray(item.notes) && item.notes.length > 0 ? (
-                      <VStack align="start" gap={1} mt={3}>
-                        {item.notes.map((note) => (
-                          <Text key={note} fontSize="xs" color="gray.600">
-                            • {note}
-                          </Text>
-                        ))}
-                      </VStack>
-                    ) : null}
-                  </Box>
-                ))}
-              </SimpleGrid>
-            </Box>
+            <FadeIn key={section.id}>
+              <Box id={section.id} scrollMarginTop="110px">
+                <span className="chip chip-teal" style={{ marginBottom: 12, display: "inline-flex" }}>{section.title}</span>
+                <Heading size="xl" mb={2} mt={2}>{section.title}</Heading>
+                <Text color="gray.700" mb={6}>{section.subtitle}</Text>
+                <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={5}>
+                  {section.items.map((item) => (
+                    <Box key={item.title} className="soft-card" p={5} style={{ borderTop: "3px solid #008f82" }}>
+                      <Text fontWeight="700" color="gray.800">{item.title}</Text>
+                      <Text fontSize="sm" color="gray.600" mt={2}>{item.desc}</Text>
+                      {Array.isArray(item.notes) && item.notes.length > 0 ? (
+                        <VStack align="start" gap={1} mt={3}>
+                          {item.notes.map((note) => (
+                            <Text key={note} fontSize="xs" color="gray.600">• {note}</Text>
+                          ))}
+                        </VStack>
+                      ) : null}
+                      {item.sample_report_url ? (
+                        <Box mt={3}>
+                          <Link href={item.sample_report_url}>
+                            <Text fontSize="xs" fontWeight="700" color="teal.700" textDecoration="underline">
+                              Preview sample DEXA report
+                            </Text>
+                          </Link>
+                        </Box>
+                      ) : null}
+                    </Box>
+                  ))}
+                </SimpleGrid>
+              </Box>
+            </FadeIn>
           ))}
         </VStack>
       </Container>

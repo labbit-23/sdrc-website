@@ -7,6 +7,7 @@ import { FaWhatsapp } from "react-icons/fa";
 import { Box, Button, Container, Grid, Heading, HStack, Text } from "@chakra-ui/react";
 import PackagesExplorer from "@/components/site/PackagesExplorer";
 import { siteConfig } from "@/data/siteConfig";
+import { FadeIn } from "@/components/site/motionUtils";
 
 export default function PackagesPage() {
   return (
@@ -15,7 +16,8 @@ export default function PackagesPage() {
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr", lg: "1.05fr .95fr" }} gap={10} alignItems="center">
             <Box>
-              <Heading color="gray.800" className="hero-title">
+              <span className="chip chip-orange" style={{ marginBottom: 16, display: "inline-flex" }}>Health check packages</span>
+              <Heading color="gray.800" className="hero-title" mt={2}>
                 Master Health Check
                 <Box as="span" color="orange.500" className="hero-subline">Packages</Box>
               </Heading>
@@ -44,7 +46,7 @@ export default function PackagesPage() {
               </HStack>
             </Box>
 
-            <Box className="soft-card" p={6} display={{ base: "none", lg: "block" }}>
+            <Box className="soft-card-orange" p={6} display={{ base: "none", lg: "block" }}>
               <Heading size="md" mb={2}>Not sure which package is right for you?</Heading>
               <Text color="gray.700" fontSize="sm" mb={3}>
                 You can compare packages or share your age, concerns and existing conditions on WhatsApp.

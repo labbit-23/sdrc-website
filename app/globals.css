@@ -287,3 +287,83 @@ a {
     linear-gradient(#fff7f2, #fff7f2) padding-box,
     linear-gradient(135deg, #007a6f 0%, #ea580c 100%) border-box !important;
 }
+
+/* ── Modern card accent variants ── */
+.soft-card-teal {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: #ffffff;
+  border-top: 3px solid #008f82;
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+.soft-card-orange {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: #ffffff;
+  border-top: 3px solid #f26939;
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+.soft-card-teal:hover,
+.soft-card-orange:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+}
+
+/* ── Chip / tag utilities ── */
+.chip {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.chip-teal  { background: #e6f6f4; color: #00695f; }
+.chip-orange { background: #fff5f0; color: #d44d1a; }
+.chip-purple { background: #f3f0ff; color: #5b21b6; }
+.chip-dark   { background: rgba(0,143,130,0.18); color: #4dd9cb; }
+
+/* ── Dark hero section ── */
+.dark-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #0f2a27 50%, #0f172a 100%);
+  position: relative;
+  overflow: hidden;
+}
+.dark-hero-cta {
+  background: linear-gradient(135deg, #0f2a27 0%, #0f172a 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Section fade-in (JS-driven, class for initial state) ── */
+.fade-section {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.fade-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Promo banner gradient ── */
+.promo-band {
+  background: linear-gradient(135deg, #0f172a 0%, #00695f 60%, #0f2a27 100%);
+}
+
+/* ── Gradient text utility ── */
+.gradient-text-orange {
+  background: linear-gradient(90deg, #f26939, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-text-teal {
+  background: linear-gradient(90deg, #008f82, #00b3a4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

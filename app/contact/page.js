@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { FaWhatsapp } from "react-icons/fa";
+import { FadeIn } from "@/components/site/motionUtils";
 import {
   Box,
   Button,
@@ -58,7 +59,8 @@ export default function ContactPage() {
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr", lg: "1.2fr 1fr" }} gap={8}>
             <Box>
-              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
+              <span className="chip chip-teal" style={{ marginBottom: 16, display: "inline-flex" }}>Jade Arcade, Paradise · Secunderabad</span>
+              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title" mt={2}>
                 Contact SDRC Diagnostics
                 <Box as="span" color="teal.700" className="hero-subline">
                   Main Centre and Collection Centres
@@ -69,7 +71,7 @@ export default function ContactPage() {
               </Text>
 
               <SimpleGrid mt={6} columns={{ base: 1, sm: 2, lg: 3 }} spacing={4} alignItems="stretch">
-                <Box className="soft-card" p={4} display={{ base: "none", sm: "flex" }} flexDirection="column" h="full">
+                <Box className="soft-card-teal" p={4} display={{ base: "none", sm: "flex" }} flexDirection="column" h="full">
                   <Text fontWeight="700" mb={1}>
                     Call
                   </Text>
@@ -132,12 +134,13 @@ export default function ContactPage() {
 
       <Container maxW="1200px" py={12}>
         <VStack align="stretch" gap={12}>
+          <FadeIn>
           <Box display="block">
             <Heading size="xl" mb={4}>
               Main centre - Jade Arcade, Paradise
             </Heading>
             <Grid templateColumns={{ base: "1fr", lg: "1.5fr 1fr" }} gap={6}>
-              <Box className="soft-card" p={6}>
+              <Box className="soft-card-teal" p={6}>
                 <Text fontWeight="700" mb={2}>
                   Address
                 </Text>
@@ -193,44 +196,36 @@ export default function ContactPage() {
               </Box>
             </Grid>
           </Box>
+          </FadeIn>
 
+          <FadeIn delay={60}>
           <Box>
-            <Heading size="xl" mb={4}>
-              Our centres
-            </Heading>
+            <Heading size="xl" mb={4}>Our centres</Heading>
             <Text fontSize="sm" color="gray.700" mb={4}>
               You can give samples or enquire about home collection at these SDRC centres.
             </Text>
-
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
               {centres.map((centre) => (
-                <Box key={centre.name} className="soft-card" p={6}>
-                  <Text fontWeight="700" mb={2}>
-                    {centre.name}
-                  </Text>
-                  <Text color="gray.700" fontSize="sm">
-                    {centre.address.join("\n")}
-                  </Text>
+                <Box key={centre.name} className="soft-card" p={6} style={{ borderTop: "3px solid #008f82" }}>
+                  <Text fontWeight="700" mb={2}>{centre.name}</Text>
+                  <Text color="gray.700" fontSize="sm">{centre.address.join("\n")}</Text>
                   <Link href={centre.map} target="_blank" style={{ display: "inline-flex", marginTop: 12 }}>
-                    <Text fontSize="xs" color="teal.600" fontWeight="600">
-                      View on Google Maps
-                    </Text>
+                    <Text fontSize="xs" color="teal.600" fontWeight="600">View on Google Maps</Text>
                   </Link>
                 </Box>
               ))}
             </SimpleGrid>
-
             <Text fontSize="xs" color="gray.500" mt={4}>
               Centre timings and available tests may vary by location. Please call or WhatsApp before visiting.
             </Text>
           </Box>
+          </FadeIn>
 
+          <FadeIn delay={60}>
           <Box>
-            <Heading size="xl" mb={4}>
-              WhatsApp and Reports Guide
-            </Heading>
+            <Heading size="xl" mb={4}>WhatsApp and Reports Guide</Heading>
             <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
-              <Box className="soft-card" p={6}>
+              <Box className="soft-card-teal" p={6}>
                 <Text fontWeight="700" mb={2}>Test booking help (human support)</Text>
                 <Text fontSize="sm" color="gray.700">
                   For package or test selection help, chat with our team on WhatsApp.
@@ -259,6 +254,7 @@ export default function ContactPage() {
               </Box>
             </Grid>
           </Box>
+          </FadeIn>
         </VStack>
       </Container>
     </>

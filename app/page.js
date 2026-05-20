@@ -9,6 +9,8 @@ import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text } from 
 import { FiSearch } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { siteConfig } from "@/data/siteConfig";
+import { FadeIn } from "@/components/site/motionUtils";
+import { getCurrentPromo } from "@/data/featuredPromo";
 import healthPackagesData from "@/data/health-packages.json";
 
 const facilityChips = [
@@ -108,6 +110,7 @@ const packagePreviewCards = homepagePreviewPackageNames
 
 export default function HomePage() {
   const [reportCount, setReportCount] = useState(0);
+  const promo = getCurrentPromo();
 
   useEffect(() => {
     const target = 1000;
@@ -236,61 +239,142 @@ export default function HomePage() {
         </Container>
       </Box>
 
+      {/* ── Monthly featured service promo ── */}
+      {promo && (
+        <Box py={{ base: 10, md: 14 }} style={{ background: "linear-gradient(135deg, #0f172a 0%, #0f2a27 55%, #0f172a 100%)", position: "relative", overflow: "hidden" }}>
+          {/* decorative blobs */}
+          <Box style={{ position: "absolute", top: "-60px", right: "-60px", width: 360, height: 360, borderRadius: "50%", background: `radial-gradient(circle, ${promo.accent}26 0%, transparent 70%)`, pointerEvents: "none" }} />
+          <Box style={{ position: "absolute", bottom: "-60px", left: "-40px", width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, rgba(242,105,57,0.1) 0%, transparent 70%)", pointerEvents: "none" }} />
+          <Container maxW="1200px" position="relative" zIndex={1}>
+            <FadeIn>
+              <Grid templateColumns={{ base: "1fr", lg: "1fr auto" }} gap={{ base: 6, lg: 12 }} alignItems="center">
+                <Box>
+                  <HStack spacing={3} mb={4} flexWrap="wrap">
+                    <Box style={{ display: "inline-flex", padding: "4px 12px", borderRadius: 99, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}>
+                      {promo.badge}
+                    </Box>
+                    <Box style={{ display: "inline-flex", padding: "4px 12px", borderRadius: 99, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", background: `${promo.accent}30`, color: "#4dd9cb" }}>
+                      {promo.eyebrow}
+                    </Box>
+                  </HStack>
+
+                  <Heading color="white" fontWeight="900" fontSize={{ base: "2xl", md: "3xl" }} lineHeight="1.15" letterSpacing="-0.02em">
+                    {promo.headline}
+                  </Heading>
+                  <Text mt={1} style={{ fontSize: "clamp(1rem,2vw,1.25rem)", fontWeight: 700, background: "linear-gradient(90deg, #f26939, #f59e0b)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                    {promo.subline}
+                  </Text>
+
+                  <Text mt={3} color="rgba(255,255,255,0.55)" fontSize={{ base: "sm", md: "md" }} maxW="560px" lineHeight="1.7">
+                    {promo.body}
+                  </Text>
+
+                  <SimpleGrid mt={4} columns={{ base: 1, sm: 2 }} spacing={1} maxW="500px" display={{ base: "none", sm: "grid" }}>
+                    {promo.bullets.map(b => (
+                      <HStack key={b} spacing={2}>
+                        <Box w="5px" h="5px" borderRadius="full" flexShrink={0} style={{ background: promo.accent }} />
+                        <Text color="rgba(255,255,255,0.5)" fontSize="sm">{b}</Text>
+                      </HStack>
+                    ))}
+                  </SimpleGrid>
+
+                  <HStack mt={6} spacing={3} flexWrap="wrap">
+                    <Button as={Link} href={promo.bookHref} size={{ base: "md", md: "lg" }}
+                      style={{ background: `linear-gradient(135deg, ${promo.accent}, #00b3a4)`, color: "white", borderRadius: 99, fontWeight: 700 }}>
+                      {promo.bookLabel}
+                    </Button>
+                    <Button as={Link} href={promo.href} size={{ base: "md", md: "lg" }}
+                      style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 99, fontWeight: 600 }}>
+                      {promo.ctaLabel}
+                    </Button>
+                  </HStack>
+                </Box>
+
+                {/* promo image — desktop only */}
+                <Box display={{ base: "none", lg: "flex" }} alignItems="center" justifyContent="center">
+                  <Box style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: "16px", width: 200 }}>
+                    <Image
+                      src={promo.image}
+                      alt={promo.imageAlt}
+                      width={951}
+                      height={2977}
+                      style={{ width: "100%", height: "auto", borderRadius: 12 }}
+                    />
+                    <Text mt={2} style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", textAlign: "center" }}>
+                      {promo.imageAlt}
+                    </Text>
+                  </Box>
+                </Box>
+              </Grid>
+            </FadeIn>
+          </Container>
+        </Box>
+      )}
+
       <Container maxW="1200px" py={12} display={{ base: "none", md: "block" }}>
-        <Heading size="xl" mb={6}>All facilities under one roof</Heading>
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-          {facilities.map((group) => (
-            <Box key={group.title} className="soft-card" p={6}>
-              <Heading size="md" mb={3}>{group.title}</Heading>
-              {group.items.map((item) => (
-                <Text key={item} fontSize="sm" color="gray.700">• {item}</Text>
-              ))}
-            </Box>
-          ))}
-        </SimpleGrid>
+        <FadeIn>
+          <Heading size="xl" mb={6}>All facilities under one roof</Heading>
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
+            {facilities.map((group) => (
+              <Box key={group.title} className="soft-card-teal" p={6}>
+                <Heading size="md" mb={3}>{group.title}</Heading>
+                {group.items.map((item) => (
+                  <Text key={item} fontSize="sm" color="gray.700">• {item}</Text>
+                ))}
+              </Box>
+            ))}
+          </SimpleGrid>
+        </FadeIn>
       </Container>
 
       <Container maxW="1200px" py={6} display={{ base: "none", md: "block" }}>
-        <HStack justify="space-between" align="end" mb={6} flexWrap="wrap" gap={3}>
-          <Box>
-            <Heading size="xl">Popular health check packages</Heading>
-            <Text color="gray.700" fontSize="sm">A few of our most commonly chosen panels. View the full list on the packages page.</Text>
-          </Box>
-          <Link href="/packages">
-            <Text color="teal.700" fontWeight="700" fontSize="sm">View all packages</Text>
-          </Link>
-        </HStack>
-
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-          {packagePreviewCards.map((card) => (
-            <Box key={card.title} className="soft-card rise-in" p={5} display="flex" flexDirection="column">
-              <Heading size="sm" color="teal.700">{card.title}</Heading>
-              <Text mt={2} fontSize="sm" color="gray.600">{card.desc}</Text>
-              <Text mt={2} fontSize="xs" color="gray.500">{card.params}</Text>
-              <Text mt={2} color="orange.500" fontWeight="700">{card.price}</Text>
-              <Box mt={2} flex="1">
-                {card.points.map((point) => (
-                  <Text key={point} mt={1} fontSize="xs" color="gray.700">• {point}</Text>
-                ))}
-              </Box>
-              <Button as={Link} href={card.href} mt={4} size="sm" w="full" textAlign="center" display="inline-flex" alignItems="center" justifyContent="center" lineHeight="1">
-                View details
-              </Button>
+        <FadeIn>
+          <HStack justify="space-between" align="end" mb={6} flexWrap="wrap" gap={3}>
+            <Box>
+              <Heading size="xl">Popular health check packages</Heading>
+              <Text color="gray.700" fontSize="sm">A few of our most commonly chosen panels. View the full list on the packages page.</Text>
             </Box>
-          ))}
-        </SimpleGrid>
+            <Link href="/packages">
+              <Text color="teal.700" fontWeight="700" fontSize="sm">View all packages</Text>
+            </Link>
+          </HStack>
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+            {packagePreviewCards.map((card, i) => (
+              <FadeIn key={card.title} delay={i * 60}>
+                <Box className="soft-card-orange" p={5} display="flex" flexDirection="column" style={{ height: "100%" }}>
+                  <Heading size="sm" color="teal.700">{card.title}</Heading>
+                  <Text mt={2} fontSize="sm" color="gray.600">{card.desc}</Text>
+                  <Text mt={2} fontSize="xs" color="gray.500">{card.params}</Text>
+                  <Text mt={2} color="orange.500" fontWeight="700">{card.price}</Text>
+                  <Box mt={2} flex="1">
+                    {card.points.map((point) => (
+                      <Text key={point} mt={1} fontSize="xs" color="gray.700">• {point}</Text>
+                    ))}
+                  </Box>
+                  <Button as={Link} href={card.href} mt={4} size="sm" w="full" textAlign="center" display="inline-flex" alignItems="center" justifyContent="center" lineHeight="1">
+                    View details
+                  </Button>
+                </Box>
+              </FadeIn>
+            ))}
+          </SimpleGrid>
+        </FadeIn>
       </Container>
 
       <Container maxW="1200px" py={12} display={{ base: "none", md: "block" }}>
-        <Heading size="xl" mb={6}>What patients say</Heading>
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-          {reviews.map((review) => (
-            <Box key={review.name} className="soft-card" p={6}>
-              <Text mt={2} color="gray.700" fontSize="sm">&ldquo;{review.text}&rdquo;</Text>
-              <Text mt={3} fontWeight="600" color="teal.700">- {review.name}</Text>
-            </Box>
-          ))}
-        </SimpleGrid>
+        <FadeIn>
+          <Heading size="xl" mb={6}>What patients say</Heading>
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
+            {reviews.map((review, i) => (
+              <FadeIn key={review.name} delay={i * 70}>
+                <Box className="soft-card" p={6}>
+                  <Text mt={2} color="gray.700" fontSize="sm">&ldquo;{review.text}&rdquo;</Text>
+                  <Text mt={3} fontWeight="600" color="teal.700">- {review.name}</Text>
+                </Box>
+              </FadeIn>
+            ))}
+          </SimpleGrid>
+        </FadeIn>
       </Container>
 
       <Box bg="teal.700" color="white" py={12}>
