@@ -81,7 +81,25 @@ Reports are available via print, email, WhatsApp and the SDRC online portal. Wha
 
 ## Home Sample Collection
 
-Home sample collection is available for select blood and urine tests. Book via the SDRC website or WhatsApp.
+Home sample collection is available for select blood and urine tests. A trained phlebotomist is dispatched to the patient's address. Patients can book a date and time slot online or via WhatsApp.
+
+URL: https://sdrc.in/home-visit
+
+## Physiotherapy
+
+SDRC Diagnostics offers physiotherapy and rehabilitation services in collaboration with Recure, a structured physiotherapy platform.
+
+Services include:
+- Orthopaedic rehabilitation (back pain, neck pain, joint disorders, arthritis)
+- Neurological rehabilitation (stroke, nerve injuries, neuro-muscular)
+- Sports injury (ligament tears, muscle injuries, return-to-sport)
+- Post-surgical rehabilitation (joint replacement, spine and trauma)
+- Geriatric care (balance, mobility, fall prevention)
+- Women's health (post-partum, pelvic floor, ergonomic care)
+
+Physiotherapy consultations are available at Jade Arcade (Paradise), SD Road and Yapral centres. Contact: +91 99634 32132 or via WhatsApp.
+
+URL: https://sdrc.in/physiotherapy
 
 ## Key URLs
 
@@ -90,6 +108,8 @@ Home sample collection is available for select blood and urine tests. Book via t
 - Health Packages: https://sdrc.in/packages
 - Book a Test: https://sdrc.in/tests
 - DEXA Scan: https://sdrc.in/dexa-body-composition
+- Home Sample Collection: https://sdrc.in/home-visit
+- Physiotherapy: https://sdrc.in/physiotherapy
 - Contact: https://sdrc.in/contact
 - About: https://sdrc.in/about
 - NABL Accreditation: https://sdrc.in/accreditation
