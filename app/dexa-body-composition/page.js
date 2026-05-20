@@ -262,7 +262,7 @@ export default function DexaBodyCompositionPage() {
                 </Heading>
                 <Text mt={4} color="rgba(255,255,255,0.6)" fontSize={{ base: "sm", md: "md" }} lineHeight="1.8">
                   GLP-1 receptor agonists — semaglutide (Ozempic, Wegovy), tirzepatide (Mounjaro) and others — drive
-                  significant weight loss. But a scale shows only the total number. DEXA tells you what you're actually losing.
+                  significant weight loss. But a scale shows only the total number. DEXA tells you what you&apos;re actually losing.
                 </Text>
                 <VStack mt={5} align="stretch" spacing={3}>
                   {[
@@ -405,7 +405,7 @@ export default function DexaBodyCompositionPage() {
                     ))}
                   </VStack>
                   <Text style={{ fontSize: 11, color: "#94a3b8", marginTop: 8 }}>
-                    Schedule guidance only. Follow your clinician's specific recommendation.
+                    Schedule guidance only. Follow your clinician&apos;s specific recommendation.
                   </Text>
                 </Box>
               </Box>
@@ -425,7 +425,7 @@ export default function DexaBodyCompositionPage() {
                   DEXA vs everything else
                 </Heading>
                 <Text mt={3} color="rgba(255,255,255,0.45)" fontSize="sm" lineHeight="1.7">
-                  Most methods estimate. DEXA directly measures. That difference matters when you're making health decisions.
+                  Most methods estimate. DEXA directly measures. That difference matters when you&apos;re making health decisions.
                 </Text>
               </Box>
 
@@ -468,7 +468,7 @@ export default function DexaBodyCompositionPage() {
           <VStack spacing={3} align="stretch">
             {reportPages.map((page, i) => (
               <FadeIn key={page.n} delay={i * 55}>
-                <Box style={{ border: "1px solid #f0f2f5", borderRadius: 16, overflow: "hidden" }}
+                <Box
                   _hover={{ boxShadow: "0 8px 32px rgba(15,23,42,0.09)", transform: "translateY(-1px)" }}
                   style={{ border: "1px solid #f0f2f5", borderRadius: 16, overflow: "hidden", transition: "box-shadow 200ms ease, transform 200ms ease" }}>
                   <Grid templateColumns={{ base: "1fr", md: "68px 1fr auto" }}>
@@ -537,7 +537,7 @@ export default function DexaBodyCompositionPage() {
                 <span className="chip chip-teal" style={{ marginBottom: 16, display: "inline-flex" }}>Is this right for you?</span>
                 <Heading fontWeight="900" fontSize={{ base: "2xl", md: "3xl" }} color="gray.900" lineHeight="1.2" mt={3}>Who benefits from DEXA</Heading>
                 <Text mt={3} color="gray.500" fontSize="sm" lineHeight="1.7">
-                  DEXA is useful whenever you need to go beyond a scale — whether you're training, managing a condition, or simply want an honest baseline.
+                  DEXA is useful whenever you need to go beyond a scale — whether you&apos;re training, managing a condition, or simply want an honest baseline.
                 </Text>
               </Box>
               <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4}>
