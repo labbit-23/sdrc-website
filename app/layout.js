@@ -2,6 +2,7 @@ import "./globals.css";
 import Providers from "./providers";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
+import RouteAnalytics from "@/components/site/RouteAnalytics";
 
 export const metadata = {
   metadataBase: new URL("https://sdrc.in"),
@@ -135,6 +136,7 @@ export default function RootLayout({ children }) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
         <Providers>
+          <RouteAnalytics />
           <SiteHeader />
           <main>{children}</main>
           <SiteFooter />
