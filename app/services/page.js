@@ -143,6 +143,50 @@ const gallery = [
   }
 ];
 
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "MedicalBusiness",
+    name: "SDRC Diagnostics — Services",
+    description: "Multi-specialty diagnostic centre offering imaging (CT, X-ray, ultrasound, DEXA, mammography), cardio-pulmonary tests (ECG, 2D-Echo, TMT, spirometry), neurology (EEG, ENMG), and NABL-accredited pathology laboratory services in Secunderabad, Hyderabad.",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "101, Jade Arcade (Corporate Block), Paradise, MG Road",
+      addressLocality: "Secunderabad",
+      addressRegion: "Telangana",
+      postalCode: "500003",
+      addressCountry: "IN"
+    },
+    hasOfferingCategory: [
+      {
+        "@type": "MedicalService",
+        name: "Imaging Services",
+        description: "CT, X-ray, ultrasound, DEXA, mammography with same-day reporting"
+      },
+      {
+        "@type": "MedicalService",
+        name: "Cardio-Pulmonary Tests",
+        description: "ECG, 2D-Echo, TMT stress test, spirometry for heart and lung assessment"
+      },
+      {
+        "@type": "MedicalService",
+        name: "Neurology Tests",
+        description: "EEG and ENMG for neurological evaluation"
+      },
+      {
+        "@type": "MedicalService",
+        name: "Pathology Laboratory",
+        description: "NABL-accredited biochemistry, haematology, microbiology and histopathology"
+      },
+      {
+        "@type": "MedicalService",
+        name: "Home Sample Collection",
+        description: "Trained phlebotomists for home-based blood and urine collection"
+      }
+    ]
+  }
+];
+
 export default function ServicesPage() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState(null);
@@ -162,6 +206,9 @@ export default function ServicesPage() {
 
   return (
     <>
+      {structuredData.map((schema, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      ))}
       <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr", lg: "1.05fr .95fr" }} gap={10} alignItems="start">

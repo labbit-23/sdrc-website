@@ -55,6 +55,87 @@ function formatInr(amount) {
   return `INR ${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "MedicalService",
+    name: "Home Sample Collection",
+    alternateName: "Home Phlebotomy Service",
+    description: "SDRC offers convenient home-based blood and urine sample collection by trained phlebotomists. Book same-day or advance appointments online or via WhatsApp.",
+    provider: {
+      "@type": "MedicalBusiness",
+      name: "SDRC Diagnostics",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "101, Jade Arcade (Corporate Block), Paradise, MG Road",
+        addressLocality: "Secunderabad",
+        addressRegion: "Telangana",
+        postalCode: "500003",
+        addressCountry: "IN"
+      },
+      telephone: "+91-40-6600-4200"
+    },
+    areaServed: [
+      { "@type": "City", name: "Secunderabad" },
+      { "@type": "City", name: "Hyderabad" }
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "How do I book a home sample collection at SDRC?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "You can book a home visit through our website at sdrc.in/home-visit by selecting a convenient date and time slot, or contact us via WhatsApp at +91-40-6600-4200. A trained phlebotomist will visit your address for sample collection."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "Which tests are available for home collection?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Home collection is available for select blood tests, urine tests and other non-imaging diagnostics. Imaging tests (CT, ultrasound, DEXA, X-ray) and procedures requiring specialized equipment must be done at our collection centers."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "What is the service area for home collection in Hyderabad?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Home sample collection is available across Secunderabad and Hyderabad. Service is fastest in central areas (Secunderabad, Banjara Hills, Jubilee Hills) with extended coverage to surrounding localities. Check availability when booking."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "Do I need to fast for home sample collection?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Fasting requirements depend on the specific tests ordered. Guidance on fasting is provided when you book or add tests to your order. Our phlebotomist will confirm fasting status on arrival."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "How soon are reports available after home collection?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Most tests report same-day or within 24 hours. Reports are sent via email, WhatsApp and are accessible online through the SDRC portal using your registered mobile number."
+        }
+      },
+      {
+        "@type": "Question",
+        name: "Can I upload a prescription during home visit booking?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Yes. During the booking process at sdrc.in/home-visit, you can upload a doctor's prescription. This ensures the correct tests are collected and helps our team prepare in advance."
+        }
+      }
+    ]
+  }
+];
+
 export default function QuickBookPage() {
   const whatsappQuickbookHref = `https://wa.me/${siteConfig.whatsappNumber}?text=${encodeURIComponent("Home visit")}`;
   const dayOptions = useMemo(() => getNextDays(7), []);
@@ -207,6 +288,9 @@ export default function QuickBookPage() {
 
   return (
     <>
+      {structuredData.map((schema, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      ))}
       <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
         <Container maxW="1100px">
           <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
