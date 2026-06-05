@@ -257,9 +257,6 @@ export default function TestsPage() {
     );
   }, []);
 
-  useEffect(() => {
-    trackEvent("page_view", { page_type: "tests" }, { pagePath: "/tests" });
-  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

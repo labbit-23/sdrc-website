@@ -97,9 +97,6 @@ export default function PackagesExplorer() {
     setCartIds(ids);
   }, []);
 
-  useEffect(() => {
-    trackEvent("page_view", { page_type: "packages" }, { pagePath: "/packages" });
-  }, []);
 
   useEffect(() => {
     if (!search.trim()) return;

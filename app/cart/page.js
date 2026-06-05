@@ -16,9 +16,6 @@ export default function CartPage() {
     setLoaded(true);
   }, []);
 
-  useEffect(() => {
-    trackEvent("page_view", { page_type: "cart" }, { pagePath: "/cart" });
-  }, []);
 
   useEffect(() => {
     if (!loaded) return;

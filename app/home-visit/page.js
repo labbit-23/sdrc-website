@@ -111,9 +111,6 @@ export default function QuickBookPage() {
     };
   }, []);
 
-  useEffect(() => {
-    trackEvent("page_view", { page_type: "quick_book" }, { pagePath: "/home-visit" });
-  }, []);
 
   useEffect(() => {
     const syncCart = () => setCartItems(readCartItems());
