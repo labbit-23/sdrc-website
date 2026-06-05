@@ -272,11 +272,11 @@ export default function HomePage() {
                     {promo.body}
                   </Text>
 
-                  <SimpleGrid mt={4} columns={{ base: 1, sm: 2 }} spacing={1} maxW="500px" display={{ base: "none", sm: "grid" }}>
+                  <SimpleGrid mt={4} columns={1} spacing={2.5} maxW="560px" display={{ base: "none", sm: "grid" }}>
                     {promo.bullets.map(b => (
-                      <HStack key={b} spacing={2}>
-                        <Box w="5px" h="5px" borderRadius="full" flexShrink={0} style={{ background: promo.accent }} />
-                        <Text color="rgba(255,255,255,0.5)" fontSize="sm">{b}</Text>
+                      <HStack key={b} spacing={2} align="start">
+                        <Box w="5px" h="5px" borderRadius="full" flexShrink={0} style={{ background: promo.accent, marginTop: "5px" }} />
+                        <Text color="rgba(255,255,255,0.5)" fontSize="sm" lineHeight="1.5">{b}</Text>
                       </HStack>
                     ))}
                   </SimpleGrid>
