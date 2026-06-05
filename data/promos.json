@@ -1,0 +1,27 @@
+{
+  "promos": [
+    {
+      "id": "dexa-body-composition",
+      "badge": "Featured this month",
+      "eyebrow": "Body Composition & Bone Health",
+      "headline": "Know exactly what your body is made of",
+      "subline": "DEXA Whole Body Scan",
+      "body": "One scan. Fat %, lean mass, bone mineral density — all measured simultaneously and separated by region. The gold standard for body composition, now at SDRC.",
+      "bullets": [
+        "Body fat % compared to same-age peers",
+        "Lean & muscle mass by region",
+        "Bone mineral density (T-score & Z-score)",
+        "Android / gynoid fat distribution ratio",
+        "Resting metabolic rate estimate"
+      ],
+      "href": "/dexa-body-composition",
+      "ctaLabel": "Learn about DEXA",
+      "bookLabel": "Book DEXA Scan",
+      "bookHref": "/tests?q=DEXA",
+      "accent": "#008f82",
+      "accentLight": "#e6f6f4",
+      "image": "/assets/dexa/fat-heatmap.webp",
+      "imageAlt": "DEXA fat distribution heatmap scan"
+    }
+  ]
+}
