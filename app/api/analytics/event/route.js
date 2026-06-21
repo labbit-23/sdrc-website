@@ -39,6 +39,9 @@ export async function POST(req) {
       user_agent: String(req.headers.get("user-agent") || "").slice(0, 500) || null,
       ip_hash: hashIp(readClientIp(req)),
       phone: String(body?.phone || "").replace(/\D/g, "").slice(0, 20) || null,
+      utm_source: String(body?.utm_source || "").slice(0, 100) || null,
+      gclid: String(body?.gclid || "").slice(0, 500) || null,
+      fbclid: String(body?.fbclid || "").slice(0, 500) || null,
       payload: body?.payload && typeof body.payload === "object" ? body.payload : {}
     };
 

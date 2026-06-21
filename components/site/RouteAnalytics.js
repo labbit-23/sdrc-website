@@ -2,10 +2,14 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, captureTrackingIds } from "@/lib/analytics";
 
 export default function RouteAnalytics() {
   const pathname = usePathname();
+
+  useEffect(() => {
+    captureTrackingIds();
+  }, []);
 
   useEffect(() => {
     if (!pathname) return;
