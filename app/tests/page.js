@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { FiFilter, FiHome, FiSearch, FiShoppingCart, FiX } from "react-icons/fi";
 import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
-import healthPackagesData from "@/data/health-packages.json";
+import defaultHealthPackagesData from "@/data/health-packages.json";
 import CartRequestPanel from "@/components/cart/CartRequestPanel";
 import { readCartItems, saveCartItems } from "@/lib/cart";
 import { trackEvent } from "@/lib/analytics";
@@ -148,7 +148,29 @@ export default function TestsPage() {
   const [showDepartmentFilters, setShowDepartmentFilters] = useState(false);
   const [showFullTestsMobile, setShowFullTestsMobile] = useState(false);
 
-  const packageVariants = useMemo(() => flattenPackageVariants(healthPackagesData), []);
+  // Instant default from the bundled copy, upgraded once /api/health-
+  // packages resolves (labit-main first, this repo's own bundled copy as
+  // ITS fallback -- see that route). 2026-09-12: this site's own data
+  // file had drifted stale for months with nothing surfacing it; this
+  // makes labit-main authoritative at request time instead of depending
+  // on someone remembering to re-run scripts/sync-health-packages.mjs.
+  const [healthPackagesData, setHealthPackagesData] = useState(defaultHealthPackagesData);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/health-packages")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data && Array.isArray(data.packages)) {
+          setHealthPackagesData(data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const packageVariants = useMemo(() => flattenPackageVariants(healthPackagesData), [healthPackagesData]);
   const panelExpansionMap = useMemo(() => {
     const map = new Map();
     (healthPackagesData.globalNotes || []).forEach((note) => {
@@ -162,7 +184,7 @@ export default function TestsPage() {
       map.set(panel.toLowerCase(), expanded);
     });
     return map;
-  }, []);
+  }, [healthPackagesData]);
   const packageTestsById = useMemo(() => {
     const map = new Map();
     packageVariants.forEach((pkg) => {

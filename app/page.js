@@ -85,32 +85,64 @@ const homepagePreviewPackageNames = [
   "Cardiac Wellness"
 ];
 
-const packagePreviewCards = homepagePreviewPackageNames
-  .map((name) => (healthPackagesData.packages || []).find((pkg) => pkg.name === name))
-  .filter(Boolean)
-  .map((pkg) => {
-    const variants = Array.isArray(pkg.variants) ? pkg.variants : [];
-    const minPrice = Math.min(
-      ...variants.map((v) => Number(v.price)).filter((v) => Number.isFinite(v))
-    );
-    const firstVariant = variants[0] || {};
-    const keyInclusions = Array.isArray(firstVariant.key_inclusions) && firstVariant.key_inclusions.length > 0
-      ? firstVariant.key_inclusions
-      : (firstVariant.tests || []).slice(0, 3);
+// Extracted so it can run again once the live fetch below resolves, not
+// just once at module load against the bundled import.
+function buildPreviewCards(data) {
+  return homepagePreviewPackageNames
+    .map((name) => (data.packages || []).find((pkg) => pkg.name === name))
+    .filter(Boolean)
+    .map((pkg) => {
+      const variants = Array.isArray(pkg.variants) ? pkg.variants : [];
+      const minPrice = Math.min(
+        ...variants.map((v) => Number(v.price)).filter((v) => Number.isFinite(v))
+      );
+      const firstVariant = variants[0] || {};
+      const keyInclusions = Array.isArray(firstVariant.key_inclusions) && firstVariant.key_inclusions.length > 0
+        ? firstVariant.key_inclusions
+        : (firstVariant.tests || []).slice(0, 3);
 
-    return {
-      title: pkg.name,
-      desc: pkg.description || "",
-      params: getParameterRange(variants),
-      price: formatInrFrom(minPrice),
-      points: keyInclusions.slice(0, 3),
-      href: `/packages#${slugify(pkg.name)}`
-    };
-  });
+      return {
+        title: pkg.name,
+        desc: pkg.description || "",
+        params: getParameterRange(variants),
+        price: formatInrFrom(minPrice),
+        points: keyInclusions.slice(0, 3),
+        href: `/packages#${slugify(pkg.name)}`
+      };
+    });
+}
+
+// Instant default from the bundled copy (zero-flicker first paint) --
+// see this file's own fetch-with-fallback effect below for how this gets
+// refreshed from labit-main's live catalog.
+const packagePreviewCardsDefault = buildPreviewCards(healthPackagesData);
 
 export default function HomePage() {
   const [reportCount, setReportCount] = useState(0);
+  const [packagePreviewCards, setPackagePreviewCards] = useState(packagePreviewCardsDefault);
   const promo = getCurrentPromo();
+
+  // Refresh from /api/health-packages (labit-main first, this repo's own
+  // bundled copy as its fallback -- see that route) once mounted; the
+  // bundled-import default above renders instantly either way, this just
+  // upgrades it if labit-main has newer data. 2026-09-12: the site's own
+  // data file had drifted stale for months with nothing surfacing it --
+  // this makes labit-main authoritative at request time instead of
+  // depending on someone remembering to re-run the sync script.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/health-packages")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data && Array.isArray(data.packages)) {
+          setPackagePreviewCards(buildPreviewCards(data));
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const target = 1000;

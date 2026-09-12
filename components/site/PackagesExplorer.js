@@ -20,7 +20,7 @@ import {
 import { FiDownload, FiHome, FiShare2, FiX } from "react-icons/fi";
 import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
 import { FaWhatsapp } from "react-icons/fa";
-import packagesData from "@/data/health-packages.json";
+import defaultPackagesData from "@/data/health-packages.json";
 import { siteConfig } from "@/data/siteConfig";
 import { readCartItems, saveCartItems } from "@/lib/cart";
 import { trackEvent } from "@/lib/analytics";
@@ -58,7 +58,7 @@ function getVariantCaptureId(pkgName, variantName) {
   return `variant-capture-${slugify(pkgName)}-${slugify(variantName)}`;
 }
 
-function getApplicableNotesForTests(testNames) {
+function getApplicableNotesForTests(testNames, packagesData) {
   const notes = packagesData.globalNotes || [];
   const loweredTests = testNames.map((test) => String(test).toLowerCase());
 
@@ -79,6 +79,29 @@ export default function PackagesExplorer() {
   const [isMobile, setIsMobile] = useState(false);
   const [showAddLabel, setShowAddLabel] = useState(true);
   const [cartIds, setCartIds] = useState(new Set());
+  // Instant default from the bundled copy, upgraded once
+  // /api/health-packages resolves (labit-main first, this repo's own
+  // bundled copy as ITS fallback -- see that route). 2026-09-12: this
+  // site's own data file had drifted stale for months with nothing
+  // surfacing it; this makes labit-main authoritative at request time
+  // instead of depending on someone remembering to re-run
+  // scripts/sync-health-packages.mjs.
+  const [packagesData, setPackagesData] = useState(defaultPackagesData);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/health-packages")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data && Array.isArray(data.packages)) {
+          setPackagesData(data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const update = () => setIsMobile(window.innerWidth < 768);
@@ -123,7 +146,7 @@ export default function PackagesExplorer() {
         return { ...pkg, variants };
       })
       .filter((pkg) => pkg.variants.length > 0);
-  }, [search]);
+  }, [search, packagesData]);
 
   const selectedVariants = useMemo(
     () => Object.keys(selected).map((key) => selected[key]).filter(Boolean),
@@ -147,7 +170,7 @@ export default function PackagesExplorer() {
         tests: Array.from(tests).sort((a, b) => a.localeCompare(b))
       }))
       .sort((a, b) => a.category.localeCompare(b.category));
-  }, [selectedVariants]);
+  }, [selectedVariants, packagesData]);
 
   const activeGrouped = useMemo(() => {
     if (!activeVariant) return [];
@@ -160,7 +183,7 @@ export default function PackagesExplorer() {
     return Array.from(byCategory.entries())
       .map(([category, tests]) => ({ category, tests }))
       .sort((a, b) => a.category.localeCompare(b.category));
-  }, [activeVariant]);
+  }, [activeVariant, packagesData]);
 
   const compareAllTests = useMemo(
     () => compareGrouped.flatMap((group) => group.tests),
@@ -168,13 +191,13 @@ export default function PackagesExplorer() {
   );
 
   const activeNotes = useMemo(
-    () => (activeVariant ? getApplicableNotesForTests(activeVariant.variant.tests || []) : []),
-    [activeVariant]
+    () => (activeVariant ? getApplicableNotesForTests(activeVariant.variant.tests || [], packagesData) : []),
+    [activeVariant, packagesData]
   );
 
   const compareNotes = useMemo(
-    () => getApplicableNotesForTests(compareAllTests),
-    [compareAllTests]
+    () => getApplicableNotesForTests(compareAllTests, packagesData),
+    [compareAllTests, packagesData]
   );
 
   const showToast = (message) => {
