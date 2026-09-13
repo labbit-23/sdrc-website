@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text } from "@chakra-ui/react";
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiDownload } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { siteConfig } from "@/data/siteConfig";
 import { FadeIn } from "@/components/site/motionUtils";
@@ -215,7 +215,7 @@ export default function HomePage() {
                 </Button>
               </HStack>
 
-              <SimpleGrid mt={4} columns={{ base: 1, sm: 3 }} spacing={3} maxW="760px">
+              <SimpleGrid mt={4} columns={{ base: 1, sm: 2, lg: 4 }} spacing={3} maxW="960px">
                 <Box as={Link} href={"https://wa.me/" + siteConfig.internalNotifyNumber} target="_blank" className="soft-card no-hover-lift" p={3}>
                   <Text fontSize="xs" color="gray.500">Need help selecting tests?</Text>
                   <HStack spacing={1.5}>
@@ -240,6 +240,38 @@ export default function HomePage() {
                 <Box as={Link} href={siteConfig.quickBookingUrl} className="soft-card no-hover-lift home-visit-card-cta" p={3} position="relative">
                   <Text fontSize="xs" color="gray.500">Want to book a home visit?</Text>
                   <Text fontSize="sm" color="teal.700" fontWeight="700">Request Home Visit</Text>
+                </Box>
+                <Box
+                  as={Link}
+                  href={siteConfig.patientAppUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="no-hover-lift"
+                  p={3}
+                  position="relative"
+                  borderRadius="12px"
+                  style={{ background: "linear-gradient(135deg, #00695f 0%, #008f82 100%)" }}
+                >
+                  <Box
+                    position="absolute"
+                    top="-8px"
+                    right="-6px"
+                    bg="orange.500"
+                    color="white"
+                    fontSize="9px"
+                    fontWeight="800"
+                    px={2}
+                    py="1px"
+                    borderRadius="full"
+                    letterSpacing="0.5px"
+                  >
+                    NEW
+                  </Box>
+                  <Text fontSize="xs" color="whiteAlpha.800">Manage everything in one place</Text>
+                  <HStack spacing={1.5}>
+                    <FiDownload color="white" />
+                    <Text fontSize="sm" color="white" fontWeight="700">SDRC Health App</Text>
+                  </HStack>
                 </Box>
               </SimpleGrid>
 

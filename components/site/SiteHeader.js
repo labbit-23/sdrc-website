@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Box, Button, Flex, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
-import { FiShoppingCart } from "react-icons/fi";
+import { FiShoppingCart, FiDownload } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { navItems, siteConfig } from "@/data/siteConfig";
 import { CART_UPDATED_EVENT, getCartCount } from "@/lib/cart";
@@ -174,9 +174,10 @@ export default function SiteHeader() {
               size="sm"
               variant="outline"
               display={{ base: "none", lg: "inline-flex" }}
-              title="Access your SDRC Health patient account"
+              title="Open the SDRC Health web app"
+              leftIcon={<FiDownload />}
             >
-              SDRC Health
+              SDRC Health App
             </Button>
             <Button
               as={Link}
@@ -295,9 +296,10 @@ export default function SiteHeader() {
                   rel="noopener noreferrer"
                   variant="outline"
                   size="sm"
-                  title="Access your SDRC Health patient account"
+                  title="Open the SDRC Health web app"
+                  leftIcon={<FiDownload />}
                 >
-                  SDRC Health
+                  SDRC Health App
                 </Button>
               </HStack>
             </VStack>

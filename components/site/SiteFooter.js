@@ -97,14 +97,48 @@ export default function SiteFooter() {
               </Link>
             </HStack>
 
-            <HStack spacing={2} flexWrap="wrap" justify={{ md: "flex-end" }}>
-              <Link href={siteConfig.apps.android} target="_blank">
-                <Image src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" width={120} height={36} style={{ width: "auto", height: 32 }} unoptimized />
+            <Box position="relative" display="inline-block">
+              <Link
+                href={siteConfig.patientAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: "inline-flex" }}
+              >
+                <HStack
+                  spacing={2.5}
+                  bg="whiteAlpha.100"
+                  border="1px solid"
+                  borderColor="whiteAlpha.300"
+                  borderRadius="full"
+                  pl={2}
+                  pr={4}
+                  py={1.5}
+                  _hover={{ bg: "whiteAlpha.200", borderColor: "#22c55e" }}
+                  transition="all .15s"
+                >
+                  <Image src="/assets/favicon-32x32.png" alt="" width={28} height={28} style={{ borderRadius: "6px" }} />
+                  <VStack align="start" spacing={0}>
+                    <Text fontSize="10px" color="gray.400" lineHeight="1">Try our web app</Text>
+                    <Text fontSize="sm" fontWeight="700" lineHeight="1.3">SDRC Health App</Text>
+                  </VStack>
+                </HStack>
               </Link>
-              <Link href={siteConfig.apps.ios} target="_blank">
-                <Image src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" width={108} height={36} style={{ width: "auto", height: 32 }} unoptimized />
-              </Link>
-            </HStack>
+              <Box
+                position="absolute"
+                top="-8px"
+                right="-6px"
+                bg="#22c55e"
+                color="#0f172a"
+                fontSize="9px"
+                fontWeight="800"
+                px={2}
+                py="1px"
+                borderRadius="full"
+                letterSpacing="0.5px"
+              >
+                NEW
+              </Box>
+            </Box>
           </VStack>
         </Container>
       </Box>
