@@ -151,6 +151,38 @@ export default function SiteHeader() {
                 </Box>
               ) : null}
             </Box>
+            <Box position="relative" display={{ base: "inline-block", lg: "none" }}>
+              <IconButton
+                as={Link}
+                href={siteConfig.patientAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                size="sm"
+                variant="outline"
+                bg="white"
+                color="teal.700"
+                borderColor="teal.300"
+                aria-label="Open the SDRC Health web app"
+                title="Open the SDRC Health web app"
+              >
+                <FiDownload />
+              </IconButton>
+              <Box
+                position="absolute"
+                top="-6px"
+                right="-6px"
+                bg="#22c55e"
+                color="white"
+                fontSize="8px"
+                fontWeight="800"
+                px="4px"
+                py="1px"
+                borderRadius="full"
+                letterSpacing="0.3px"
+              >
+                NEW
+              </Box>
+            </Box>
             <Button
               as={Link}
               href={siteConfig.reportsUrl}
