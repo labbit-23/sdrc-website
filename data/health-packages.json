@@ -834,6 +834,7 @@
     "Electrolytes": "Kidney",
     "Cholesterol": "Cardiac",
     "Urea": "Kidney",
+    "Serum Uric Acid": "Kidney",
     "Vitamin D (25-OH)": "Vitamins",
     "Vitamin D": "Vitamins",
     "Vitamin B12": "Vitamins",
