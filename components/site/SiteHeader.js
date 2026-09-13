@@ -160,11 +160,23 @@ export default function SiteHeader() {
               variant="outline"
               display={{ base: "none", lg: "inline-flex" }}
               title="Get our bot to send your reports. Chat using your registered mobile number."
-             
-            
+
+
               leftIcon={<FaWhatsapp />}
             >
               Download Reports
+            </Button>
+            <Button
+              as={Link}
+              href={siteConfig.patientAppUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="sm"
+              variant="outline"
+              display={{ base: "none", lg: "inline-flex" }}
+              title="Access your SDRC Health patient account"
+            >
+              SDRC Health
             </Button>
             <Button
               as={Link}
@@ -270,12 +282,23 @@ export default function SiteHeader() {
                   variant="outline"
                   size="sm"
                   title="Get our bot to send your reports. Chat using your registered mobile number."
-             
-            
+
+
               leftIcon={<FaWhatsapp />}
             >
               Download Reports
             </Button>
+                <Button
+                  as={Link}
+                  href={siteConfig.patientAppUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="outline"
+                  size="sm"
+                  title="Access your SDRC Health patient account"
+                >
+                  SDRC Health
+                </Button>
               </HStack>
             </VStack>
           </Box>

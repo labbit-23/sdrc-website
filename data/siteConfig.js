@@ -1,7 +1,8 @@
 const env = {
   reportsUrl: process.env.NEXT_PUBLIC_REPORTS_URL,
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER,
-  internalNotifyNumber: process.env.NEXT_PUBLIC_INTERNAL_NOTIFY_WHATSAPP
+  internalNotifyNumber: process.env.NEXT_PUBLIC_INTERNAL_NOTIFY_WHATSAPP,
+  patientAppUrl: process.env.NEXT_PUBLIC_PATIENT_APP_URL
 };
 
 export const siteConfig = {
@@ -13,6 +14,7 @@ export const siteConfig = {
   bookingUrl: "/tests",
   quickBookingUrl: "/home-visit",
   reportsUrl: env.reportsUrl || "http://120.138.8.37:9999/shivam/onlinereporting/index.jsp",
+  patientAppUrl: env.patientAppUrl || "https://app.sdrc.in",
   feedbackUrl: "/feedback",
   social: {
     facebook: "https://facebook.com/sdrc.in",
