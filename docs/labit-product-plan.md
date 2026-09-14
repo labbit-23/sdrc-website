@@ -14,6 +14,23 @@ the stack. Labit, SDRC, and future labs should be modeled as tenants/providers
 inside the existing Labit platform shape, with adapters where a provider uses a
 different core/LIMS.
 
+The commercial wedge is not "replace every lab's LIMS." The wedge is the
+patient/home-collection layer: acquisition, catalog, booking, payment, visit
+tracking, report access, delivery, reviews, and reminders. That is closer to a
+sellable product than any broader internal platform effort because the pieces
+already exist and are being exercised in real operations.
+
+Build Labit for SDRC first, but with product seams in place. SDRC should become
+the first serious tenant/customer of the product, not a one-off demo or an
+exception baked into the app. Use SDRC daily, harden the flow against real
+booking/payment/report edge cases, then package that same patient journey for
+other labs.
+
+The right route is deliberately not a long abstract-platform build. Ship the
+patient/home-collection wedge, keep adapter and capability boundaries clean, and
+offer deeper core/ops integration as an upsell for labs that want more than the
+front-door patient layer.
+
 ## System Roles
 
 ### Labit App
