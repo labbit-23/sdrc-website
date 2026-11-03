@@ -105,6 +105,7 @@ export default function PackagesExplorer() {
   const [toastMessage, setToastMessage] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [showAddLabel, setShowAddLabel] = useState(true);
+  const [exportBusy, setExportBusy] = useState(false);
   const [cartIds, setCartIds] = useState(new Set());
   const [packagesData, setPackagesData] = useState(defaultPackagesData);
 
@@ -222,6 +223,10 @@ export default function PackagesExplorer() {
     setToastMessage(message);
     window.setTimeout(() => setToastMessage(""), 1800);
   };
+
+  const yieldAfterPaint = () => new Promise((resolve) => {
+    window.requestAnimationFrame(() => window.setTimeout(resolve, 0));
+  });
 
   const addVariantToCart = (pkg, variant) => {
     trackEvent(
@@ -499,13 +504,16 @@ export default function PackagesExplorer() {
   }
 
   const handleShare = async (pkgName, variant) => {
+    if (exportBusy) return;
     const pageLink = `${window.location.origin}${variantShareUrl(pkgName)}`;
     const shareText = `${pkgName} - ${variant.name}\n${pageLink}`;
     const captureId = getVariantCaptureId(pkgName, variant.name);
     const node = document.getElementById("package-detail-capture") || document.getElementById(captureId);
 
     try {
+      setExportBusy(true);
       showToast("Preparing package image...");
+      await yieldAfterPaint();
       const canvas = (await renderPackageSummaryCanvas(pkgName, variant, activeVariant?.description)) || (await capturePackageCanvas()) || (await nodeToCanvas(node));
       if (canvas && await shareCanvas(canvas, `${slugify(pkgName)}-${slugify(variant.name)}.jpg`, shareText)) return;
 
@@ -525,14 +533,19 @@ export default function PackagesExplorer() {
     } catch (err) {
       if (err && (err.name === "AbortError" || /cancel/i.test(String(err.message || "")))) return;
       showToast("Unable to share right now");
+    } finally {
+      setExportBusy(false);
     }
   };
 
   const handleDownload = async (pkgName, variant) => {
+    if (exportBusy) return;
     const captureId = getVariantCaptureId(pkgName, variant.name);
     const node = document.getElementById("package-detail-capture") || document.getElementById(captureId);
     try {
+      setExportBusy(true);
       showToast("Preparing package image...");
+      await yieldAfterPaint();
       const canvas = (await renderPackageSummaryCanvas(pkgName, variant, activeVariant?.description)) || (await capturePackageCanvas()) || (await nodeToCanvas(node));
       if (!canvas) {
         showToast("Image export unavailable");
@@ -542,6 +555,8 @@ export default function PackagesExplorer() {
       showToast(downloaded ? "Package image downloaded" : "Image export unavailable");
     } catch (err) {
       showToast("Image export unavailable");
+    } finally {
+      setExportBusy(false);
     }
   };
 
@@ -656,24 +671,40 @@ export default function PackagesExplorer() {
   }
 
   const downloadCompareImage = async () => {
-    const canvas = await captureCompareCanvas();
-    if (!canvas) return;
-    await downloadCanvas(canvas, "sdrc-package-comparison.jpg");
-    showToast("Comparison downloaded as JPG");
+    if (exportBusy) return;
+    try {
+      setExportBusy(true);
+      showToast("Preparing comparison image...");
+      await yieldAfterPaint();
+      const canvas = await captureCompareCanvas();
+      if (!canvas) return;
+      await downloadCanvas(canvas, "sdrc-package-comparison.jpg");
+      showToast("Comparison downloaded as JPG");
+    } finally {
+      setExportBusy(false);
+    }
   };
 
   const shareCompareImage = async () => {
-    const canvas = await captureCompareCanvas();
-    if (!canvas) return;
-    const packagesLink = `${window.location.origin}/packages`;
-    const shared = await shareCanvas(canvas, "sdrc-package-comparison.jpg", `Compare SDRC packages\n${packagesLink}`);
-    if (!shared) {
-      await downloadCanvas(canvas, "sdrc-package-comparison.jpg");
-      if (await copyToClipboard(packagesLink)) {
-        showToast("Image downloaded. Packages link copied");
-      } else {
-        showToast("Image downloaded. Please share with /packages link");
+    if (exportBusy) return;
+    try {
+      setExportBusy(true);
+      showToast("Preparing comparison image...");
+      await yieldAfterPaint();
+      const canvas = await captureCompareCanvas();
+      if (!canvas) return;
+      const packagesLink = `${window.location.origin}/packages`;
+      const shared = await shareCanvas(canvas, "sdrc-package-comparison.jpg", `Compare SDRC packages\n${packagesLink}`);
+      if (!shared) {
+        await downloadCanvas(canvas, "sdrc-package-comparison.jpg");
+        if (await copyToClipboard(packagesLink)) {
+          showToast("Image downloaded. Packages link copied");
+        } else {
+          showToast("Image downloaded. Please share with /packages link");
+        }
       }
+    } finally {
+      setExportBusy(false);
     }
   };
 
@@ -895,6 +926,9 @@ export default function PackagesExplorer() {
       {activeVariant ? (
         <div
           className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-3"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="package-detail-title"
           onClick={() => setActiveVariant(null)}
         >
           <Card
@@ -903,12 +937,12 @@ export default function PackagesExplorer() {
             className="flex max-h-[88vh] w-full max-w-[680px] flex-col overflow-hidden p-0"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-3.5 py-2">
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2.5">
               <div className="flex min-w-0 items-center gap-3">
                 <img src="/assets/sdrc-logo.png" alt="SDRC" width="94" height="28" />
                 <div>
                   <p className="text-[11px] leading-4 text-slate-500">{activeVariant.pkgName}</p>
-                  <h3 className="text-sm font-extrabold leading-tight text-slate-900 md:text-base">{activeVariant.variant.name}</h3>
+                  <h3 id="package-detail-title" className="text-base font-extrabold leading-tight text-slate-900">{activeVariant.variant.name}</h3>
                 </div>
               </div>
               <div className="flex gap-1" data-export-hide="true">
@@ -917,6 +951,8 @@ export default function PackagesExplorer() {
                     as="button"
                     type="button"
                     aria-label="Share package"
+                    aria-busy={exportBusy}
+                    disabled={exportBusy}
                     onClick={() => handleShare(activeVariant.pkgName, activeVariant.variant)}
                   >
                     <FiShare2 />
@@ -926,6 +962,8 @@ export default function PackagesExplorer() {
                     as="button"
                     type="button"
                     aria-label="Download package summary"
+                    aria-busy={exportBusy}
+                    disabled={exportBusy}
                     onClick={() => handleDownload(activeVariant.pkgName, activeVariant.variant)}
                   >
                     <FiDownload />
@@ -937,7 +975,7 @@ export default function PackagesExplorer() {
               </div>
             </div>
 
-            <div className="shrink-0 border-b border-slate-100 bg-slate-50 px-3.5 py-1.5">
+            <div className="shrink-0 border-b border-slate-100 bg-slate-50 px-4 py-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-white px-2.5 py-1 text-[11px] leading-none text-[var(--sdrc-teal-deep)]">
                   {activeVariant.variant.parameters} parameters
@@ -946,29 +984,29 @@ export default function PackagesExplorer() {
                   INR {Number(activeVariant.variant.price).toLocaleString("en-IN")}
                 </span>
               </div>
-              <p className="mt-1 line-clamp-2 text-xs leading-[1.3] text-slate-600">{activeVariant.description}</p>
+              <p className="mt-1.5 text-xs leading-5 text-slate-600">{activeVariant.description}</p>
             </div>
 
             <div className="min-h-0 overflow-y-auto">
-              <div className="flex flex-col gap-0.5 px-3.5 py-1.5" data-export-content="package-tests">
+              <div className="flex flex-col gap-1.5 px-4 py-2.5" data-export-content="package-tests">
                 {activeGrouped.map((group) => (
                   <section key={group.category}>
-                    <div className="mb-px flex items-center gap-1.5">
+                    <div className="mb-0.5 flex items-center gap-1.5">
                       {packagesData.categoryIconMap?.[group.category] ? (
-                        <img src={packagesData.categoryIconMap[group.category]} alt="" width={14} height={14} />
+                        <img src={packagesData.categoryIconMap[group.category]} alt="" width={16} height={16} />
                       ) : null}
-                      <p className="text-xs font-extrabold leading-4 text-[var(--sdrc-teal-deep)]">{group.category}</p>
+                      <p className="text-xs font-extrabold text-[var(--sdrc-teal-deep)]">{group.category}</p>
                     </div>
-                    <div className="grid gap-x-4 gap-y-0 md:grid-cols-2">
+                    <div className="flex flex-col">
                       {group.tests.map((test) => (
-                        <p key={test} className="text-[13px] leading-[1.22] text-slate-800">• {test}</p>
+                        <p key={test} className="text-[13px] leading-[1.4] text-slate-800">• {test}</p>
                       ))}
                     </div>
                   </section>
                 ))}
               </div>
 
-              <div className="border-t border-slate-200 bg-white px-3.5 py-1.5">
+              <div className="border-t border-slate-200 bg-slate-50 px-4 py-2">
                 {activeVariant.variant.sample_report_url ? (
                   <Link href={activeVariant.variant.sample_report_url} target="_blank" rel="noopener noreferrer" className="mb-2 block text-xs font-bold text-[var(--sdrc-teal-deep)] underline">
                     View Sample DEXA Report
@@ -976,9 +1014,9 @@ export default function PackagesExplorer() {
                 ) : null}
                 {activeNotes.length > 0 ? (
                   <div data-export-hide="true">
-                    <p className="mb-1 text-[11px] font-bold text-slate-500">Important notes</p>
+                    <p className="mb-1 text-xs font-bold text-slate-700">Important notes</p>
                     {activeNotes.map((note) => (
-                      <p key={note} className="text-[11px] text-slate-500">{note}</p>
+                      <p key={note} className="text-[11px] leading-4 text-slate-600">{note}</p>
                     ))}
                   </div>
                 ) : null}
@@ -1002,11 +1040,11 @@ export default function PackagesExplorer() {
               <div />
               <div className="flex gap-1">
                 {isMobile ? (
-                  <IconButton as="button" type="button" aria-label="Share comparison" onClick={shareCompareImage}>
+                  <IconButton as="button" type="button" aria-label="Share comparison" aria-busy={exportBusy} disabled={exportBusy} onClick={shareCompareImage}>
                     <FiShare2 />
                   </IconButton>
                 ) : (
-                  <IconButton as="button" type="button" aria-label="Download comparison JPG" onClick={downloadCompareImage}>
+                  <IconButton as="button" type="button" aria-label="Download comparison JPG" aria-busy={exportBusy} disabled={exportBusy} onClick={downloadCompareImage}>
                     <FiDownload />
                   </IconButton>
                 )}
