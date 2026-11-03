@@ -621,53 +621,99 @@ export default function PackagesExplorer() {
   }
 
   async function captureCompareCanvas() {
-    const html2canvas = await ensureHtml2Canvas();
-    if (!html2canvas) {
-      showToast("Image export unavailable");
-      return null;
-    }
-    const source = document.getElementById("compare-capture");
-    if (!source) return null;
+    if (typeof window === "undefined" || selectedVariants.length < 2) return null;
 
-    const wrapper = document.createElement("div");
-    wrapper.style.position = "fixed";
-    wrapper.style.left = "-100000px";
-    wrapper.style.top = "0";
-    wrapper.style.background = "#ffffff";
-    wrapper.style.padding = "28px";
-    wrapper.style.width = `${Math.max(source.scrollWidth, 980)}px`;
+    const width = 1400;
+    const margin = 48;
+    const testColumnWidth = 520;
+    const variantColumnWidth = (width - (margin * 2) - testColumnWidth) / selectedVariants.length;
+    const headerHeight = 154;
+    const categoryHeight = 38;
+    const testRowHeight = 34;
+    const notesHeight = compareNotes.length > 0 ? 36 + (compareNotes.length * 28) : 0;
+    const bodyHeight = compareGrouped.reduce(
+      (total, group) => total + categoryHeight + (group.tests.length * testRowHeight),
+      0
+    );
 
-    const clone = source.cloneNode(true);
-    clone.style.overflow = "visible";
-    clone.style.maxHeight = "none";
-    clone.style.width = "100%";
-    clone.querySelectorAll("th, td, div, span, p").forEach((el) => {
-      const current = Number.parseFloat(window.getComputedStyle(el).fontSize || "0");
-      if (!Number.isNaN(current) && current < 16) el.style.fontSize = "16px";
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = headerHeight + bodyHeight + notesHeight + 70;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#008f82";
+    ctx.fillRect(0, 0, canvas.width, 8);
+    await drawImageSafe(ctx, "/assets/sdrc-logo.png", margin, 28, 138, 42);
+
+    ctx.fillStyle = "#334155";
+    ctx.font = "800 28px Arial";
+    ctx.fillText("Package Comparison", margin + 164, 59);
+    ctx.fillStyle = "#64748b";
+    ctx.font = "700 19px Arial";
+    ctx.fillText("Test", margin, 128);
+
+    selectedVariants.forEach((item, index) => {
+      const centerX = margin + testColumnWidth + (index * variantColumnWidth) + (variantColumnWidth / 2);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "800 19px Arial";
+      const nameLines = wrapCanvasText(ctx, item.variantName, variantColumnWidth - 28).slice(0, 2);
+      nameLines.forEach((line, lineIndex) => ctx.fillText(line, centerX, 95 + (lineIndex * 21)));
+      ctx.fillStyle = "#f26939";
+      ctx.font = "800 21px Arial";
+      ctx.fillText(`INR ${Number(item.price).toLocaleString("en-IN")}`, centerX, 137);
     });
-    wrapper.appendChild(clone);
-    document.body.appendChild(wrapper);
+    ctx.textAlign = "left";
 
-    try {
-      const width = wrapper.scrollWidth;
-      const height = wrapper.scrollHeight;
-      const maxDim = 14000;
-      const scale = Math.min(3, maxDim / Math.max(width, height));
+    let y = headerHeight;
+    compareGrouped.forEach((group) => {
+      ctx.fillStyle = "#f1f5f9";
+      ctx.fillRect(margin, y, width - (margin * 2), categoryHeight);
+      ctx.fillStyle = "#00695f";
+      ctx.font = "800 18px Arial";
+      ctx.fillText(group.category, margin + 12, y + 25);
+      y += categoryHeight;
 
-      return await html2canvas(wrapper, {
-        backgroundColor: "#ffffff",
-        scale: Math.max(1, scale),
-        useCORS: true,
-        width,
-        height,
-        windowWidth: width,
-        windowHeight: height,
-        scrollX: 0,
-        scrollY: 0,
+      group.tests.forEach((test) => {
+        ctx.strokeStyle = "#e2e8f0";
+        ctx.beginPath();
+        ctx.moveTo(margin, y + testRowHeight);
+        ctx.lineTo(width - margin, y + testRowHeight);
+        ctx.stroke();
+        ctx.fillStyle = "#1e293b";
+        ctx.font = "18px Arial";
+        ctx.fillText(test, margin + 12, y + 23);
+        selectedVariants.forEach((item, index) => {
+          if (!item.tests.includes(test)) return;
+          const centerX = margin + testColumnWidth + (index * variantColumnWidth) + (variantColumnWidth / 2);
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#008f82";
+          ctx.font = "800 22px Arial";
+          ctx.fillText("✓", centerX, y + 24);
+        });
+        ctx.textAlign = "left";
+        y += testRowHeight;
       });
-    } finally {
-      wrapper.remove();
+    });
+
+    if (compareNotes.length > 0) {
+      y += 18;
+      ctx.fillStyle = "#475569";
+      ctx.font = "800 16px Arial";
+      ctx.fillText("Important notes", margin, y);
+      y += 26;
+      ctx.font = "15px Arial";
+      compareNotes.forEach((note) => {
+        ctx.fillText(note, margin, y);
+        y += 28;
+      });
     }
+
+    ctx.fillStyle = "#64748b";
+    ctx.font = "15px Arial";
+    ctx.fillText("SDRC Diagnostics · Jade Arcade, Paradise, Secunderabad · sdrc.in", margin, canvas.height - 24);
+    return canvas;
   }
 
   const downloadCompareImage = async () => {
@@ -937,7 +983,7 @@ export default function PackagesExplorer() {
             className="flex max-h-[88vh] w-full max-w-[680px] flex-col overflow-hidden p-0"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2.5">
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-3.5 py-2">
               <div className="flex min-w-0 items-center gap-3">
                 <img src="/assets/sdrc-logo.png" alt="SDRC" width="94" height="28" />
                 <div>
@@ -975,7 +1021,7 @@ export default function PackagesExplorer() {
               </div>
             </div>
 
-            <div className="shrink-0 border-b border-slate-100 bg-slate-50 px-4 py-2">
+            <div className="shrink-0 border-b border-slate-100 bg-slate-50 px-3.5 py-1.5">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-white px-2.5 py-1 text-[11px] leading-none text-[var(--sdrc-teal-deep)]">
                   {activeVariant.variant.parameters} parameters
@@ -984,11 +1030,11 @@ export default function PackagesExplorer() {
                   INR {Number(activeVariant.variant.price).toLocaleString("en-IN")}
                 </span>
               </div>
-              <p className="mt-1.5 text-xs leading-5 text-slate-600">{activeVariant.description}</p>
+              <p className="mt-1 text-xs leading-4 text-slate-600">{activeVariant.description}</p>
             </div>
 
             <div className="min-h-0 overflow-y-auto">
-              <div className="flex flex-col gap-1.5 px-4 py-2.5" data-export-content="package-tests">
+              <div className="flex flex-col gap-1 px-3.5 py-1.5" data-export-content="package-tests">
                 {activeGrouped.map((group) => (
                   <section key={group.category}>
                     <div className="mb-0.5 flex items-center gap-1.5">
@@ -999,14 +1045,14 @@ export default function PackagesExplorer() {
                     </div>
                     <div className="flex flex-col">
                       {group.tests.map((test) => (
-                        <p key={test} className="text-[13px] leading-[1.4] text-slate-800">• {test}</p>
+                        <p key={test} className="text-[12px] leading-[1.3] text-slate-800">• {test}</p>
                       ))}
                     </div>
                   </section>
                 ))}
               </div>
 
-              <div className="border-t border-slate-200 bg-slate-50 px-4 py-2">
+              <div className="border-t border-slate-200 bg-slate-50 px-3.5 py-1.5">
                 {activeVariant.variant.sample_report_url ? (
                   <Link href={activeVariant.variant.sample_report_url} target="_blank" rel="noopener noreferrer" className="mb-2 block text-xs font-bold text-[var(--sdrc-teal-deep)] underline">
                     View Sample DEXA Report
