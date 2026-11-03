@@ -4,165 +4,19 @@ export const dynamic = "force-dynamic";
 
 import Image from "next/image";
 import Link from "next/link";
-import { Box, Container, Grid, Heading, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { FadeIn } from "@/components/site/motionUtils";
+import { Card } from "@/components/ui/card";
+import { Chip, TwContainer } from "@/components/site/tw-layout";
 
 const approachCards = [
-  { title: "Clinical context first", text: "We encourage patients and doctors to share clinical details and previous history wherever possible, so reports and impressions are meaningful and not just numbers or images.", color: "#008f82" },
-  { title: "Quality and standardisation", text: "Internal quality controls, calibration logs and participation in external quality programs help ensure reliability across disciplines.", color: "#f26939" },
-  { title: "Clear communication", text: "We keep reports readable and structured, with clear flags, comments and references to support treating physicians in decision-making.", color: "#7c3aed" },
+  { title: "Clinical context first", text: "We encourage patients and doctors to share clinical details and previous history wherever possible, so reports and impressions are meaningful and not just numbers or images.", accent: "teal" },
+  { title: "Quality and standardisation", text: "Internal quality controls, calibration logs and participation in external quality programs help ensure reliability across disciplines.", accent: "orange" },
+  { title: "Clear communication", text: "We keep reports readable and structured, with clear flags, comments and references to support treating physicians in decision-making.", accent: "teal" }
 ];
 
 export default function AboutPage() {
-  return (
-    <>
-      <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
-        <Container maxW="1200px">
-          <Grid templateColumns={{ base: "1fr", lg: "1.05fr .95fr" }} gap={10} alignItems="center">
-            <Box>
-              <span className="chip chip-teal" style={{ marginBottom: 16, display: "inline-flex" }}>Since 1983 · 40+ years</span>
-              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title" mt={2}>
-                SDRC Diagnostics
-                <Box as="span" color="teal.700" className="hero-subline">40 Years of Service</Box>
-              </Heading>
-              <Text mt={4} fontSize={{ base: "md", md: "lg" }} color="gray.700">
-                SDRC (Secunderabad Diagnostic and Research Centre) is a multi-specialty diagnostic centre at Jade Arcade,
-                Paradise, bringing together imaging, cardiology, neurology, pulmonology and a comprehensive laboratory under one roof.
-              </Text>
-              <Text mt={3} color="gray.600" fontSize="sm" display={{ base: "none", md: "block" }}>
-                Established in 1983, SDRC has grown from a standalone laboratory into a benchmark for diagnostics in Secunderabad,
-                combining experienced professionals, calibrated equipment and structured reporting.
-              </Text>
-            </Box>
-
-            <Box className="soft-card-teal" p={6}>
-              <Grid templateColumns={{ base: "1fr", sm: "1fr auto" }} gap={3} alignItems="start">
-                <Heading size="md">At a glance</Heading>
-                <Image src="/assets/sdrc-40-years.png" alt="Over 40 years" width={72} height={72} />
-              </Grid>
-              <VStack align="stretch" gap={2} mt={3} fontSize="sm" color="gray.700">
-                <Text>✔ Serving Secunderabad since 1983</Text>
-                <Text>✔ Multi-modality imaging (CT, X-Ray, Mammography, DEXA, Ultrasound and Doppler)</Text>
-                <Text>✔ Cardio-pulmonary and neuro diagnostics (ECG, 2D-Echo, TMT, EEG, ENMG, Spirometry)</Text>
-                <Text>✔ Comprehensive laboratory including biochemistry, haematology and microbiology</Text>
-                <Text>✔ NABL accredited laboratory for select parameters</Text>
-                <Text>✔ Online and WhatsApp report access with home sample collection</Text>
-              </VStack>
-            </Box>
-          </Grid>
-        </Container>
-      </Box>
-
-      <Container maxW="1200px" py={12}>
-        <VStack align="stretch" gap={12}>
-          <FadeIn>
-            <Box>
-              <span className="chip chip-teal" style={{ marginBottom: 16, display: "inline-flex" }}>How we work</span>
-              <Heading size="xl" mb={5} mt={2}>Our approach to diagnostics</Heading>
-              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-                {approachCards.map((card) => (
-                  <Box key={card.title} className="soft-card" p={6} style={{ borderTop: `3px solid ${card.color}` }}>
-                    <Text fontWeight="700" mb={2}>{card.title}</Text>
-                    <Text fontSize="sm" color="gray.700">{card.text}</Text>
-                  </Box>
-                ))}
-              </SimpleGrid>
-            </Box>
-          </FadeIn>
-
-          <FadeIn delay={60}>
-            <Box display={{ base: "none", md: "block" }}>
-              <Heading size="xl" mb={4}>Clinical &amp; management team</Heading>
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-                <Box className="soft-card-teal" p={6}>
-                  <Text fontWeight="700" mb={2}>Clinical leadership</Text>
-                  <Text fontSize="sm" color="gray.700" mb={3}>
-                    SDRC reporting is led by experienced consultants across pathology, radiology, cardiology and other specialties,
-                    with long-standing hospital and academic backgrounds.
-                  </Text>
-                  <Text fontSize="sm" color="gray.700">• Pathology and laboratory medicine</Text>
-                  <Text fontSize="sm" color="gray.700">• Radiology and imaging (CT, Ultrasound, X-Ray, Mammography, DEXA)</Text>
-                  <Text fontSize="sm" color="gray.700">• Cardiology and pulmonology (ECG, 2D-Echo, TMT, Spirometry)</Text>
-                  <Text fontSize="sm" color="gray.700">• Neurology-related diagnostics (EEG and ENMG)</Text>
-                  <Text fontSize="xs" color="gray.500" mt={3}>Detailed doctor profiles can be shared on request or through the referring physician.</Text>
-                </Box>
-                <Box className="soft-card" p={6}>
-                  <Text fontWeight="700" mb={2}>Operations and quality</Text>
-                  <Text fontSize="sm" color="gray.700" mb={3}>
-                    The management team oversees quality systems and technology adoption to keep turnaround times predictable and reporting consistent.
-                  </Text>
-                  <Text fontSize="sm" color="gray.700">• Standard operating procedures for each department</Text>
-                  <Text fontSize="sm" color="gray.700">• Internal audits and external quality participation</Text>
-                  <Text fontSize="sm" color="gray.700">• Digital report delivery via portal, email and WhatsApp</Text>
-                  <Text fontSize="sm" color="gray.700">• Continuous technical and customer-care training</Text>
-                </Box>
-              </SimpleGrid>
-            </Box>
-          </FadeIn>
-
-          <FadeIn delay={80}>
-            <Box display={{ base: "none", md: "block" }}>
-              <Heading size="xl" mb={4}>Our journey since 1983</Heading>
-              <Grid templateColumns={{ base: "1fr", md: "1.4fr 1fr" }} gap={6} alignItems="center">
-                <Box className="soft-card" p={6}>
-                  <Text fontSize="sm" color="gray.700" mb={3}>
-                    SDRC began in 1983 as a focused diagnostic laboratory in Secunderabad. Over time, services expanded from routine
-                    pathology to specialised testing, imaging and cardio-pulmonary diagnostics.
-                  </Text>
-                  <Text fontSize="sm" color="gray.700" mb={3}>
-                    Today, the main centre at Jade Arcade brings together CT, Ultrasound and Doppler, Digital X-Ray, Mammography, DEXA,
-                    ECG/2D-Echo, EEG/ENMG, TMT, Spirometry and a comprehensive laboratory under one roof.
-                  </Text>
-                  <Text fontSize="sm" color="gray.700">
-                    SDRC has also expanded with collection centres and digital report delivery with online booking support.
-                  </Text>
-                </Box>
-                <Box display="flex" justifyContent={{ base: "center", md: "flex-end" }}>
-                  <Box className="soft-card" borderRadius="full" px={6} py={4}>
-                    <Image src="/assets/sdrc-40-years.png" alt="40 years" width={120} height={120} />
-                  </Box>
-                </Box>
-              </Grid>
-            </Box>
-          </FadeIn>
-
-          <FadeIn delay={60}>
-            <Box display={{ base: "none", md: "block" }}>
-              <Heading size="xl" mb={4}>Centres &amp; coverage</Heading>
-              <Box className="soft-card" p={6}>
-                <Text fontSize="sm" color="gray.700" mb={3}>
-                  The main SDRC Diagnostics centre is at Jade Arcade (Corporate Block), Paradise, MG Road, Secunderabad.
-                  From this hub we manage imaging, cardiology, neurology and an NABL accredited laboratory.
-                </Text>
-                <Text fontSize="sm" color="gray.700" mb={3}>
-                  SDRC also operates collection centres at SD Road, West Marredpally and Yapral, with home sample collection support.
-                </Text>
-                <Text fontSize="sm" color="gray.700">
-                  For full addresses, directions and centre-wise timings, visit the{" "}
-                  <Link href="/contact">
-                    <Box as="span" color="teal.700" fontWeight="700">Contact</Box>
-                  </Link>{" "}page.
-                </Text>
-              </Box>
-            </Box>
-          </FadeIn>
-
-          <FadeIn delay={60}>
-            <Box>
-              <Heading size="xl" mb={4}>Reports and interpretation</Heading>
-              <Box className="soft-card" p={6}>
-                <Text fontSize="sm" color="gray.700" mb={3}>
-                  Reports are shared via print, email and WhatsApp. Our team can clarify report structure and technical aspects
-                  so clinical decisions remain with your treating physician.
-                </Text>
-                <Text fontSize="sm" color="gray.700">
-                  Many health panels are designed to be practical and clinically relevant. Additional tests can be added based on doctor advice.
-                </Text>
-              </Box>
-            </Box>
-          </FadeIn>
-        </VStack>
-      </Container>
-    </>
-  );
+  return <>
+    <section className="brochure-bg py-10 md:py-14"><TwContainer className="grid items-center gap-8 lg:grid-cols-[1.05fr_.95fr] lg:gap-10"><div><Chip>Since 1983 · 40+ years</Chip><h1 className="hero-title mt-4 text-slate-800">SDRC Diagnostics<span className="hero-subline text-[var(--sdrc-teal-deep)]">40 Years of Service</span></h1><p className="mt-4 text-base leading-7 text-slate-700 md:text-lg md:leading-8">SDRC is a multi-specialty diagnostic centre at Jade Arcade, Paradise, bringing together imaging, cardiology, neurology, pulmonology and a comprehensive laboratory under one roof.</p><p className="mt-3 hidden text-sm leading-7 text-slate-600 md:block">Established in 1983, SDRC has grown from a standalone laboratory into a benchmark for diagnostics in Secunderabad, combining experienced professionals, calibrated equipment and structured reporting.</p></div><Card accent="teal" className="hero-side-card p-6"><div className="flex items-start justify-between gap-4"><h2 className="text-lg font-bold leading-snug text-slate-800">At a glance</h2><Image src="/assets/sdrc-40-years.png" alt="Over 40 years" width={124} height={60} className="h-auto w-[124px] shrink-0" /></div><div className="mt-4 flex flex-col gap-2.5 text-sm leading-7 text-slate-700"><p>✓ Serving Secunderabad since 1983</p><p>✓ Multi-modality imaging including CT, X-Ray, Mammography, DEXA, Ultrasound and Doppler</p><p>✓ Cardio-pulmonary and neuro diagnostics</p><p>✓ Comprehensive laboratory including biochemistry, haematology and microbiology</p><p>✓ NABL accredited laboratory for select parameters</p><p>✓ Online and WhatsApp report access with home sample collection</p></div></Card></TwContainer></section>
+    <main className="py-12"><TwContainer><FadeIn><section><Chip>How we work</Chip><h2 className="mb-5 mt-3 text-2xl font-bold text-slate-800">Our approach to diagnostics</h2><div className="grid gap-6 md:grid-cols-3">{approachCards.map((card) => <Card key={card.title} accent={card.accent} className="p-6"><h3 className="font-bold text-slate-800">{card.title}</h3><p className="mt-2 text-sm leading-7 text-slate-700">{card.text}</p></Card>)}</div></section></FadeIn><FadeIn delay={60}><section className="mt-12 hidden md:block"><h2 className="mb-4 text-2xl font-bold text-slate-800">Centres &amp; coverage</h2><Card className="p-6"><p className="text-sm leading-7 text-slate-700">The main SDRC Diagnostics centre is at Jade Arcade (Corporate Block), Paradise, MG Road, Secunderabad. From this hub we manage imaging, cardiology, neurology and an NABL accredited laboratory.</p><p className="mt-3 text-sm leading-7 text-slate-700">SDRC also operates collection centres at SD Road, West Marredpally and Yapral, with home sample collection support.</p><p className="mt-3 text-sm leading-7 text-slate-700">For full addresses, directions and centre-wise timings, visit the <Link href="/contact" className="font-bold text-[var(--sdrc-teal-deep)] underline">Contact</Link> page.</p></Card></section></FadeIn><FadeIn delay={80}><section className="mt-12"><h2 className="mb-4 text-2xl font-bold text-slate-800">Reports and interpretation</h2><Card className="p-6"><p className="text-sm leading-7 text-slate-700">Reports are shared via print, email and WhatsApp. Our team can clarify report structure and technical aspects so clinical decisions remain with your treating physician.</p><p className="mt-3 text-sm leading-7 text-slate-700">Many health panels are designed to be practical and clinically relevant. Additional tests can be added based on doctor advice.</p></Card></section></FadeIn></TwContainer></main>
+  </>;
 }

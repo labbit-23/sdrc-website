@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Box, Button, HStack, SimpleGrid, Spinner, Text, VStack, useBreakpointValue } from "@chakra-ui/react";
 import { FiHome } from "react-icons/fi";
 import { BsBuilding } from "react-icons/bs";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function parseSlotHour(slot) {
   const candidate = String(slot?.start_time || slot?.slot_name || "");
@@ -46,8 +47,7 @@ export default function VisitDateTimeSelector({
   onRevealDateTimeSelection,
   collapsedSlotLabel = ""
 }) {
-  const maxVisibleDates = useBreakpointValue({ base: 5, md: 7 }) ?? 5;
-  const visibleDateOptions = dateOptions.slice(0, maxVisibleDates);
+  const visibleDateOptions = dateOptions.slice(0, 7);
   const orderedSlots = useMemo(
     () =>
       [...slots].sort((a, b) => {
@@ -83,24 +83,21 @@ export default function VisitDateTimeSelector({
   }, [activePeriod, periodTabs]);
 
   return (
-    <VStack align="stretch" gap={2}>
+    <div className="flex flex-col gap-3">
       {allowVisitTypeToggle ? (
-        <VStack align="stretch" gap={1}>
-          <Text fontSize="sm" color="gray.700" fontWeight="600">Visit Type</Text>
-          <HStack spacing={2} p={2} borderRadius="full" bg="gray.50" borderWidth="1px" borderColor="gray.200" w="fit-content">
-            <HStack
-              spacing={1}
-              px={2}
-              py={1}
-              borderRadius="full"
-              bg={!homeVisitRequested ? "teal.50" : "gray.100"}
-              color={!homeVisitRequested ? "teal.700" : "gray.600"}
+        <div className="flex flex-col gap-1">
+          <p className="text-sm font-semibold text-slate-700">Visit Type</p>
+          <div className="flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 p-2">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-bold",
+                !homeVisitRequested ? "bg-[var(--sdrc-teal-soft)] text-[var(--sdrc-teal-deep)]" : "bg-slate-100 text-slate-600"
+              )}
             >
               <BsBuilding size={12} />
-              <Text fontSize="xs" fontWeight="700">Center</Text>
-            </HStack>
-            <Box
-              as="button"
+              Center
+            </span>
+            <button
               type="button"
               role="switch"
               aria-checked={homeVisitRequested}
@@ -110,76 +107,59 @@ export default function VisitDateTimeSelector({
                 if (lockCenterVisit) return;
                 onHomeVisitChange?.(!homeVisitRequested);
               }}
-              position="relative"
-              w="52px"
-              h="30px"
-              borderRadius="full"
-              bg={homeVisitRequested ? "teal.600" : "gray.300"}
-              borderWidth="1px"
-              borderColor={homeVisitRequested ? "teal.600" : "gray.300"}
-              transition="all .2s ease"
-              opacity={formBusy || lockCenterVisit ? 0.6 : 1}
-              cursor={formBusy || lockCenterVisit ? "not-allowed" : "pointer"}
+              className={cn(
+                "relative h-[30px] w-[52px] rounded-full border transition disabled:cursor-not-allowed disabled:opacity-60",
+                homeVisitRequested ? "border-[var(--sdrc-teal-600)] bg-[var(--sdrc-teal-600)]" : "border-slate-300 bg-slate-300"
+              )}
             >
-              <Box
-                position="absolute"
-                top="3px"
-                left={homeVisitRequested ? "25px" : "3px"}
-                w="22px"
-                h="22px"
-                borderRadius="full"
-                bg="white"
-                boxShadow="sm"
-                transition="left .2s ease"
+              <span
+                className={cn(
+                  "absolute top-[3px] size-[22px] rounded-full bg-white shadow-sm transition-[left]",
+                  homeVisitRequested ? "left-[25px]" : "left-[3px]"
+                )}
               />
-            </Box>
-            <HStack
-              spacing={1}
-              px={2}
-              py={1}
-              borderRadius="full"
-              bg={homeVisitRequested ? "teal.50" : "gray.100"}
-              color={homeVisitRequested ? "teal.700" : "gray.600"}
+            </button>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-bold",
+                homeVisitRequested ? "bg-[var(--sdrc-teal-soft)] text-[var(--sdrc-teal-deep)]" : "bg-slate-100 text-slate-600"
+              )}
             >
               <FiHome size={12} />
-              <Text fontSize="xs" fontWeight="700">Home</Text>
-            </HStack>
-          </HStack>
-          <Text fontSize="xs" color="gray.500">
+              Home
+            </span>
+          </div>
+          <p className="text-xs text-slate-500">
             {lockCenterVisit
               ? "One or more selected items require center visit."
               : "Select home collection or center visit for this request."}
-          </Text>
-        </VStack>
+          </p>
+        </div>
       ) : null}
 
       {showDateTimeSelection ? (
-        <Text fontSize="xs" color="gray.600">
+        <p className="text-xs text-slate-600">
           {homeVisitRequested
             ? "Select preferred home-visit date and time."
             : "Select tentative center-visit date and time. Our team may adjust and confirm."}
-        </Text>
+        </p>
       ) : (
-        <Box px={3} py={2} borderRadius="md" bg="teal.50" borderWidth="1px" borderColor="teal.100">
-          <Text fontSize="xs" color="gray.700">
+        <div className="rounded-md border border-teal-100 bg-[var(--sdrc-teal-soft)] px-3 py-2">
+          <p className="text-xs text-slate-700">
             Center visit default slot: <strong>{collapsedSlotLabel}</strong>{" "}
-            <Box
-              as="button"
+            <button
               type="button"
               onClick={() => onRevealDateTimeSelection?.()}
-              color="teal.700"
-              fontWeight="700"
-              textDecoration="underline"
-              ml={1}
+              className="ml-1 font-bold text-[var(--sdrc-teal-deep)] underline"
             >
               Change
-            </Box>
-          </Text>
-        </Box>
+            </button>
+          </p>
+        </div>
       )}
 
       {showDateTimeSelection ? (
-        <SimpleGrid columns={{ base: 5, md: 7 }} gap={1.5}>
+        <div className="grid grid-cols-5 gap-1.5 md:grid-cols-7">
         {visibleDateOptions.map((day) => {
           const active = preferredDate === day.iso;
           const dayMonth = day.month || "";
@@ -189,65 +169,61 @@ export default function VisitDateTimeSelector({
             <Button
               key={day.iso}
               variant={active ? "solid" : "outline"}
-              h={{ base: "72px", md: "84px" }}
-              px={1}
-              borderRadius={{ base: "lg", md: "xl" }}
+              className="h-[72px] flex-col gap-0 rounded-lg px-1 md:h-[84px] md:rounded-xl"
               disabled={formBusy}
               onClick={() => onDateChange?.(day.iso)}
             >
-              <VStack gap={0}>
-                <Text fontSize="10px" opacity={0.9}>{dayMonth}</Text>
-                <Text fontSize={{ base: "xl", md: "2xl" }} lineHeight="1" fontWeight="800">{dayNum}</Text>
-                <Text fontSize="11px" color={active ? "white" : "gray.600"}>{dayWeek}</Text>
-              </VStack>
+              <span className="text-[10px] opacity-90">{dayMonth}</span>
+              <span className="text-xl font-extrabold leading-none md:text-2xl">{dayNum}</span>
+              <span className={cn("text-[11px]", active ? "text-white" : "text-slate-600")}>{dayWeek}</span>
             </Button>
           );
         })}
-        </SimpleGrid>
+        </div>
       ) : null}
 
       {showDateTimeSelection && loadingSlots ? (
-        <HStack>
-          <Spinner size="sm" color="teal.500" />
-          <Text fontSize="xs" color="gray.600">Loading time slots...</Text>
-        </HStack>
+        <div className="flex items-center gap-2">
+          <span className="inline-block size-4 animate-spin rounded-full border-2 border-[var(--sdrc-teal)] border-r-transparent" />
+          <p className="text-xs text-slate-600">Loading time slots...</p>
+        </div>
       ) : null}
 
       {showDateTimeSelection && !loadingSlots ? (
-        <Box borderWidth="1px" borderColor="orange.100" borderRadius="xl" p={2} bg="orange.50">
-          <HStack spacing={1.5} mb={2} flexWrap="wrap" p={1} borderRadius="md" bg="white" borderWidth="1px" borderColor="orange.100">
+        <div className="rounded-xl border border-orange-100 bg-orange-50 p-2">
+          <div className="mb-2 flex flex-wrap gap-1.5 rounded-md border border-orange-100 bg-white p-1">
             {periodTabs.map((period) => (
               <Button
                 key={period}
                 size="xs"
-                variant="solid"
-                bg={activePeriod === period ? "orange.500" : "gray.100"}
-                color={activePeriod === period ? "white" : "gray.700"}
-                _hover={activePeriod === period ? { bg: "orange.600" } : { bg: "gray.200" }}
+                variant={activePeriod === period ? "solid" : "ghost"}
+                className={cn(
+                  activePeriod === period
+                    ? "border-[var(--sdrc-orange)] bg-[var(--sdrc-orange)] text-white hover:border-[#f05a2b] hover:bg-[#f05a2b]"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                )}
                 onClick={() => setActivePeriod(period)}
                 disabled={formBusy}
               >
                 {period}
               </Button>
             ))}
-          </HStack>
-          <SimpleGrid columns={2} gap={1.5}>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
             {(slotGroups[activePeriod] || []).map((slot) => {
               const active = preferredSlot === slot.id;
               const toneBg = activePeriod === "Morning" ? "teal.50" : activePeriod === "Afternoon" ? "orange.50" : "orange.100";
               return (
                 <Button
                   key={slot.id}
-                  h={{ base: "40px", md: "42px" }}
-                  px={2}
-                  borderRadius="md"
                   variant={active ? "solid" : "outline"}
-                  bg={active ? undefined : toneBg}
-                  justifyContent="center"
-                  fontSize="xs"
-                  whiteSpace="nowrap"
-                  overflow="hidden"
-                  textOverflow="ellipsis"
+                  size="sm"
+                  className={cn(
+                    "h-10 overflow-hidden text-ellipsis whitespace-nowrap rounded-md px-2 text-xs md:h-[42px]",
+                    !active && toneBg === "teal.50" && "bg-teal-50",
+                    !active && toneBg === "orange.50" && "bg-orange-50",
+                    !active && toneBg === "orange.100" && "bg-orange-100"
+                  )}
                   disabled={formBusy}
                   onClick={() => onSlotChange?.(slot.id)}
                 >
@@ -255,9 +231,9 @@ export default function VisitDateTimeSelector({
                 </Button>
               );
             })}
-          </SimpleGrid>
-        </Box>
+          </div>
+        </div>
       ) : null}
-    </VStack>
+    </div>
   );
 }

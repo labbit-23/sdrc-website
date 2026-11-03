@@ -4,27 +4,21 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  Grid,
-  Heading,
-  IconButton,
-  HStack,
-  Input,
-  Text,
-  VStack
-} from "@chakra-ui/react";
 import { FiDownload, FiHome, FiShare2, FiX } from "react-icons/fi";
 import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
 import { FaWhatsapp } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/form";
+import { Chip, TwContainer } from "@/components/site/tw-layout";
 import defaultPackagesData from "@/data/health-packages.json";
 import { siteConfig } from "@/data/siteConfig";
 import { readCartItems, saveCartItems } from "@/lib/cart";
 import { trackEvent } from "@/lib/analytics";
 import { sortPackages, sortPackageVariants } from "@/lib/packageOrdering";
+import { cn } from "@/lib/utils";
+
+let html2CanvasLoader = null;
 
 function getVariantKey(pkgName, variantName) {
   return String(pkgName) + "::" + String(variantName);
@@ -47,7 +41,7 @@ function buildPackageEnquiryUrl(pkgName, variantName, price) {
     `Package: ${pkgName}`,
     `Variant: ${variantName}`,
     price != null ? `Price: INR ${Number(price).toLocaleString("en-IN")}` : null,
-    "Source: /packages"
+    "Source: /packages",
   ]
     .filter(Boolean)
     .join("\n");
@@ -70,6 +64,39 @@ function getApplicableNotesForTests(testNames, packagesData) {
   });
 }
 
+function IconButton({ as: Comp = "button", className, children, ...props }) {
+  return (
+    <Comp
+      className={cn(
+        "inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--sdrc-teal)] bg-white text-[var(--sdrc-teal-deep)] transition hover:bg-[var(--sdrc-teal-soft)] disabled:pointer-events-none disabled:opacity-60",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </Comp>
+  );
+}
+
+function VisitBadge({ homeCollection }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold",
+        homeCollection ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-700"
+      )}
+      title={
+        homeCollection
+          ? "Home collection possible for this package."
+          : "This package requires a centre visit."
+      }
+    >
+      {homeCollection ? <FiHome size={11} /> : <BsBuilding size={11} />}
+      {homeCollection ? "Home Collection" : "Center Visit"}
+    </span>
+  );
+}
+
 export default function PackagesExplorer() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState({});
@@ -79,13 +106,6 @@ export default function PackagesExplorer() {
   const [isMobile, setIsMobile] = useState(false);
   const [showAddLabel, setShowAddLabel] = useState(true);
   const [cartIds, setCartIds] = useState(new Set());
-  // Instant default from the bundled copy, upgraded once
-  // /api/health-packages resolves (labit-main first, this repo's own
-  // bundled copy as ITS fallback -- see that route). 2026-09-12: this
-  // site's own data file had drifted stale for months with nothing
-  // surfacing it; this makes labit-main authoritative at request time
-  // instead of depending on someone remembering to re-run
-  // scripts/sync-health-packages.mjs.
   const [packagesData, setPackagesData] = useState(defaultPackagesData);
 
   useEffect(() => {
@@ -120,18 +140,16 @@ export default function PackagesExplorer() {
     setCartIds(ids);
   }, []);
 
-
   useEffect(() => {
     if (!search.trim()) return;
     trackEvent("search_packages", { query: search.trim() }, { pagePath: "/packages" });
   }, [search]);
 
-
   const filteredPackages = useMemo(() => {
     const q = search.trim().toLowerCase();
     const orderedPackages = sortPackages(packagesData.packages || []).map((pkg) => ({
       ...pkg,
-      variants: sortPackageVariants(pkg.variants || [])
+      variants: sortPackageVariants(pkg.variants || []),
     }));
     if (q.length === 0) return orderedPackages;
 
@@ -167,7 +185,7 @@ export default function PackagesExplorer() {
     return Array.from(byCategory.entries())
       .map(([category, tests]) => ({
         category,
-        tests: Array.from(tests).sort((a, b) => a.localeCompare(b))
+        tests: Array.from(tests).sort((a, b) => a.localeCompare(b)),
       }))
       .sort((a, b) => a.category.localeCompare(b.category));
   }, [selectedVariants, packagesData]);
@@ -229,8 +247,8 @@ export default function PackagesExplorer() {
         package_name: pkg.name,
         price: variant.price,
         home_collection: typeof variant.home_collection === "boolean" ? variant.home_collection : null,
-        tests_count: Array.isArray(variant.tests) ? variant.tests.length : null
-      }
+        tests_count: Array.isArray(variant.tests) ? variant.tests.length : null,
+      },
     ];
 
     saveCartItems(next);
@@ -252,7 +270,7 @@ export default function PackagesExplorer() {
           variantName: variant.name,
           price: variant.price,
           parameters: variant.parameters,
-          tests: variant.tests || []
+          tests: variant.tests || [],
         };
       } else {
         showToast("You can compare up to 3 variants");
@@ -261,9 +279,26 @@ export default function PackagesExplorer() {
     });
   };
 
+  async function ensureHtml2Canvas() {
+    if (typeof window === "undefined") return null;
+    if (window.html2canvas) return window.html2canvas;
+    if (!html2CanvasLoader) {
+      html2CanvasLoader = new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
+        script.async = true;
+        script.onload = () => resolve(window.html2canvas || null);
+        script.onerror = () => resolve(null);
+        document.head.appendChild(script);
+      });
+    }
+    return html2CanvasLoader;
+  }
+
   async function nodeToCanvas(node) {
-    if (typeof window === "undefined" || !window.html2canvas || !node) return null;
-    return window.html2canvas(node, {
+    const html2canvas = await ensureHtml2Canvas();
+    if (!html2canvas || !node) return null;
+    return html2canvas(node, {
       backgroundColor: "#ffffff",
       scale: 2.8,
       useCORS: true,
@@ -272,7 +307,7 @@ export default function PackagesExplorer() {
       windowWidth: node.scrollWidth,
       windowHeight: node.scrollHeight,
       scrollX: 0,
-      scrollY: 0
+      scrollY: 0,
     });
   }
 
@@ -301,11 +336,166 @@ export default function PackagesExplorer() {
     return false;
   }
 
-  function downloadCanvas(canvas, fileName) {
+  async function downloadCanvas(canvas, fileName) {
+    const blob = await canvasToBlob(canvas);
+    if (!blob) return false;
     const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
     link.download = fileName;
-    link.href = canvas.toDataURL("image/jpeg", 0.96);
+    link.href = url;
+    link.style.display = "none";
+    document.body.appendChild(link);
     link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return true;
+  }
+
+  function wrapCanvasText(ctx, text, maxWidth) {
+    const words = String(text || "").split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = "";
+    for (const word of words) {
+      const test = line ? `${line} ${word}` : word;
+      if (ctx.measureText(test).width > maxWidth && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function drawRoundRect(ctx, x, y, width, height, radius) {
+    const r = Math.min(radius, width / 2, height / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + width, y, x + width, y + height, r);
+    ctx.arcTo(x + width, y + height, x, y + height, r);
+    ctx.arcTo(x, y + height, x, y, r);
+    ctx.arcTo(x, y, x + width, y, r);
+    ctx.closePath();
+  }
+
+  async function drawImageSafe(ctx, src, x, y, width, height) {
+    if (!src) return false;
+    return new Promise((resolve) => {
+      const img = new window.Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        ctx.drawImage(img, x, y, width, height);
+        resolve(true);
+      };
+      img.onerror = () => resolve(false);
+      img.src = src;
+    });
+  }
+
+  async function renderPackageSummaryCanvas(pkgName, variant, description) {
+    if (typeof window === "undefined") return null;
+    const grouped = (() => {
+      const byCategory = new Map();
+      (variant.tests || []).forEach((test) => {
+        const category = packagesData.testCategoryMap[test] || "Others";
+        if (!byCategory.has(category)) byCategory.set(category, []);
+        byCategory.get(category).push(test);
+      });
+      return Array.from(byCategory.entries())
+        .map(([category, tests]) => ({ category, tests }))
+        .sort((a, b) => a.category.localeCompare(b.category));
+    })();
+
+    const width = 1080;
+    const margin = 56;
+    const colGap = 34;
+    const colCount = 2;
+    const colWidth = (width - (margin * 2) - colGap) / colCount;
+    const rowHeight = 24;
+    const groupHeaderHeight = 28;
+    const desc = description || variant.description || "";
+
+    const probe = document.createElement("canvas").getContext("2d");
+    probe.font = "24px Arial";
+    const descLines = wrapCanvasText(probe, desc, width - margin * 2).slice(0, 3);
+    let contentHeight = 172 + descLines.length * 24;
+    grouped.forEach((group) => {
+      contentHeight += groupHeaderHeight + Math.ceil(group.tests.length / colCount) * rowHeight + 12;
+    });
+    contentHeight += 70;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = Math.max(640, contentHeight);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#008f82";
+    ctx.fillRect(0, 0, canvas.width, 8);
+    await drawImageSafe(ctx, "/assets/sdrc-logo.png", margin, 32, 138, 42);
+
+    ctx.fillStyle = "#64748b";
+    ctx.font = "700 18px Arial";
+    ctx.fillText(pkgName, margin, 102);
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "800 32px Arial";
+    ctx.fillText(variant.name || pkgName, margin, 140);
+
+    const priceText = `INR ${Number(variant.price).toLocaleString("en-IN")}`;
+    ctx.font = "800 28px Arial";
+    const priceWidth = ctx.measureText(priceText).width + 34;
+    drawRoundRect(ctx, width - margin - priceWidth, 104, priceWidth, 48, 24);
+    ctx.fillStyle = "#fff5f0";
+    ctx.fill();
+    ctx.fillStyle = "#f26939";
+    ctx.fillText(priceText, width - margin - priceWidth + 17, 136);
+
+    ctx.font = "700 17px Arial";
+    const paramText = `${variant.parameters || (variant.tests || []).length} parameters`;
+    const paramWidth = ctx.measureText(paramText).width + 28;
+    drawRoundRect(ctx, width - margin - priceWidth - paramWidth - 12, 110, paramWidth, 34, 17);
+    ctx.fillStyle = "#e6f6f4";
+    ctx.fill();
+    ctx.fillStyle = "#00695f";
+    ctx.fillText(paramText, width - margin - priceWidth - paramWidth - 12 + 14, 133);
+
+    let y = 178;
+    ctx.fillStyle = "#475569";
+    ctx.font = "20px Arial";
+    descLines.forEach((line) => {
+      ctx.fillText(line, margin, y);
+      y += 24;
+    });
+    y += 20;
+
+    grouped.forEach((group) => {
+      ctx.fillStyle = "#00695f";
+      ctx.font = "800 19px Arial";
+      ctx.fillText(group.category, margin, y);
+      y += groupHeaderHeight;
+      ctx.fillStyle = "#1e293b";
+      ctx.font = "19px Arial";
+      group.tests.forEach((test, index) => {
+        const col = index % colCount;
+        const row = Math.floor(index / colCount);
+        const x = margin + col * (colWidth + colGap);
+        const lineY = y + row * rowHeight;
+        ctx.fillText(`• ${test}`, x, lineY);
+      });
+      y += Math.ceil(group.tests.length / colCount) * rowHeight + 14;
+    });
+
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.beginPath();
+    ctx.moveTo(margin, canvas.height - 48);
+    ctx.lineTo(canvas.width - margin, canvas.height - 48);
+    ctx.stroke();
+    ctx.fillStyle = "#64748b";
+    ctx.font = "16px Arial";
+    ctx.fillText("SDRC Diagnostics · Jade Arcade, Paradise, Secunderabad · sdrc.in", margin, canvas.height - 22);
+    return canvas;
   }
 
   const handleShare = async (pkgName, variant) => {
@@ -315,7 +505,8 @@ export default function PackagesExplorer() {
     const node = document.getElementById("package-detail-capture") || document.getElementById(captureId);
 
     try {
-      const canvas = (await capturePackageCanvas()) || (await nodeToCanvas(node));
+      showToast("Preparing package image...");
+      const canvas = (await renderPackageSummaryCanvas(pkgName, variant, activeVariant?.description)) || (await capturePackageCanvas()) || (await nodeToCanvas(node));
       if (canvas && await shareCanvas(canvas, `${slugify(pkgName)}-${slugify(variant.name)}.jpg`, shareText)) return;
 
       if (typeof navigator !== "undefined" && navigator.share) {
@@ -323,8 +514,8 @@ export default function PackagesExplorer() {
         return;
       }
 
-      if (canvas) {
-        downloadCanvas(canvas, `${slugify(pkgName)}-${slugify(variant.name)}.jpg`);
+      if (canvas && await downloadCanvas(canvas, `${slugify(pkgName)}-${slugify(variant.name)}.jpg`)) {
+        showToast("Package image downloaded. Link copied separately if needed");
       }
       if (await copyToClipboard(pageLink)) {
         showToast("Image downloaded. Package link copied");
@@ -340,17 +531,23 @@ export default function PackagesExplorer() {
   const handleDownload = async (pkgName, variant) => {
     const captureId = getVariantCaptureId(pkgName, variant.name);
     const node = document.getElementById("package-detail-capture") || document.getElementById(captureId);
-    const canvas = (await capturePackageCanvas()) || (await nodeToCanvas(node));
-    if (!canvas) {
+    try {
+      showToast("Preparing package image...");
+      const canvas = (await renderPackageSummaryCanvas(pkgName, variant, activeVariant?.description)) || (await capturePackageCanvas()) || (await nodeToCanvas(node));
+      if (!canvas) {
+        showToast("Image export unavailable");
+        return;
+      }
+      const downloaded = await downloadCanvas(canvas, `${slugify(pkgName)}-${slugify(variant.name)}.jpg`);
+      showToast(downloaded ? "Package image downloaded" : "Image export unavailable");
+    } catch (err) {
       showToast("Image export unavailable");
-      return;
     }
-    downloadCanvas(canvas, `${slugify(pkgName)}-${slugify(variant.name)}.jpg`);
-    showToast("Package image downloaded");
   };
 
   async function capturePackageCanvas() {
-    if (typeof window === "undefined" || !window.html2canvas) return null;
+    const html2canvas = await ensureHtml2Canvas();
+    if (!html2canvas) return null;
     const source = document.getElementById("package-detail-capture");
     if (!source) return null;
 
@@ -374,6 +571,16 @@ export default function PackagesExplorer() {
       img.style.objectFit = "contain";
       img.style.display = "block";
     });
+    clone.querySelectorAll("p, span, h3").forEach((el) => {
+      const style = window.getComputedStyle(el);
+      const current = Number.parseFloat(style.fontSize || "0");
+      if (!Number.isNaN(current) && current < 13) el.style.fontSize = "13px";
+      el.style.lineHeight = style.lineHeight === "normal" ? "1.45" : style.lineHeight;
+    });
+    clone.querySelectorAll('[data-export-content="package-tests"] section').forEach((el) => {
+      el.style.breakInside = "avoid";
+      el.style.marginBottom = "10px";
+    });
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
 
@@ -382,7 +589,7 @@ export default function PackagesExplorer() {
       const height = wrapper.scrollHeight;
       const maxDim = 14000;
       const scale = Math.min(3, maxDim / Math.max(width, height));
-      return await window.html2canvas(wrapper, {
+      return await html2canvas(wrapper, {
         backgroundColor: "#ffffff",
         scale: Math.max(1, scale),
         useCORS: true,
@@ -391,7 +598,7 @@ export default function PackagesExplorer() {
         windowWidth: width,
         windowHeight: height,
         scrollX: 0,
-        scrollY: 0
+        scrollY: 0,
       });
     } finally {
       wrapper.remove();
@@ -399,7 +606,8 @@ export default function PackagesExplorer() {
   }
 
   async function captureCompareCanvas() {
-    if (typeof window === "undefined" || !window.html2canvas) {
+    const html2canvas = await ensureHtml2Canvas();
+    if (!html2canvas) {
       showToast("Image export unavailable");
       return null;
     }
@@ -431,7 +639,7 @@ export default function PackagesExplorer() {
       const maxDim = 14000;
       const scale = Math.min(3, maxDim / Math.max(width, height));
 
-      const canvas = await window.html2canvas(wrapper, {
+      return await html2canvas(wrapper, {
         backgroundColor: "#ffffff",
         scale: Math.max(1, scale),
         useCORS: true,
@@ -440,9 +648,8 @@ export default function PackagesExplorer() {
         windowWidth: width,
         windowHeight: height,
         scrollX: 0,
-        scrollY: 0
+        scrollY: 0,
       });
-      return canvas;
     } finally {
       wrapper.remove();
     }
@@ -451,7 +658,7 @@ export default function PackagesExplorer() {
   const downloadCompareImage = async () => {
     const canvas = await captureCompareCanvas();
     if (!canvas) return;
-    downloadCanvas(canvas, "sdrc-package-comparison.jpg");
+    await downloadCanvas(canvas, "sdrc-package-comparison.jpg");
     showToast("Comparison downloaded as JPG");
   };
 
@@ -461,7 +668,7 @@ export default function PackagesExplorer() {
     const packagesLink = `${window.location.origin}/packages`;
     const shared = await shareCanvas(canvas, "sdrc-package-comparison.jpg", `Compare SDRC packages\n${packagesLink}`);
     if (!shared) {
-      downloadCanvas(canvas, "sdrc-package-comparison.jpg");
+      await downloadCanvas(canvas, "sdrc-package-comparison.jpg");
       if (await copyToClipboard(packagesLink)) {
         showToast("Image downloaded. Packages link copied");
       } else {
@@ -471,60 +678,40 @@ export default function PackagesExplorer() {
   };
 
   return (
-    <Container maxW="1200px" py={10}>
+    <TwContainer className="py-10">
       <Script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" strategy="afterInteractive" />
-      <VStack align="stretch" gap={6}>
-        <Box className="soft-card-orange" p={6}>
-          <span className="chip chip-orange" style={{ marginBottom: 14, display: "inline-flex" }}>Health Packages</span>
-          <Heading size="lg" mb={1} color="gray.800">
-            Master Health Check Packages
-          </Heading>
-          <Text color="gray.600" mb={4} fontSize="sm">
-            Browse, filter and compare package variants by included tests.
-          </Text>
+
+      <div className="flex flex-col gap-6">
+        <Card accent="orange" className="rise-in p-6" interactive={false}>
+          <Chip tone="orange" className="mb-3.5">Health Packages</Chip>
+          <h2 className="mb-1 text-2xl font-bold leading-tight text-slate-900">Master Health Check Packages</h2>
+          <p className="mb-4 text-sm text-slate-600">Browse, filter and compare package variants by included tests.</p>
           <Input
             placeholder="Search package / test — try: cardiac, vitamin, thyroid…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            bg="white"
-            borderColor="orange.200"
-            _focus={{ borderColor: "orange.400", boxShadow: "0 0 0 1px #f26939" }}
+            className="border-orange-200 ring-2 ring-orange-100/80 focus:border-orange-400 focus:ring-orange-300"
           />
-          <HStack mt={4} spacing={2} flexWrap="wrap">
+          <div className="mt-4 flex flex-wrap gap-2">
             {filteredPackages.map((pkg) => (
-              <Box
-                as={Link}
+              <Link
                 key={pkg.name}
                 href={`#${slugify(pkg.name)}`}
-                px={3}
-                py={1}
-                bg="white"
-                border="1px solid"
-                borderColor="orange.200"
-                borderRadius="full"
-                fontSize="xs"
-                fontWeight="600"
-                color="orange.700"
-                transition="all .15s ease"
-                _hover={{ borderColor: "orange.400", bg: "orange.50" }}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 transition hover:border-[var(--sdrc-teal)] hover:bg-[var(--sdrc-teal-soft)] hover:text-[var(--sdrc-teal-deep)]"
               >
                 {pkg.name}
-              </Box>
+              </Link>
             ))}
-          </HStack>
-        </Box>
+          </div>
+        </Card>
 
         {filteredPackages.map((pkg) => (
-          <Box key={pkg.name} id={slugify(pkg.name)} scrollMarginTop="110px">
-            <span className="chip chip-orange" style={{ marginBottom: 10, display: "inline-flex" }}>{pkg.name}</span>
-            <Heading size="md" mb={1} mt={1} color="gray.800" noOfLines={2}>
-              {pkg.name}
-            </Heading>
-            <Text color="gray.600" mb={4} fontSize="sm">
-              {pkg.description}
-            </Text>
+          <section key={pkg.name} id={slugify(pkg.name)} className="rise-in scroll-mt-[110px]">
+            <Chip tone="orange" className="mb-2.5">{pkg.name}</Chip>
+            <h2 className="mb-1 text-xl font-bold leading-tight text-slate-900">{pkg.name}</h2>
+            <p className="mb-4 max-w-4xl text-sm leading-6 text-slate-600">{pkg.description}</p>
 
-            <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={4}>
+            <div className="grid items-stretch gap-4 md:grid-cols-2 lg:grid-cols-3">
               {pkg.variants.map((variant) => {
                 const key = getVariantKey(pkg.name, variant.name);
                 const checked = Boolean(selected[key]);
@@ -534,117 +721,70 @@ export default function PackagesExplorer() {
                 const keyInclusions = Array.isArray(variant.key_inclusions) && variant.key_inclusions.length > 0
                   ? variant.key_inclusions
                   : (variant.tests || []).slice(0, 4);
+                const testsCount = (variant.tests || []).length;
+                const remainingTestsCount = Math.max(0, testsCount - keyInclusions.length);
 
                 return (
-                  <Box
+                  <Card
                     key={key}
                     id={getVariantCaptureId(pkg.name, variant.name)}
-                    className="soft-card no-hover-lift"
-                    p={4}
-                    position="relative"
-                    overflow="hidden"
-                    display="flex"
-                    flexDirection="column"
+                    interactive={false}
+                    className="relative flex h-full min-h-[376px] flex-col overflow-hidden p-4"
                   >
-                    <Box
-                      position="absolute"
-                      top={0}
-                      left={0}
-                      right={0}
-                      h="5px"
-                      bgImage="linear-gradient(90deg, #008f82 0%, #f46c3b 52%, #008f82 100%)"
-                      borderTopRadius="xl"
-                      zIndex={2}
-                      boxShadow="0 1px 0 rgba(0,0,0,0.06)"
-                    />
-                    <Box position="absolute" top={3} right={3} opacity={0.9}>
+                    <div className="absolute inset-x-0 top-0 h-[5px] rounded-t-xl bg-[linear-gradient(90deg,#008f82_0%,#f46c3b_52%,#008f82_100%)] shadow-[0_1px_0_rgba(0,0,0,.06)]" />
+                    <div className="absolute right-3 top-3 opacity-90">
                       <Image src="/assets/sdrc-logo.png" alt="SDRC" width={62} height={18} />
-                    </Box>
-                    <Heading size="sm" color="teal.700" noOfLines={2}>
-                      {variant.name}
-                    </Heading>
-                    <Text fontSize="sm" color="gray.600" mt={1}>
-                      {description}
-                    </Text>
+                    </div>
 
-                    <HStack justify="space-between" mt={3}>
-                      <Text fontWeight="700" color="orange.500">
-                        INR {Number(variant.price).toLocaleString("en-IN")}
-                      </Text>
-                      <Text fontSize="xs" color="gray.500">
-                        {variant.parameters} parameters
-                      </Text>
-                    </HStack>
-                    <HStack mt={1} spacing={1}>
-                      <HStack
-                        spacing={1}
-                        px={2}
-                        py={0.5}
-                        borderRadius="full"
-                        bg={variant.home_collection ? "green.50" : "gray.100"}
-                        color={variant.home_collection ? "green.700" : "gray.700"}
-                        title={
-                          variant.home_collection
-                            ? "Home collection possible for this package."
-                            : "This package requires a centre visit."
-                        }
-                      >
-                        {variant.home_collection ? <FiHome size={11} /> : <BsBuilding size={11} />}
-                        <Text fontSize="10px" fontWeight="700">
-                          {variant.home_collection ? "Home Collection" : "Center Visit"}
-                        </Text>
-                      </HStack>
-                    </HStack>
+                    <div className="min-h-[92px] pr-20">
+                      <h3 className="text-base font-bold leading-tight text-[var(--sdrc-teal-deep)]">{variant.name}</h3>
+                      <p className="mt-1 line-clamp-3 text-sm leading-[1.65] text-slate-600">{description}</p>
+                    </div>
 
-                    <Box mt={3} bg="teal.50" borderRadius="md" p={2} borderLeft="3px solid" borderLeftColor="teal.400">
-                      <Text fontSize="xs" color="teal.700" fontWeight="700" mb={1}>
-                        Key inclusions
-                      </Text>
-                      {keyInclusions.map((test) => (
-                        <Text key={test} fontSize="xs" color="gray.600">
-                          • {test}
-                        </Text>
-                      ))}
-                      {(variant.tests || []).length > 0 ? (
-                        <Box
-                          as="button"
+                    <div className="mt-3 flex min-h-8 items-center justify-between gap-3 border-y border-slate-100 py-2">
+                      <p className="font-bold text-[var(--sdrc-orange)]">INR {Number(variant.price).toLocaleString("en-IN")}</p>
+                      <p className="text-xs text-slate-500">{variant.parameters} parameters</p>
+                    </div>
+                    <div className="mt-2 flex">
+                      <VisitBadge homeCollection={variant.home_collection} />
+                    </div>
+
+                    <div className="mt-3 rounded-md border border-[#cfeeea] border-l-[3px] border-l-[#2db5a5] bg-[var(--sdrc-teal-soft)] p-3">
+                      <p className="mb-1 text-xs font-bold text-[var(--sdrc-teal-deep)]">Key inclusions</p>
+                      <div className="space-y-1.5">
+                        {keyInclusions.map((test) => (
+                          <p key={test} className="flex gap-1.5 text-xs leading-[1.55] text-slate-700">
+                            <span className="mt-[7px] size-1 shrink-0 rounded-full bg-[var(--sdrc-teal)]" />
+                            <span>{test}</span>
+                          </p>
+                        ))}
+                      </div>
+                      {testsCount > 0 ? (
+                        <button
                           type="button"
-                          mt={1}
-                          fontSize="xs"
-                          fontWeight="700"
-                          color="teal.700"
-                          textDecoration="underline"
-                          cursor="pointer"
-                          _hover={{ color: "teal.800" }}
+                          className="mt-2 inline-flex min-h-7 items-center rounded-full border border-[var(--sdrc-teal)] bg-white px-2.5 text-xs font-bold leading-none text-[var(--sdrc-teal-deep)] transition hover:bg-[var(--sdrc-teal-soft)]"
                           onClick={() => {
                             trackEvent("view_package_details", { package_name: pkg.name, variant_name: variant.name }, { pagePath: "/packages" });
                             setActiveVariant({ pkgName: pkg.name, variant, description });
                           }}
                         >
-                          {(variant.tests || []).length > 4
-                            ? `+ ${(variant.tests || []).length - 4} more tests`
-                            : "+ View included tests"}
-                        </Box>
+                          {remainingTestsCount > 0
+                            ? `+ ${remainingTestsCount} more tests`
+                            : "View included tests"}
+                        </button>
                       ) : null}
                       {variant.sample_report_url ? (
-                        <Box mt={1}>
-                          <Link href={variant.sample_report_url} target="_blank" rel="noopener noreferrer">
-                            <Text fontSize="xs" fontWeight="700" color="teal.700" textDecoration="underline">
-                              View Sample DEXA Report
-                            </Text>
-                          </Link>
-                        </Box>
+                        <Link href={variant.sample_report_url} target="_blank" rel="noopener noreferrer" className="mt-1 block text-xs font-bold text-[var(--sdrc-teal-deep)] underline">
+                          View Sample DEXA Report
+                        </Link>
                       ) : null}
-                    </Box>
+                    </div>
 
-                    <Box mt="auto">
-                      <HStack mt={4} justify="space-between" align="center">
-                        <HStack
-                          as="label"
+                    <div className="mt-auto">
+                      <div className="mt-4 flex items-center justify-between gap-2">
+                        <label
                           htmlFor={`compare-${getVariantKey(pkg.name, variant.name)}`}
-                          spacing={2}
-                          cursor="pointer"
-                          userSelect="none"
+                          className="flex cursor-pointer select-none items-center gap-2 text-xs text-slate-600"
                           title="Select to compare this package variant"
                         >
                           <input
@@ -654,95 +794,90 @@ export default function PackagesExplorer() {
                             onChange={() => toggleCompare(pkg.name, variant)}
                             style={{ accentColor: "#008f82" }}
                           />
-                          <Text fontSize="xs" color="gray.600" _hover={{ color: "teal.800" }}>
-                            Compare
-                          </Text>
-                        </HStack>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          bg={added ? "teal.600" : "white"}
-                          color={added ? "white" : "orange.600"}
-                          borderColor={added ? "teal.600" : "orange.300"}
-                          onClick={() => addVariantToCart(pkg, variant)}
-                          disabled={added}
-                          px={showAddLabel && !added ? 3 : 0}
-                          minW={showAddLabel && !added ? "110px" : "38px"}
-                          leftIcon={showAddLabel && !added ? <BsCartPlus /> : null}
-                        >
-                          {added ? <BsCartCheck /> : showAddLabel ? "Add to Cart" : <BsCartPlus />}
-                        </Button>
-                      </HStack>
+                          Compare
+                        </label>
+                        {showAddLabel && !added ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            aria-label="Add package to cart"
+                            title="Add to Cart"
+                            className="h-9 min-w-[118px] px-3 [&>svg]:size-4"
+                            onClick={() => addVariantToCart(pkg, variant)}
+                            leftIcon={<BsCartPlus aria-hidden="true" />}
+                          >
+                            Add to Cart
+                          </Button>
+                        ) : (
+                          <IconButton
+                            as="button"
+                            type="button"
+                            aria-label={added ? "Package already in cart" : "Add package to cart"}
+                            title={added ? "Already in cart" : "Add to Cart"}
+                            className={cn(
+                              "border-[var(--sdrc-teal)] text-[var(--sdrc-teal-deep)] [&>svg]:size-4",
+                              added && "border-[var(--sdrc-teal-600)] bg-[var(--sdrc-teal-600)] text-white"
+                            )}
+                            onClick={() => addVariantToCart(pkg, variant)}
+                            disabled={added}
+                          >
+                            {added ? <BsCartCheck aria-hidden="true" /> : <BsCartPlus aria-hidden="true" />}
+                          </IconButton>
+                        )}
+                      </div>
 
-                    <HStack mt={3} spacing={2}>
-                      <Button
-                        as={Link}
-                        href={`/tests?q=${encodeURIComponent(variant.name)}`}
-                        size="sm"
-                        flex="1"
-                        style={{ background: "linear-gradient(135deg, #008f82, #00a896)", color: "white", fontWeight: 700 }}
-                        onClick={() =>
-                          trackEvent(
-                            "package_book_click",
-                            { package_name: pkg.name, variant_name: variant.name, price: variant.price },
-                            { pagePath: "/packages" }
-                          )
-                        }
-                      >
-                        Book Online
-                      </Button>
-                      <IconButton
-                        as={Link}
-                        href={buildPackageEnquiryUrl(pkg.name, variant.name, variant.price)}
-                        size="sm"
-                        variant="outline"
-                        borderColor="green.300"
-                        color="green.600"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Chat on WhatsApp"
-                        title="Have questions? Chat with us on WhatsApp"
-                        onClick={() =>
-                          trackEvent(
-                            "package_whatsapp_click",
-                            { package_name: pkg.name, variant_name: variant.name },
-                            { pagePath: "/packages" }
-                          )
-                        }
-                      >
-                        <FaWhatsapp />
-                      </IconButton>
-                    </HStack>
-                    </Box>
-                  </Box>
+                      <div className="mt-3 flex gap-2">
+                        <Button
+                          as={Link}
+                          href={`/tests?q=${encodeURIComponent(variant.name)}`}
+                          size="sm"
+                          className="flex-1 bg-[linear-gradient(135deg,#008f82,#00a896)] font-bold text-white"
+                          onClick={() =>
+                            trackEvent(
+                              "package_book_click",
+                              { package_name: pkg.name, variant_name: variant.name, price: variant.price },
+                              { pagePath: "/packages" }
+                            )
+                          }
+                        >
+                          Book Online
+                        </Button>
+                        <IconButton
+                          as={Link}
+                          href={buildPackageEnquiryUrl(pkg.name, variant.name, variant.price)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Chat on WhatsApp"
+                          title="Have questions? Chat with us on WhatsApp"
+                          className="border-green-300 text-green-600 hover:bg-green-50"
+                          onClick={() =>
+                            trackEvent(
+                              "package_whatsapp_click",
+                              { package_name: pkg.name, variant_name: variant.name },
+                              { pagePath: "/packages" }
+                            )
+                          }
+                        >
+                          <FaWhatsapp />
+                        </IconButton>
+                      </div>
+                    </div>
+                  </Card>
                 );
               })}
-            </Grid>
-          </Box>
+            </div>
+          </section>
         ))}
-      </VStack>
+      </div>
 
       {selectedVariants.length > 0 ? (
-        <Flex
-          position="fixed"
-          bottom={{ base: 2, md: 4 }}
-          left={{ base: 2, md: 4 }}
-          right={{ base: 2, md: 4 }}
-          zIndex={25}
-          className="soft-card"
-          p={3}
-          justify="space-between"
-          align={{ base: "stretch", md: "center" }}
-          gap={2}
-          direction={{ base: "column", md: "row" }}
+        <Card
+          interactive={false}
+          className="fixed bottom-2 left-2 right-2 z-[25] flex flex-col gap-2 p-3 md:bottom-4 md:left-4 md:right-4 md:flex-row md:items-center md:justify-between"
         >
-          <Text fontSize="sm" fontWeight="600">
-            {selectedVariants.length} variant(s) selected for compare
-          </Text>
-          <HStack alignSelf={{ base: "flex-end", md: "auto" }}>
-            <Button size="sm" variant="outline" onClick={() => setSelected({})}>
-              Clear
-            </Button>
+          <p className="text-sm font-semibold">{selectedVariants.length} variant(s) selected for compare</p>
+          <div className="flex self-end gap-2 md:self-auto">
+            <Button size="sm" variant="outline" onClick={() => setSelected({})}>Clear</Button>
             <Button
               size="sm"
               disabled={selectedVariants.length < 2}
@@ -753,47 +888,34 @@ export default function PackagesExplorer() {
             >
               Compare now
             </Button>
-          </HStack>
-        </Flex>
+          </div>
+        </Card>
       ) : null}
 
       {activeVariant ? (
-        <Box
-          position="fixed"
-          inset={0}
-          bg="blackAlpha.700"
-          zIndex={40}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          p={3}
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-3"
           onClick={() => setActiveVariant(null)}
         >
-          <Box
+          <Card
             id="package-detail-capture"
-            className="soft-card"
-            maxW={{ base: "100%", md: "680px" }}
-            w="full"
-            p={0}
-            maxH="88vh"
-            overflow="hidden"
-            display="flex"
-            flexDirection="column"
+            interactive={false}
+            className="flex max-h-[88vh] w-full max-w-[680px] flex-col overflow-hidden p-0"
             onClick={(e) => e.stopPropagation()}
           >
-            <Flex justify="space-between" align="center" px={4} py={3} borderBottom="1px solid" borderColor="gray.200" flexShrink={0}>
-              <HStack spacing={3}>
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-3.5 py-2">
+              <div className="flex min-w-0 items-center gap-3">
                 <img src="/assets/sdrc-logo.png" alt="SDRC" width="94" height="28" />
-                <Box>
-                  <Text fontSize="11px" color="gray.500">{activeVariant.pkgName}</Text>
-                  <Heading size="sm">{activeVariant.variant.name}</Heading>
-                </Box>
-              </HStack>
-              <HStack spacing={1} data-export-hide="true">
+                <div>
+                  <p className="text-[11px] leading-4 text-slate-500">{activeVariant.pkgName}</p>
+                  <h3 className="text-sm font-extrabold leading-tight text-slate-900 md:text-base">{activeVariant.variant.name}</h3>
+                </div>
+              </div>
+              <div className="flex gap-1" data-export-hide="true">
                 {isMobile ? (
                   <IconButton
-                    size="sm"
-                    variant="outline"
+                    as="button"
+                    type="button"
                     aria-label="Share package"
                     onClick={() => handleShare(activeVariant.pkgName, activeVariant.variant)}
                   >
@@ -801,216 +923,163 @@ export default function PackagesExplorer() {
                   </IconButton>
                 ) : (
                   <IconButton
-                    size="sm"
-                    variant="outline"
+                    as="button"
+                    type="button"
                     aria-label="Download package summary"
                     onClick={() => handleDownload(activeVariant.pkgName, activeVariant.variant)}
                   >
                     <FiDownload />
                   </IconButton>
                 )}
-                <IconButton
-                  size="sm"
-                  variant="outline"
-                  aria-label="Close modal"
-                  onClick={() => setActiveVariant(null)}
-                >
+                <IconButton as="button" type="button" aria-label="Close modal" onClick={() => setActiveVariant(null)}>
                   <FiX />
                 </IconButton>
-              </HStack>
-            </Flex>
+              </div>
+            </div>
 
-            <Box px={4} py={3} borderBottom="1px solid" borderColor="gray.100" bg="gray.50" flexShrink={0}>
-              <HStack spacing={2} flexWrap="wrap">
-                <Text fontSize="11px" px={2.5} py={1} borderRadius="full" bg="white" color="teal.700">
+            <div className="shrink-0 border-b border-slate-100 bg-slate-50 px-3.5 py-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-white px-2.5 py-1 text-[11px] leading-none text-[var(--sdrc-teal-deep)]">
                   {activeVariant.variant.parameters} parameters
-                </Text>
-                <Text fontSize="md" px={3} py={1.5} borderRadius="full" bg="white" color="orange.500" fontWeight="800">
+                </span>
+                <span className="rounded-full bg-white px-3 py-1 text-sm font-extrabold leading-none text-[var(--sdrc-orange)]">
                   INR {Number(activeVariant.variant.price).toLocaleString("en-IN")}
-                </Text>
-              </HStack>
-              <Text color="gray.600" fontSize="xs" mt={2}>{activeVariant.description}</Text>
-            </Box>
+                </span>
+              </div>
+              <p className="mt-1 line-clamp-2 text-xs leading-[1.3] text-slate-600">{activeVariant.description}</p>
+            </div>
 
-            <Box flex="1" minH={0} overflowY="auto">
-              <VStack align="stretch" px={4} py={3} gap={2}>
+            <div className="min-h-0 overflow-y-auto">
+              <div className="flex flex-col gap-0.5 px-3.5 py-1.5" data-export-content="package-tests">
                 {activeGrouped.map((group) => (
-                  <Box key={group.category}>
-                    <HStack mb={1.5} spacing={2}>
+                  <section key={group.category}>
+                    <div className="mb-px flex items-center gap-1.5">
                       {packagesData.categoryIconMap?.[group.category] ? (
-                        <img src={packagesData.categoryIconMap[group.category]} alt={group.category} width={16} height={16} />
+                        <img src={packagesData.categoryIconMap[group.category]} alt="" width={14} height={14} />
                       ) : null}
-                      <Text fontSize="12px" fontWeight="700" color="teal.700">{group.category}</Text>
-                    </HStack>
-                    <VStack align="stretch" gap={1}>
+                      <p className="text-xs font-extrabold leading-4 text-[var(--sdrc-teal-deep)]">{group.category}</p>
+                    </div>
+                    <div className="grid gap-x-4 gap-y-0 md:grid-cols-2">
                       {group.tests.map((test) => (
-                        <Text key={test} fontSize="sm" color="gray.800" lineHeight="1.25">
-                          • {test}
-                        </Text>
+                        <p key={test} className="text-[13px] leading-[1.22] text-slate-800">• {test}</p>
                       ))}
-                    </VStack>
-                  </Box>
+                    </div>
+                  </section>
                 ))}
-              </VStack>
+              </div>
 
-              <Box px={4} py={3} borderTop="1px solid" borderColor="gray.200" bg="white">
+              <div className="border-t border-slate-200 bg-white px-3.5 py-1.5">
                 {activeVariant.variant.sample_report_url ? (
-                  <Box mb={2}>
-                    <Link href={activeVariant.variant.sample_report_url} target="_blank" rel="noopener noreferrer">
-                      <Text fontSize="12px" fontWeight="700" color="teal.700" textDecoration="underline">
-                        View Sample DEXA Report
-                      </Text>
-                    </Link>
-                  </Box>
+                  <Link href={activeVariant.variant.sample_report_url} target="_blank" rel="noopener noreferrer" className="mb-2 block text-xs font-bold text-[var(--sdrc-teal-deep)] underline">
+                    View Sample DEXA Report
+                  </Link>
                 ) : null}
                 {activeNotes.length > 0 ? (
-                  <Box mb={3} data-export-hide="true">
-                    <Text fontSize="11px" color="gray.500" fontWeight="700" mb={1}>Important notes</Text>
+                  <div data-export-hide="true">
+                    <p className="mb-1 text-[11px] font-bold text-slate-500">Important notes</p>
                     {activeNotes.map((note) => (
-                      <Text key={note} fontSize="11px" color="gray.500">{note}</Text>
+                      <p key={note} className="text-[11px] text-slate-500">{note}</p>
                     ))}
-                  </Box>
+                  </div>
                 ) : null}
-
-                <Text fontSize="11px" color="gray.500" data-export-hide="true">
-                  Use the top-right icons to share on mobile or download on desktop.
-                </Text>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
+              </div>
+            </div>
+          </Card>
+        </div>
       ) : null}
 
       {showCompare ? (
-        <Box
-          position="fixed"
-          inset={0}
-          bg="blackAlpha.700"
-          zIndex={45}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          p={4}
+        <div
+          className="fixed inset-0 z-[45] flex items-center justify-center bg-black/70 p-4"
           onClick={() => setShowCompare(false)}
         >
-          <Box
-            className="soft-card"
-            maxW={{ base: "100%", md: "1040px" }}
-            w="full"
-            p={{ base: 3, md: 5 }}
-            maxH="84vh"
-            overflowY="auto"
+          <Card
+            interactive={false}
+            className="max-h-[84vh] w-full max-w-[1040px] overflow-y-auto p-3 md:p-5"
             onClick={(e) => e.stopPropagation()}
           >
-            <Flex justify="space-between" align="center" mb={3} wrap="wrap" gap={2}>
-              <Box />
-              <HStack spacing={1}>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div />
+              <div className="flex gap-1">
                 {isMobile ? (
-                  <IconButton
-                    size="sm"
-                    variant="outline"
-                    aria-label="Share comparison"
-                    onClick={shareCompareImage}
-                  >
+                  <IconButton as="button" type="button" aria-label="Share comparison" onClick={shareCompareImage}>
                     <FiShare2 />
                   </IconButton>
                 ) : (
-                  <IconButton
-                    size="sm"
-                    variant="outline"
-                    aria-label="Download comparison JPG"
-                    onClick={downloadCompareImage}
-                  >
+                  <IconButton as="button" type="button" aria-label="Download comparison JPG" onClick={downloadCompareImage}>
                     <FiDownload />
                   </IconButton>
                 )}
-                <IconButton
-                  size="sm"
-                  variant="outline"
-                  aria-label="Close comparison modal"
-                  onClick={() => setShowCompare(false)}
-                >
+                <IconButton as="button" type="button" aria-label="Close comparison modal" onClick={() => setShowCompare(false)}>
                   <FiX />
                 </IconButton>
-              </HStack>
-            </Flex>
+              </div>
+            </div>
 
-            <Box id="compare-capture">
-              <HStack spacing={3} mb={3}>
+            <div id="compare-capture">
+              <div className="mb-3 flex items-center gap-3">
                 <img src="/assets/sdrc-logo.png" alt="SDRC" width="110" height="32" />
-                <Text fontWeight="700" color="gray.700">Package Comparison</Text>
-              </HStack>
-              <Box overflowX="auto">
+                <p className="font-bold text-slate-700">Package Comparison</p>
+              </div>
+              <div className="overflow-x-auto">
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "16px", lineHeight: 1.4 }}>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: "left", padding: "10px 12px", borderBottom: "1px solid #e2e8f0" }}>Test</th>
-                    {selectedVariants.map((v) => (
-                      <th key={v.key} style={{ textAlign: "center", padding: "10px 12px", borderBottom: "1px solid #e2e8f0" }}>
-                        <div>{v.variantName}</div>
-                        <div style={{ color: "#f26939", fontWeight: 800, fontSize: "18px" }}>INR {Number(v.price).toLocaleString("en-IN")}</div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {compareGrouped.map((group) => (
-                    <Fragment key={group.category}>
-                      <tr key={group.category + "-head"}>
-                        <td colSpan={1 + selectedVariants.length} style={{ padding: "9px 12px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0", fontWeight: 700 }}>
-                          <span style={{ display: "inline-flex", gap: "6px", alignItems: "center" }}>
-                            {packagesData.categoryIconMap?.[group.category] ? (
-                              <img src={packagesData.categoryIconMap[group.category]} alt={group.category} width="14" height="14" />
-                            ) : null}
-                            {group.category}
-                          </span>
-                        </td>
-                      </tr>
-                      {group.tests.map((test) => (
-                        <tr key={group.category + "-" + test}>
-                          <td style={{ padding: "8px 10px", borderBottom: "1px solid #edf2f7" }}>{test}</td>
-                          {selectedVariants.map((v) => (
-                            <td key={v.key + "-" + test} style={{ textAlign: "center", padding: "8px 10px", borderBottom: "1px solid #edf2f7", fontWeight: 700 }}>
-                              {v.tests.includes(test) ? "✓" : ""}
-                            </td>
-                          ))}
-                        </tr>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: "left", padding: "10px 12px", borderBottom: "1px solid #e2e8f0" }}>Test</th>
+                      {selectedVariants.map((v) => (
+                        <th key={v.key} style={{ textAlign: "center", padding: "10px 12px", borderBottom: "1px solid #e2e8f0" }}>
+                          <div>{v.variantName}</div>
+                          <div style={{ color: "#f26939", fontWeight: 800, fontSize: "18px" }}>INR {Number(v.price).toLocaleString("en-IN")}</div>
+                        </th>
                       ))}
-                    </Fragment>
-                  ))}
-                </tbody>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {compareGrouped.map((group) => (
+                      <Fragment key={group.category}>
+                        <tr key={group.category + "-head"}>
+                          <td colSpan={1 + selectedVariants.length} style={{ padding: "9px 12px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0", fontWeight: 700 }}>
+                            <span style={{ display: "inline-flex", gap: "6px", alignItems: "center" }}>
+                              {packagesData.categoryIconMap?.[group.category] ? (
+                                <img src={packagesData.categoryIconMap[group.category]} alt={group.category} width="14" height="14" />
+                              ) : null}
+                              {group.category}
+                            </span>
+                          </td>
+                        </tr>
+                        {group.tests.map((test) => (
+                          <tr key={group.category + "-" + test}>
+                            <td style={{ padding: "8px 10px", borderBottom: "1px solid #edf2f7" }}>{test}</td>
+                            {selectedVariants.map((v) => (
+                              <td key={v.key + "-" + test} style={{ textAlign: "center", padding: "8px 10px", borderBottom: "1px solid #edf2f7", fontWeight: 700 }}>
+                                {v.tests.includes(test) ? "✓" : ""}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </Fragment>
+                    ))}
+                  </tbody>
                 </table>
-              </Box>
+              </div>
               {compareNotes.length > 0 ? (
-                <Box mt={3} data-export-hide="true">
-                <Text fontSize="11px" color="gray.500" fontWeight="700" mb={1}>Important notes</Text>
-                {compareNotes.map((note) => (
-                  <Text key={note} fontSize="11px" color="gray.500">{note}</Text>
-                ))}
-                </Box>
+                <div className="mt-3" data-export-hide="true">
+                  <p className="mb-1 text-[11px] font-bold text-slate-500">Important notes</p>
+                  {compareNotes.map((note) => (
+                    <p key={note} className="text-[11px] text-slate-500">{note}</p>
+                  ))}
+                </div>
               ) : null}
-            </Box>
-          </Box>
-        </Box>
+            </div>
+          </Card>
+        </div>
       ) : null}
 
       {toastMessage ? (
-        <Box
-          position="fixed"
-          bottom={{ base: 20, md: 6 }}
-          left="50%"
-          transform="translateX(-50%)"
-          bg="gray.800"
-          color="white"
-          px={4}
-          py={2}
-          borderRadius="md"
-          zIndex={60}
-          fontSize="sm"
-        >
+        <div className="fixed bottom-20 left-1/2 z-[60] -translate-x-1/2 rounded-md bg-slate-800 px-4 py-2 text-sm text-white md:bottom-6">
           {toastMessage}
-        </Box>
+        </div>
       ) : null}
-    </Container>
+    </TwContainer>
   );
 }

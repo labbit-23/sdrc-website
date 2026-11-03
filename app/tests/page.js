@@ -1,26 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  Heading,
-  HStack,
-  IconButton,
-  Input,
-  Spinner,
-  Text,
-  VStack
-} from "@chakra-ui/react";
 import { FiFilter, FiHome, FiSearch, FiShoppingCart, FiX } from "react-icons/fi";
 import { BsBuilding, BsCartCheck, BsCartPlus } from "react-icons/bs";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/form";
+import { TwContainer } from "@/components/site/tw-layout";
 import defaultHealthPackagesData from "@/data/health-packages.json";
 import CartRequestPanel from "@/components/cart/CartRequestPanel";
 import { readCartItems, saveCartItems } from "@/lib/cart";
 import { trackEvent } from "@/lib/analytics";
 import { sortPackages, sortPackageVariants } from "@/lib/packageOrdering";
+import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
 const QUERY_DEBOUNCE_MS = 350;
@@ -88,7 +80,7 @@ function flattenPackageVariants(data) {
         tests_count: Array.isArray(variant.tests) ? variant.tests.length : null,
         home_collection: typeof variant.home_collection === "boolean" ? variant.home_collection : true,
         is_most_booked: Boolean(variant.is_most_booked),
-        tests: Array.isArray(variant.tests) ? variant.tests : []
+        tests: Array.isArray(variant.tests) ? variant.tests : [],
       });
     });
   });
@@ -126,6 +118,57 @@ function prioritizeSearchResults(items, query) {
   });
 }
 
+function IconButton({ className, children, ...props }) {
+  return (
+    <button
+      className={cn(
+        "inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--sdrc-teal)] bg-white text-[var(--sdrc-teal-deep)] transition hover:bg-[var(--sdrc-teal-soft)] disabled:pointer-events-none disabled:opacity-60",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Spinner() {
+  return <span className="inline-block size-5 animate-spin rounded-full border-2 border-[var(--sdrc-teal)] border-r-transparent" />;
+}
+
+function VisitBadge({ homeCollection, compact = false }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-bold",
+        compact ? "text-[10px]" : "text-[11px]",
+        homeCollection ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-700"
+      )}
+      title={homeCollection ? "Home sample collection available" : "Center visit required"}
+    >
+      {homeCollection ? <FiHome size={11} /> : <BsBuilding size={11} />}
+      {compact ? (homeCollection ? "Home" : "Center") : homeCollection ? "Home Collection" : "Center Visit"}
+    </span>
+  );
+}
+
+function SmallBadge({ children, tone = "teal" }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold",
+        tone === "orange"
+          ? "bg-orange-50 text-orange-700"
+          : tone === "slate"
+            ? "bg-slate-100 text-slate-700"
+            : "bg-[var(--sdrc-teal-soft)] text-[var(--sdrc-teal-deep)]"
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
 export default function TestsPage() {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
@@ -148,12 +191,6 @@ export default function TestsPage() {
   const [showDepartmentFilters, setShowDepartmentFilters] = useState(false);
   const [showFullTestsMobile, setShowFullTestsMobile] = useState(false);
 
-  // Instant default from the bundled copy, upgraded once /api/health-
-  // packages resolves (labit-main first, this repo's own bundled copy as
-  // ITS fallback -- see that route). 2026-09-12: this site's own data
-  // file had drifted stale for months with nothing surfacing it; this
-  // makes labit-main authoritative at request time instead of depending
-  // on someone remembering to re-run scripts/sync-health-packages.mjs.
   const [healthPackagesData, setHealthPackagesData] = useState(defaultHealthPackagesData);
   useEffect(() => {
     let cancelled = false;
@@ -177,10 +214,7 @@ export default function TestsPage() {
       const m = String(note).match(/^\*([^:]+):\s*(.+)$/);
       if (!m) return;
       const panel = m[1].trim();
-      const expanded = m[2]
-        .split(",")
-        .map((x) => x.trim())
-        .filter(Boolean);
+      const expanded = m[2].split(",").map((x) => x.trim()).filter(Boolean);
       map.set(panel.toLowerCase(), expanded);
     });
     return map;
@@ -205,12 +239,7 @@ export default function TestsPage() {
     const base = homeCollectionFilter ? packageVariants.filter((pkg) => pkg.home_collection) : packageVariants;
     if (!q) return base;
     return base.filter((pkg) => {
-      const blob = [
-        pkg.package_name,
-        pkg.name,
-        pkg.short_description,
-        ...(Array.isArray(pkg.tests) ? pkg.tests : [])
-      ]
+      const blob = [pkg.package_name, pkg.name, pkg.short_description, ...(Array.isArray(pkg.tests) ? pkg.tests : [])]
         .join(" ")
         .toLowerCase();
       return blob.includes(q);
@@ -222,10 +251,7 @@ export default function TestsPage() {
       if (!groups.has(pkg.package_name)) groups.set(pkg.package_name, []);
       groups.get(pkg.package_name).push(pkg);
     });
-    return Array.from(groups.entries()).map(([packageName, variants]) => ({
-      packageName,
-      variants
-    }));
+    return Array.from(groups.entries()).map(([packageName, variants]) => ({ packageName, variants }));
   }, [filteredPackageVariants]);
   const mobileFeaturedPackages = useMemo(() => {
     const byName = new Map();
@@ -250,10 +276,7 @@ export default function TestsPage() {
   }, [isSearching, items, mobilePopularTests]);
   const categoryFilters = useMemo(() => ["All", ...categories], [categories]);
 
-  const subtotal = useMemo(
-    () => cartItems.reduce((acc, item) => acc + (Number(item.price) || 0), 0),
-    [cartItems]
-  );
+  const subtotal = useMemo(() => cartItems.reduce((acc, item) => acc + (Number(item.price) || 0), 0), [cartItems]);
   const itemCount = cartItems.length;
   const hasCenterOnlyItems = cartItems.some((item) => item.home_collection === false);
 
@@ -264,21 +287,18 @@ export default function TestsPage() {
 
   useEffect(() => {
     const parsed = readCartItems();
-    setCartItems(
-      parsed.map((row) => ({
-        id: row.id,
-        item_type: row.item_type === "package" ? "package" : "test",
-        name: row.name,
-        internal_code: row.internal_code || null,
-        department: row.department || null,
-        package_name: row.package_name || null,
-        price: row.price,
-        home_collection: row.home_collection ?? null,
-        tests_count: row.tests_count ?? null
-      }))
-    );
+    setCartItems(parsed.map((row) => ({
+      id: row.id,
+      item_type: row.item_type === "package" ? "package" : "test",
+      name: row.name,
+      internal_code: row.internal_code || null,
+      department: row.department || null,
+      package_name: row.package_name || null,
+      price: row.price,
+      home_collection: row.home_collection ?? null,
+      tests_count: row.tests_count ?? null,
+    })));
   }, []);
-
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -356,7 +376,7 @@ export default function TestsPage() {
           limit: String(PAGE_SIZE),
           most_common: String(mostCommonOnly),
           most_popular: String(mostPopularOnly),
-          home_collection: String(homeCollectionFilter)
+          home_collection: String(homeCollectionFilter),
         });
 
         if (debouncedQuery) params.set("q", debouncedQuery);
@@ -385,15 +405,7 @@ export default function TestsPage() {
         setPagination(data.pagination || defaultPagination);
         clientCache.set(key, { ts: Date.now(), data });
 
-        if (
-          page === 1 &&
-          !debouncedQuery &&
-          activeCategory === "All" &&
-          !mostCommonOnly &&
-          mostPopularOnly &&
-          !homeCollectionFilter &&
-          typeof window !== "undefined"
-        ) {
+        if (isDefaultMostBookedView && typeof window !== "undefined") {
           try {
             window.localStorage.setItem(MOST_BOOKED_CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
           } catch {}
@@ -430,27 +442,21 @@ export default function TestsPage() {
         return tests.some((pkgTest) => isLikelySameTest(pkgTest, test.name));
       });
       if (overlapPackages.length > 0) {
-        const top = overlapPackages
-          .slice(0, 2)
-          .map((item) => (item.package_name ? `${item.package_name} (${item.name})` : item.name))
-          .join(", ");
+        const top = overlapPackages.slice(0, 2).map((item) => (item.package_name ? `${item.package_name} (${item.name})` : item.name)).join(", ");
         const suffix = overlapPackages.length > 2 ? ` +${overlapPackages.length - 2} more` : "";
         showCartWarning(`Heads up: ${test.name} is likely already included in ${top}${suffix}.`);
       }
-      return [
-        ...prev,
-        {
-          id: test.id,
-          item_type: "test",
-          name: test.name,
-          internal_code: test.internal_code || null,
-          department: test.department || null,
-          package_name: null,
-          price: test.price,
-          home_collection: test.home_collection ?? null,
-          tests_count: null
-        }
-      ];
+      return [...prev, {
+        id: test.id,
+        item_type: "test",
+        name: test.name,
+        internal_code: test.internal_code || null,
+        department: test.department || null,
+        package_name: null,
+        price: test.price,
+        home_collection: test.home_collection ?? null,
+        tests_count: null,
+      }];
     });
   }
 
@@ -463,27 +469,21 @@ export default function TestsPage() {
         return (pkg.tests || []).some((pkgTest) => isLikelySameTest(pkgTest, item.name));
       });
       if (overlapTests.length > 0) {
-        const top = overlapTests
-          .slice(0, 3)
-          .map((item) => item.name)
-          .join(", ");
+        const top = overlapTests.slice(0, 3).map((item) => item.name).join(", ");
         const suffix = overlapTests.length > 3 ? ` +${overlapTests.length - 3} more` : "";
         showCartWarning(`Heads up: ${pkg.name} already includes ${top}${suffix}.`);
       }
-      return [
-        ...prev,
-        {
-          id: pkg.id,
-          item_type: "package",
-          name: pkg.name,
-          internal_code: null,
-          department: null,
-          package_name: pkg.package_name || null,
-          price: pkg.price,
-          home_collection: pkg.home_collection ?? null,
-          tests_count: pkg.tests_count
-        }
-      ];
+      return [...prev, {
+        id: pkg.id,
+        item_type: "package",
+        name: pkg.name,
+        internal_code: null,
+        department: null,
+        package_name: pkg.package_name || null,
+        price: pkg.price,
+        home_collection: pkg.home_collection ?? null,
+        tests_count: pkg.tests_count,
+      }];
     });
   }
 
@@ -510,371 +510,252 @@ export default function TestsPage() {
     document.getElementById("cart-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  const searchInput = (
+    <Input
+      placeholder="Search tests or packages (TSH, HbA1c, Lipid...)"
+      value={query}
+      inputMode="search"
+      enterKeyHint="search"
+      onChange={(e) => {
+        const value = e.target.value;
+        setPage(1);
+        setQuery(value);
+        if (value.trim().length > 0) {
+          setActiveCategory("All");
+          setMostCommonOnly(false);
+          setMostPopularOnly(false);
+          setHomeCollectionFilter(false);
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          setDebouncedQuery(query.trim());
+        }
+      }}
+      className="border-teal-200 ring-2 ring-teal-100/80 focus:border-teal-400 focus:ring-teal-300"
+    />
+  );
+
   return (
     <>
-      <Box className="brochure-bg functional-hero-cover" py={{ base: 10, md: 14 }}>
-        <Container maxW="1200px">
-          <Grid templateColumns={{ base: "1fr" }} gap={6} alignItems="center">
-            <Box>
-              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
-                Test Selection
-                <Box as="span" color="teal.700" className="hero-subline">
-                  Search, Compare, <Box as="span" color="orange.500">Add to Cart</Box>
-                </Box>
-              </Heading>
-              <Text mt={3} color="gray.700" fontSize={{ base: "md", md: "lg" }}>
-                Find tests and packages, then send one request to the lab team.
-              </Text>
-              <HStack mt={4} maxW={{ base: "100%", md: "720px" }}>
-                <Input
-                  bg="white"
-                  placeholder="Search tests or packages (TSH, HbA1c, Lipid...)"
-                  value={query}
-                  inputMode="search"
-                  enterKeyHint="search"
+      <section className="brochure-bg functional-hero-cover py-10 md:py-14">
+        <TwContainer>
+          <h1 className="hero-title text-slate-800">
+            Test Selection
+            <span className="hero-subline text-[var(--sdrc-teal-deep)]">
+              Search, Compare, <span className="text-[var(--sdrc-orange)]">Add to Cart</span>
+            </span>
+          </h1>
+          <p className="mt-3 text-base text-slate-700 md:text-lg">
+            Find tests and packages, then send one request to the lab team.
+          </p>
+          <div className="mt-4 flex max-w-[720px] gap-2">
+            {searchInput}
+            <span className="hidden md:block">
+              <Button
+                size="sm"
+                variant="outline"
+                className="px-3"
+                onClick={query ? clearSearchAndFilters : () => setDebouncedQuery(query.trim())}
+                aria-label={query ? "Clear search" : "Search"}
+              >
+                {query ? <FiX /> : <FiSearch />}
+              </Button>
+            </span>
+            <span className="md:hidden">
+              <Button
+                size="sm"
+                variant="outline"
+                className="px-3"
+                onClick={() => setDebouncedQuery(query.trim())}
+                aria-label="Search"
+              >
+                <FiSearch />
+              </Button>
+            </span>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-3">
+            {[
+              ["Common tests", mostCommonOnly, setMostCommonOnly],
+              ["Most booked", mostPopularOnly, setMostPopularOnly],
+              ["Home collection", homeCollectionFilter, setHomeCollectionFilter],
+            ].map(([label, checked, setter]) => (
+              <label key={label} className="flex items-center gap-2 text-xs font-semibold">
+                <input
+                  type="checkbox"
+                  checked={checked}
                   onChange={(e) => {
-                    const value = e.target.value;
                     setPage(1);
-                    setQuery(value);
-                    if (value.trim().length > 0) {
-                      setActiveCategory("All");
-                      setMostCommonOnly(false);
-                      setMostPopularOnly(false);
-                      setHomeCollectionFilter(false);
-                    }
+                    setter(e.target.checked);
                   }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      setDebouncedQuery(query.trim());
-                    }
-                  }}
+                  style={{ accentColor: "#008f82" }}
                 />
-                {/* Desktop: X to clear when text present, search icon when empty */}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  display={{ base: "none", md: "flex" }}
-                  onClick={query ? clearSearchAndFilters : () => setDebouncedQuery(query.trim())}
-                  aria-label={query ? "Clear search" : "Search"}
-                >
-                  {query ? <FiX /> : <FiSearch />}
-                </Button>
-                {/* Mobile: search icon only — Enter on keyboard does same */}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  display={{ base: "flex", md: "none" }}
-                  onClick={() => setDebouncedQuery(query.trim())}
-                  aria-label="Search"
-                >
-                  <FiSearch />
-                </Button>
-              </HStack>
-              <HStack mt={3} spacing={3} flexWrap="wrap">
-                <HStack spacing={2}>
-                  <Box
-                    as="input"
-                    type="checkbox"
-                    checked={mostCommonOnly}
-                    onChange={(e) => {
-                      setPage(1);
-                      setMostCommonOnly(e.target.checked);
-                    }}
-                    style={{ accentColor: "#008f82" }}
-                  />
-                  <Text fontSize="xs" fontWeight="600">Common tests</Text>
-                </HStack>
-                <HStack spacing={2}>
-                  <Box
-                    as="input"
-                    type="checkbox"
-                    checked={mostPopularOnly}
-                    onChange={(e) => {
-                      setPage(1);
-                      setMostPopularOnly(e.target.checked);
-                    }}
-                    style={{ accentColor: "#008f82" }}
-                  />
-                  <Text fontSize="xs" fontWeight="600">Most booked</Text>
-                </HStack>
-                <HStack spacing={2}>
-                  <Box
-                    as="input"
-                    type="checkbox"
-                    checked={homeCollectionFilter}
-                    onChange={(e) => {
-                      setPage(1);
-                      setHomeCollectionFilter(e.target.checked);
-                    }}
-                    style={{ accentColor: "#008f82" }}
-                  />
-                  <Text fontSize="xs" fontWeight="600">Home collection</Text>
-                </HStack>
-              </HStack>
-            </Box>
-          </Grid>
-        </Container>
-      </Box>
+                {label}
+              </label>
+            ))}
+          </div>
+        </TwContainer>
+      </section>
 
       <IconButton
-        position="fixed"
-        right={{ base: 4, md: 6 }}
-        bottom={{ base: 5, md: 6 }}
-        zIndex={30}
-        size="lg"
-        variant="outline"
-        bg="white"
-        color="teal.700"
-        borderColor="teal.300"
+        className="fixed bottom-5 right-4 z-30 size-11 shadow-lg md:bottom-6 md:right-6"
         aria-label="Open cart"
         onClick={scrollToCart}
       >
         <FiShoppingCart />
       </IconButton>
-
       {itemCount > 0 ? (
-        <Box
-          position="fixed"
-          right={{ base: 3, md: 5 }}
-          bottom={{ base: 3, md: 4 }}
-          zIndex={31}
-          minW="20px"
-          h="20px"
-          px="4px"
-          borderRadius="full"
-          bg="orange.500"
-          color="white"
-          fontSize="11px"
-          fontWeight="700"
-          display="inline-flex"
-          alignItems="center"
-          justifyContent="center"
-          pointerEvents="none"
-        >
+        <span className="pointer-events-none fixed bottom-3 right-3 z-[31] inline-flex min-w-5 items-center justify-center rounded-full bg-[var(--sdrc-orange)] px-1 text-[11px] font-bold text-white md:bottom-4 md:right-5">
           {itemCount}
-        </Box>
+        </span>
       ) : null}
 
-      <Container maxW="1200px" py={10}>
-        <VStack display={{ base: "flex", lg: "none" }} align="stretch" gap={4} mb={6}>
-          <Box className="soft-card no-hover-lift" p={4}>
-            <HStack justify="space-between" mb={3}>
-              <Heading size="sm">{isSearching ? "Matching Checkups" : "Popular Checkups"}</Heading>
+      <TwContainer className="py-10">
+        <div className="mb-6 flex flex-col gap-4 lg:hidden">
+          <Card interactive={false} className="p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-bold">{isSearching ? "Matching Checkups" : "Popular Checkups"}</h2>
               <Button as="a" href="/packages" size="xs" variant="outline">Compare</Button>
-            </HStack>
+            </div>
             {mobileFeaturedPackages.length === 0 ? (
-              <Box borderWidth="1px" borderStyle="dashed" borderColor="gray.200" borderRadius="lg" p={3}>
-                <Text fontSize="sm" color="gray.500">No packages match this search.</Text>
-              </Box>
+              <div className="rounded-lg border border-dashed border-slate-200 p-3">
+                <p className="text-sm text-slate-500">No packages match this search.</p>
+              </div>
             ) : (
-              <HStack gap={3} overflowX="auto" pb={1} align="stretch">
+              <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
                 {mobileFeaturedPackages.map((pkg) => {
-                const added = isInCart(pkg.id);
-                return (
-                  <Box key={pkg.id} minW="220px" borderWidth="1px" borderColor="gray.100" borderRadius="xl" p={3} bg="white">
-                    <Text fontSize="sm" fontWeight="700" color="gray.800" lineHeight="1.2" noOfLines={2}>{pkg.package_name}</Text>
-                    <Text fontSize="xs" color="gray.500" mt={0.5}>{pkg.name}</Text>
-                    <Text fontSize="xs" color="gray.600" mt={1} noOfLines={2}>{pkg.short_description}</Text>
-                    <HStack spacing={1.5} mt={2} flexWrap="wrap">
-                      {pkg.is_most_booked ? (
-                        <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="orange.50" color="orange.700" title="Most booked package variant">
-                          <Text fontSize="10px" fontWeight="700">Most booked</Text>
-                        </HStack>
-                      ) : null}
-                      {pkg.home_collection ? (
-                        <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="green.50" color="green.700" title="Home sample collection available for this package">
-                          <FiHome size={11} />
-                          <Text fontSize="10px" fontWeight="700">Home</Text>
-                        </HStack>
-                      ) : (
-                        <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="gray.100" color="gray.700" title="Center visit required">
-                          <BsBuilding size={11} />
-                          <Text fontSize="10px" fontWeight="700">Center</Text>
-                        </HStack>
-                      )}
-                    </HStack>
-                    <HStack justify="space-between" mt={3}>
-                      <Text fontSize="sm" fontWeight="800" color="orange.500">{formatInr(pkg.price)}</Text>
-                      <IconButton
-                        size="sm"
-                        variant={added ? "solid" : "outline"}
-                        bg={added ? "teal.600" : "white"}
-                        color={added ? "white" : "teal.700"}
-                        borderColor={added ? "teal.600" : "teal.300"}
-                        aria-label={added ? "Added to cart" : "Add package to cart"}
-                        onClick={() => addPackageToCart(pkg)}
-                        disabled={added}
-                      >
-                        {added ? <BsCartCheck /> : <BsCartPlus />}
-                      </IconButton>
-                    </HStack>
-                  </Box>
-                );
+                  const added = isInCart(pkg.id);
+                  return (
+                    <div key={pkg.id} className="min-w-[220px] rounded-xl border border-slate-100 bg-white p-3">
+                      <p className="line-clamp-2 text-sm font-bold leading-tight text-slate-800">{pkg.package_name}</p>
+                      <p className="mt-0.5 text-xs text-slate-500">{pkg.name}</p>
+                      <p className="mt-1 line-clamp-2 text-xs text-slate-600">{pkg.short_description}</p>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {pkg.is_most_booked ? <SmallBadge tone="orange">Most booked</SmallBadge> : null}
+                        <VisitBadge homeCollection={pkg.home_collection} compact />
+                      </div>
+                      <div className="mt-3 flex items-center justify-between gap-3">
+                        <p className="text-sm font-extrabold text-[var(--sdrc-orange)]">{formatInr(pkg.price)}</p>
+                        <IconButton
+                          className={cn(added && "border-[var(--sdrc-teal-600)] bg-[var(--sdrc-teal-600)] text-white")}
+                          aria-label={added ? "Added to cart" : "Add package to cart"}
+                          onClick={() => addPackageToCart(pkg)}
+                          disabled={added}
+                        >
+                          {added ? <BsCartCheck /> : <BsCartPlus />}
+                        </IconButton>
+                      </div>
+                    </div>
+                  );
                 })}
-              </HStack>
+              </div>
             )}
-          </Box>
+          </Card>
 
-          <Box className="soft-card no-hover-lift" p={4}>
-            <Heading size="sm" mb={3}>{mobileTestSectionTitle}</Heading>
+          <Card interactive={false} className="p-4">
+            <h2 className="mb-3 text-lg font-bold">{mobileTestSectionTitle}</h2>
             {loading ? (
-              <HStack py={6} justify="center">
-                <Spinner color="teal.500" />
-                <Text fontSize="sm" color="gray.600">Loading tests...</Text>
-              </HStack>
+              <div className="flex justify-center gap-2 py-6">
+                <Spinner />
+                <p className="text-sm text-slate-600">Loading tests...</p>
+              </div>
             ) : (
-              <HStack gap={3} overflowX="auto" pb={1} align="stretch">
+              <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
                 {mobileTestCards.map((test) => {
                   const added = isInCart(test.id);
                   return (
-                    <Box key={test.id} minW="230px" borderWidth="1px" borderColor="gray.100" borderRadius="xl" p={3} bg="white">
-                      <Text fontSize="xs" color="gray.500">
-                        {test.internal_code || "No code"} {test.department ? `• ${test.department}` : ""}
-                      </Text>
-                      <Text fontWeight="800" color="gray.800" lineHeight="1.2" mt={0.5} noOfLines={2}>{test.name}</Text>
-                      <HStack justify="space-between" mt={3}>
-                        <Text fontSize="sm" fontWeight="800" color="orange.500">{test.price == null ? "Price N/A" : formatInr(test.price)}</Text>
+                    <div key={test.id} className="min-w-[230px] rounded-xl border border-slate-100 bg-white p-3">
+                      <p className="text-xs text-slate-500">{test.internal_code || "No code"} {test.department ? `• ${test.department}` : ""}</p>
+                      <p className="mt-0.5 line-clamp-2 font-extrabold leading-tight text-slate-800">{test.name}</p>
+                      <div className="mt-3 flex items-center justify-between gap-3">
+                        <p className="text-sm font-extrabold text-[var(--sdrc-orange)]">{test.price == null ? "Price N/A" : formatInr(test.price)}</p>
                         <IconButton
-                          size="sm"
-                          variant={added ? "solid" : "outline"}
-                          bg={added ? "teal.600" : "white"}
-                          color={added ? "white" : "teal.700"}
-                          borderColor={added ? "teal.600" : "teal.300"}
+                          className={cn(added && "border-[var(--sdrc-teal-600)] bg-[var(--sdrc-teal-600)] text-white")}
                           aria-label={added ? "Added to cart" : "Add test to cart"}
                           onClick={() => addTestToCart(test)}
                           disabled={added}
                         >
                           {added ? <BsCartCheck /> : <BsCartPlus />}
                         </IconButton>
-                      </HStack>
-                    </Box>
+                      </div>
+                    </div>
                   );
                 })}
-              </HStack>
+              </div>
             )}
-            <Button mt={3} size="sm" variant="outline" onClick={() => setShowFullTestsMobile((v) => !v)}>
+            <Button className="mt-3" size="sm" variant="outline" onClick={() => setShowFullTestsMobile((v) => !v)}>
               {showFullTestsMobile ? "Hide full list" : "See full test list"}
             </Button>
-          </Box>
+          </Card>
 
           {showFullTestsMobile ? (
-            <Box className="soft-card no-hover-lift" p={4}>
-              <Heading size="sm" mb={3}>All Matching Tests</Heading>
-              <VStack align="stretch" gap={2}>
+            <Card interactive={false} className="p-4">
+              <h2 className="mb-3 text-lg font-bold">All Matching Tests</h2>
+              <div className="flex flex-col gap-2">
                 {items.map((test) => {
                   const added = isInCart(test.id);
                   return (
-                    <Box key={test.id} p={2.5} borderWidth="1px" borderColor="gray.100" borderRadius="md">
-                      <HStack justify="space-between" gap={2} align="start">
-                        <Box>
-                          <Text fontSize="xs" color="gray.500">{test.internal_code || "No code"} {test.department ? `• ${test.department}` : ""}</Text>
-                          <Text fontSize="sm" fontWeight="700" color="gray.800">{test.name}</Text>
-                        </Box>
-                        <HStack align="center" spacing={2}>
-                          <Text fontSize="xs" fontWeight="700" color="orange.500" whiteSpace="nowrap">
-                            {test.price == null ? "Price N/A" : formatInr(test.price)}
-                          </Text>
+                    <div key={test.id} className="rounded-md border border-slate-100 p-2.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-xs text-slate-500">{test.internal_code || "No code"} {test.department ? `• ${test.department}` : ""}</p>
+                          <p className="text-sm font-bold text-slate-800">{test.name}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="whitespace-nowrap text-xs font-bold text-[var(--sdrc-orange)]">{test.price == null ? "Price N/A" : formatInr(test.price)}</p>
                           <IconButton
-                            size="xs"
-                            variant={added ? "solid" : "outline"}
-                            bg={added ? "teal.600" : "white"}
-                            color={added ? "white" : "teal.700"}
-                            borderColor={added ? "teal.600" : "teal.300"}
+                            className={cn("size-8", added && "border-[var(--sdrc-teal-600)] bg-[var(--sdrc-teal-600)] text-white")}
                             aria-label={added ? "Added to cart" : "Add test to cart"}
                             onClick={() => addTestToCart(test)}
                             disabled={added}
                           >
                             {added ? <BsCartCheck /> : <BsCartPlus />}
                           </IconButton>
-                        </HStack>
-                      </HStack>
-                    </Box>
+                        </div>
+                      </div>
+                    </div>
                   );
                 })}
-              </VStack>
-              <HStack justify="space-between" mt={4}>
-                <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={loading || page <= 1}>
-                  Previous
-                </Button>
-                <Text fontSize="xs" color="gray.600">
-                  Page {page} of {Math.max(1, Math.ceil((pagination.total || 0) / (pagination.limit || PAGE_SIZE)))}
-                </Text>
-                <Button size="sm" variant="outline" onClick={() => setPage((p) => p + 1)} disabled={loading || !pagination.has_next}>
-                  Next
-                </Button>
-              </HStack>
-            </Box>
+              </div>
+              <PaginationControls page={page} pagination={pagination} loading={loading} setPage={setPage} />
+            </Card>
           ) : null}
-        </VStack>
+        </div>
 
-        <Grid display={{ base: "none", lg: "grid" }} templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} alignItems="start">
-          <Box className="soft-card no-hover-lift" p={5}>
-            <Heading size="md" mb={2}>
-              Find Your Tests
-            </Heading>
-            <Text fontSize="sm" color="gray.600" mb={4}>
-              Search by test name or internal code.
-            </Text>
+        <div className="hidden grid-cols-2 items-start gap-6 lg:grid">
+          <Card interactive={false} className="p-5">
+            <div className="mb-4">
+              <h2 className="mb-2 text-xl font-bold">Find Your Tests</h2>
+              <p className="text-sm text-slate-600">Search by test name or internal code.</p>
+            </div>
 
-            <Grid templateColumns={{ base: "1fr", md: "1fr auto" }} gap={3} alignItems="center">
-              <Text fontSize="sm" color="gray.600">
-                Use the hero search above to find tests instantly.
-              </Text>
-
+            <div className="grid items-center gap-3 md:grid-cols-[1fr_auto]">
+              <p className="text-sm text-slate-600">Use the hero search above to find tests instantly.</p>
               <Button size="sm" variant="outline" onClick={() => setShowDepartmentFilters((v) => !v)} leftIcon={<FiFilter />}>
                 {showDepartmentFilters ? "Hide Departments" : "Show Departments"}
               </Button>
-            </Grid>
+            </div>
 
-            <HStack mt={3} spacing={2} flexWrap="wrap">
-              <HStack spacing={2}>
-                <Box
-                  as="input"
-                  type="checkbox"
-                  checked={mostCommonOnly}
-                  onChange={(e) => {
-                    setPage(1);
-                    setMostCommonOnly(e.target.checked);
-                  }}
-                  style={{ accentColor: "#008f82" }}
-                />
-                <Text fontSize="xs" fontWeight="600">
-                  Common tests
-                </Text>
-              </HStack>
-
-              <HStack spacing={2}>
-                <Box
-                  as="input"
-                  type="checkbox"
-                  checked={mostPopularOnly}
-                  onChange={(e) => {
-                    setPage(1);
-                    setMostPopularOnly(e.target.checked);
-                  }}
-                  style={{ accentColor: "#008f82" }}
-                />
-                <Text fontSize="xs" fontWeight="600">
-                  Most booked
-                </Text>
-              </HStack>
-
-              <HStack spacing={2}>
-                <Box
-                  as="input"
-                  type="checkbox"
-                  checked={homeCollectionFilter}
-                  onChange={(e) => {
-                    setPage(1);
-                    setHomeCollectionFilter(e.target.checked);
-                  }}
-                  style={{ accentColor: "#008f82" }}
-                />
-                <Text fontSize="xs" fontWeight="600">
-                  Home collection only
-                </Text>
-              </HStack>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {[
+                ["Common tests", mostCommonOnly, setMostCommonOnly],
+                ["Most booked", mostPopularOnly, setMostPopularOnly],
+                ["Home collection only", homeCollectionFilter, setHomeCollectionFilter],
+              ].map(([label, checked, setter]) => (
+                <label key={label} className="flex items-center gap-2 text-xs font-semibold">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => {
+                      setPage(1);
+                      setter(e.target.checked);
+                    }}
+                    style={{ accentColor: "#008f82" }}
+                  />
+                  {label}
+                </label>
+              ))}
 
               {showDepartmentFilters ? (
                 categoryFilters.map((cat) => (
@@ -892,220 +773,71 @@ export default function TestsPage() {
                   </Button>
                 ))
               ) : null}
-            </HStack>
+            </div>
 
-            <Box mt={4}>
+            <div className="mt-4">
               {loading ? (
-                <HStack py={8} justify="center">
-                  <Spinner color="teal.500" />
-                  <Text fontSize="sm" color="gray.600">Loading tests...</Text>
-                </HStack>
+                <div className="flex justify-center gap-2 py-8">
+                  <Spinner />
+                  <p className="text-sm text-slate-600">Loading tests...</p>
+                </div>
               ) : error ? (
-                <Box p={4} borderWidth="1px" borderColor="red.100" borderRadius="md" bg="red.50">
-                  <Text fontSize="sm" color="red.700">{error}</Text>
-                </Box>
+                <div className="rounded-md border border-red-100 bg-red-50 p-4">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
               ) : items.length === 0 ? (
-                <Box p={4} borderWidth="1px" borderStyle="dashed" borderColor="gray.300" borderRadius="md" bg="gray.50">
-                  <Text fontSize="sm" color="gray.600">No tests found.</Text>
-                </Box>
+                <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 p-4">
+                  <p className="text-sm text-slate-600">No tests found.</p>
+                </div>
               ) : (
-                <VStack align="stretch" gap={3}>
-                  {items.map((test) => {
-                    const added = isInCart(test.id);
-                    return (
-                      <Box key={test.id} p={3} borderWidth="1px" borderColor="gray.100" borderRadius="md">
-                        <HStack justify="space-between" align="start" gap={3}>
-                          <Box>
-                            <Text fontSize="xs" color="gray.500">
-                              {test.internal_code || "No code"} {test.department ? `• ${test.department}` : ""}
-                            </Text>
-                            <Text fontWeight="700" color="gray.800">{test.name}</Text>
-                            {test.sample_type || test.tat_hours ? (
-                              <Text fontSize="xs" color="gray.600" mt={1}>
-                                {test.sample_type ? `Sample: ${test.sample_type}` : ""}
-                                {test.sample_type && test.tat_hours ? " • " : ""}
-                                {test.tat_hours ? `TAT: ${test.tat_hours}h` : ""}
-                              </Text>
-                            ) : null}
-                            <HStack spacing={2} mt={1} flexWrap="wrap">
-                              {test.is_most_common ? (
-                                <Text fontSize="10px" px={2} py={0.5} borderRadius="full" bg="teal.50" color="teal.700" fontWeight="700">
-                                  Most Common
-                                </Text>
-                              ) : null}
-                              {test.is_most_popular ? (
-                                <Text fontSize="10px" px={2} py={0.5} borderRadius="full" bg="teal.100" color="teal.700" fontWeight="700">
-                                  Most booked
-                                </Text>
-                              ) : null}
-                              {test.home_collection === true ? (
-                                <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="green.50" color="green.700" title="Home sample collection available">
-                                  <FiHome size={11} />
-                                  <Text fontSize="10px" fontWeight="700">Home Collection</Text>
-                                </HStack>
-                              ) : (
-                                <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="gray.100" color="gray.700" title="Center visit required">
-                                  <BsBuilding size={11} />
-                                  <Text fontSize="10px" fontWeight="700">Center Visit</Text>
-                                </HStack>
-                              )}
-                            </HStack>
-                          </Box>
-                          <HStack align="center" spacing={2}>
-                            <Text fontSize="md" fontWeight="700" color="orange.500" whiteSpace="nowrap">{test.price == null ? "Price N/A" : formatInr(test.price)}</Text>
-                            <IconButton
-                              size="sm"
-                              variant={added ? "solid" : "outline"}
-                              bg={added ? "teal.600" : "white"}
-                              color={added ? "white" : "teal.700"}
-                              borderColor={added ? "teal.600" : "teal.300"}
-                              aria-label={added ? "Added to cart" : "Add test to cart"}
-                              onClick={() => addTestToCart(test)}
-                              disabled={added}
-                            >
-                              {added ? <BsCartCheck /> : <BsCartPlus />}
-                            </IconButton>
-                          </HStack>
-                        </HStack>
-                      </Box>
-                    );
-                  })}
-                </VStack>
+                <div className="flex flex-col gap-3">
+                  {items.map((test) => <TestRow key={test.id} test={test} added={isInCart(test.id)} addTestToCart={addTestToCart} />)}
+                </div>
               )}
 
-              <HStack justify="space-between" mt={5}>
-                <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={loading || page <= 1}>
-                  Previous
-                </Button>
-                <Text fontSize="sm" color="gray.600">
-                  Page {page} of {Math.max(1, Math.ceil((pagination.total || 0) / (pagination.limit || PAGE_SIZE)))}
-                </Text>
-                <Button size="sm" variant="outline" onClick={() => setPage((p) => p + 1)} disabled={loading || !pagination.has_next}>
-                  Next
-                </Button>
-              </HStack>
-            </Box>
-          </Box>
+              <PaginationControls page={page} pagination={pagination} loading={loading} setPage={setPage} />
+            </div>
+          </Card>
 
-          <Box className="soft-card no-hover-lift" p={5}>
-            <Heading size="md" mb={2}>Find Your Packages</Heading>
-            <Text fontSize="sm" color="gray.600" mb={4}>Add package variants to cart and review included tests.</Text>
+          <Card interactive={false} className="p-5">
+            <div className="mb-4">
+              <h2 className="mb-2 text-xl font-bold">Find Your Packages</h2>
+              <p className="text-sm text-slate-600">Add package variants to cart and review included tests.</p>
+            </div>
 
-            <VStack align="stretch" gap={4}>
+            <div className="flex flex-col gap-4">
               {groupedPackageVariants.map((group) => (
-                <Box key={group.packageName}>
-                  <Text fontWeight="700" color="gray.800" mb={2}>{group.packageName}</Text>
-                  <VStack align="stretch" gap={3}>
+                <div key={group.packageName}>
+                  <p className="mb-2 font-bold text-slate-800">{group.packageName}</p>
+                  <div className="flex flex-col gap-3">
                     {group.variants.map((pkg) => {
                       const added = isInCart(pkg.id);
                       const showIncludes = openPackageIncludesId === pkg.id;
                       return (
-                        <Box key={pkg.id} p={3} borderWidth="1px" borderColor="gray.100" borderRadius="md" position="relative">
-                          <HStack justify="space-between" align="start" gap={3}>
-                            <Box>
-                              <Text fontSize="xs" color="gray.500">{pkg.name}</Text>
-                              {pkg.short_description ? (
-                                <Text fontSize="xs" color="gray.600" mt={1} noOfLines={2}>
-                                  {pkg.short_description}
-                                </Text>
-                              ) : null}
-                              <HStack spacing={2} mt={1} flexWrap="wrap">
-                                {pkg.parameters != null ? (
-                                  <Text fontSize="10px" px={2} py={0.5} borderRadius="full" bg="gray.100" color="gray.700" fontWeight="700">
-                                    {pkg.parameters} parameters
-                                  </Text>
-                                ) : null}
-
-                                <Box
-                                  as="button"
-                                  type="button"
-                                  fontSize="11px"
-                                  fontWeight="700"
-                                  color="teal.700"
-                                  textDecoration="underline"
-                                  data-includes-trigger
-                                  onClick={() => setOpenPackageIncludesId((v) => (v === pkg.id ? null : pkg.id))}
-                                >
-                                  Includes {pkg.tests_count ?? 0} tests
-                                </Box>
-
-                                {pkg.home_collection ? (
-                                  <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="green.50" color="green.700" title="Home sample collection available for this package">
-                                    <Box w="6px" h="6px" borderRadius="full" bg="green.500" />
-                                    <FiHome size={11} />
-                                    <Text fontSize="10px" fontWeight="700">Home Collection</Text>
-                                  </HStack>
-                                ) : (
-                                  <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="gray.100" color="gray.700" title="Center visit required">
-                                    <BsBuilding size={11} />
-                                    <Text fontSize="10px" fontWeight="700">Center Visit</Text>
-                                  </HStack>
-                                )}
-                                {pkg.is_most_booked ? (
-                                  <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="orange.50" color="orange.700" title="Most booked package variant">
-                                    <Text fontSize="10px" fontWeight="700">Most booked</Text>
-                                  </HStack>
-                                ) : null}
-                              </HStack>
-                            </Box>
-                            <HStack align="center" spacing={2}>
-                              <Text fontSize="md" fontWeight="700" color="orange.500" whiteSpace="nowrap">{formatInr(pkg.price)}</Text>
-                              <IconButton
-                                size="sm"
-                                variant={added ? "solid" : "outline"}
-                                bg={added ? "teal.600" : "white"}
-                                color={added ? "white" : "teal.700"}
-                                borderColor={added ? "teal.600" : "teal.300"}
-                                aria-label={added ? "Added to cart" : "Add package to cart"}
-                                onClick={() => addPackageToCart(pkg)}
-                                disabled={added}
-                              >
-                                {added ? <BsCartCheck /> : <BsCartPlus />}
-                              </IconButton>
-                            </HStack>
-                          </HStack>
-
-                          {showIncludes ? (
-                            <Box
-                              data-includes-popup
-                              position="absolute"
-                              zIndex={8}
-                              right={3}
-                              top="68px"
-                              w={{ base: "calc(100% - 24px)", md: "320px" }}
-                              maxH="220px"
-                              overflowY="auto"
-                              bg="white"
-                              borderWidth="1px"
-                              borderColor="gray.200"
-                              borderRadius="md"
-                              p={3}
-                              boxShadow="lg"
-                            >
-                              <Text fontSize="xs" color="gray.500" mb={1} fontWeight="700">Included tests</Text>
-                              {pkg.tests.map((test) => (
-                                <Text key={test} fontSize="xs" color="gray.700" lineHeight="1.35">• {test}</Text>
-                              ))}
-                            </Box>
-                          ) : null}
-                        </Box>
+                        <PackageVariantRow
+                          key={pkg.id}
+                          pkg={pkg}
+                          added={added}
+                          showIncludes={showIncludes}
+                          setOpenPackageIncludesId={setOpenPackageIncludesId}
+                          addPackageToCart={addPackageToCart}
+                        />
                       );
                     })}
-                  </VStack>
-                </Box>
+                  </div>
+                </div>
               ))}
-            </VStack>
-          </Box>
-        </Grid>
+            </div>
+          </Card>
+        </div>
 
-        <Box id="cart-section" mt={8} className="soft-card no-hover-lift" p={5}>
-          <HStack justify="space-between" mb={2}>
-            <IconButton size="sm" variant="outline" aria-label="Cart">
+        <Card id="cart-section" interactive={false} className="mt-8 p-5">
+          <div className="mb-2 flex justify-between">
+            <IconButton aria-label="Cart">
               <FiShoppingCart />
             </IconButton>
-          </HStack>
-          <Text fontSize="sm" color="gray.600" mb={4}>Selected tests and packages for booking request.</Text>
-
+          </div>
+          <p className="mb-4 text-sm text-slate-600">Selected tests and packages for booking request.</p>
           <CartRequestPanel
             cartItems={cartItems}
             subtotal={subtotal}
@@ -1115,29 +847,115 @@ export default function TestsPage() {
             onRemoveItem={removeFromCart}
             onClearCart={clearCart}
           />
-        </Box>
-      </Container>
+        </Card>
+      </TwContainer>
 
       {cartWarning ? (
-        <Box
-          position="fixed"
-          bottom={{ base: 3, md: 5 }}
-          left="50%"
-          transform="translateX(-50%)"
-          zIndex={50}
-          px={4}
-          py={2.5}
-          borderRadius="md"
-          bg="orange.50"
-          borderWidth="1px"
-          borderColor="orange.200"
-          color="orange.800"
-          boxShadow="md"
-          maxW={{ base: "92vw", md: "620px" }}
-        >
-          <Text fontSize="sm" fontWeight="600">{cartWarning}</Text>
-        </Box>
+        <div className="fixed bottom-3 left-1/2 z-50 max-w-[92vw] -translate-x-1/2 rounded-md border border-orange-200 bg-orange-50 px-4 py-2.5 text-orange-800 shadow-md md:bottom-5 md:max-w-[620px]">
+          <p className="text-sm font-semibold">{cartWarning}</p>
+        </div>
       ) : null}
     </>
+  );
+}
+
+function PaginationControls({ page, pagination, loading, setPage }) {
+  return (
+    <div className="mt-5 flex items-center justify-between gap-3">
+      <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={loading || page <= 1}>
+        Previous
+      </Button>
+      <p className="text-sm text-slate-600">
+        Page {page} of {Math.max(1, Math.ceil((pagination.total || 0) / (pagination.limit || PAGE_SIZE)))}
+      </p>
+      <Button size="sm" variant="outline" onClick={() => setPage((p) => p + 1)} disabled={loading || !pagination.has_next}>
+        Next
+      </Button>
+    </div>
+  );
+}
+
+function TestRow({ test, added, addTestToCart }) {
+  return (
+    <div className="rounded-md border border-slate-100 p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs text-slate-500">{test.internal_code || "No code"} {test.department ? `• ${test.department}` : ""}</p>
+          <p className="font-bold text-slate-800">{test.name}</p>
+          {test.sample_type || test.tat_hours ? (
+            <p className="mt-1 text-xs text-slate-600">
+              {test.sample_type ? `Sample: ${test.sample_type}` : ""}
+              {test.sample_type && test.tat_hours ? " • " : ""}
+              {test.tat_hours ? `TAT: ${test.tat_hours}h` : ""}
+            </p>
+          ) : null}
+          <div className="mt-1 flex flex-wrap gap-2">
+            {test.is_most_common ? <SmallBadge>Most Common</SmallBadge> : null}
+            {test.is_most_popular ? <SmallBadge>Most booked</SmallBadge> : null}
+            <VisitBadge homeCollection={test.home_collection === true} />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="whitespace-nowrap text-base font-bold text-[var(--sdrc-orange)]">{test.price == null ? "Price N/A" : formatInr(test.price)}</p>
+          <IconButton
+            className={cn(added && "border-[var(--sdrc-teal-600)] bg-[var(--sdrc-teal-600)] text-white")}
+            aria-label={added ? "Added to cart" : "Add test to cart"}
+            onClick={() => addTestToCart(test)}
+            disabled={added}
+          >
+            {added ? <BsCartCheck /> : <BsCartPlus />}
+          </IconButton>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PackageVariantRow({ pkg, added, showIncludes, setOpenPackageIncludesId, addPackageToCart }) {
+  return (
+    <div className="relative rounded-md border border-slate-100 p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs text-slate-500">{pkg.name}</p>
+          {pkg.short_description ? <p className="mt-1 line-clamp-2 text-xs text-slate-600">{pkg.short_description}</p> : null}
+          <div className="mt-1 flex flex-wrap gap-2">
+            {pkg.parameters != null ? <SmallBadge tone="slate">{pkg.parameters} parameters</SmallBadge> : null}
+            <button
+              type="button"
+              className="text-[11px] font-bold text-[var(--sdrc-teal-deep)] underline"
+              data-includes-trigger
+              onClick={() => setOpenPackageIncludesId((v) => (v === pkg.id ? null : pkg.id))}
+            >
+              Includes {pkg.tests_count ?? 0} tests
+            </button>
+            <VisitBadge homeCollection={pkg.home_collection} />
+            {pkg.is_most_booked ? <SmallBadge tone="orange">Most booked</SmallBadge> : null}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="whitespace-nowrap text-base font-bold text-[var(--sdrc-orange)]">{formatInr(pkg.price)}</p>
+          <IconButton
+            className={cn(added && "border-[var(--sdrc-teal-600)] bg-[var(--sdrc-teal-600)] text-white")}
+            aria-label={added ? "Added to cart" : "Add package to cart"}
+            onClick={() => addPackageToCart(pkg)}
+            disabled={added}
+          >
+            {added ? <BsCartCheck /> : <BsCartPlus />}
+          </IconButton>
+        </div>
+      </div>
+
+      {showIncludes ? (
+        <div
+          data-includes-popup
+          className="absolute left-3 right-3 top-[68px] z-[8] max-h-[220px] overflow-y-auto rounded-md border border-slate-200 bg-white p-3 shadow-lg md:left-auto md:w-80"
+        >
+          <p className="mb-1 text-xs font-bold text-slate-500">Included tests</p>
+          {pkg.tests.map((test) => (
+            <p key={test} className="text-xs leading-snug text-slate-700">• {test}</p>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }

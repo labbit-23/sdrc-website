@@ -4,259 +4,158 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { FaWhatsapp } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input, Textarea } from "@/components/ui/form";
+import { Chip, TwContainer } from "@/components/site/tw-layout";
 import { FadeIn } from "@/components/site/motionUtils";
-import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  Heading,
-  HStack,
-  Input,
-  SimpleGrid,
-  Text,
-  Textarea,
-  VStack
-} from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
 
 const centres = [
   {
     name: "SD Road",
-    address: [
-      "1-1-58/7/3, Srinath Complex, SD Road",
-      "Opp. Taj Mahal Hotel",
-      "Secunderabad - 500003, Telangana"
-    ],
-    map: siteConfig.locations.sdRoad
+    address: ["1-1-58/7/3, Srinath Complex, SD Road", "Opp. Taj Mahal Hotel", "Secunderabad - 500003, Telangana"],
+    map: siteConfig.locations.sdRoad,
   },
   {
     name: "West Marredpally",
-    address: [
-      "Plot No. 35 & 36, Santhoshima Colony, West Marredpally",
-      "Next to Happy Women's Clinic",
-      "Secunderabad - 500026, Telangana"
-    ],
-    map: siteConfig.locations.marredpally
+    address: ["Plot No. 35 & 36, Santhoshima Colony, West Marredpally", "Next to Happy Women's Clinic", "Secunderabad - 500026, Telangana"],
+    map: siteConfig.locations.marredpally,
   },
   {
     name: "Yapral",
-    address: [
-      "Ambey Nilayam, Ground Floor, Bhanu Enclave, Yapral",
-      "Near Bhanu Enclave",
-      "Secunderabad - 500087, Telangana"
-    ],
-    map: siteConfig.locations.yapral
-  }
+    address: ["Ambey Nilayam, Ground Floor, Bhanu Enclave, Yapral", "Near Bhanu Enclave", "Secunderabad - 500087, Telangana"],
+    map: siteConfig.locations.yapral,
+  },
 ];
+
+const mapEmbedSrc = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13401.644712873018!2d78.4691960871582!3d17.441311199999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9a10b7ee2ab1%3A0xf08c95962eaf6b5b!2sSDRC%20-%20The%20Secunderabad%20Diagnostic%20and%20Research%20Centre!5e1!3m2!1sen!2sin!4v1764932257326!5m2!1sen!2sin";
+
+function ContactCard({ title, children, note, className = "" }) {
+  return (
+    <Card className={`flex h-full flex-col p-4 ${className}`}>
+      <h3 className="mb-1 font-bold leading-snug text-slate-800">{title}</h3>
+      <div className="text-sm font-semibold leading-6 text-[var(--sdrc-teal-deep)]">{children}</div>
+      <p className="mt-2 flex-1 text-xs leading-5 text-slate-500">{note}</p>
+    </Card>
+  );
+}
 
 export default function ContactPage() {
   const whatsappDisplay = "+91 " + siteConfig.whatsappNumber.slice(2);
 
   return (
     <>
-      <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
-        <Container maxW="1200px">
-          <Grid templateColumns={{ base: "1fr", lg: "1.2fr 1fr" }} gap={8}>
-            <Box>
-              <span className="chip chip-teal" style={{ marginBottom: 16, display: "inline-flex" }}>Jade Arcade, Paradise · Secunderabad</span>
-              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title" mt={2}>
-                Contact SDRC Diagnostics
-                <Box as="span" color="teal.700" className="hero-subline">
-                  Main Centre and Collection Centres
-                </Box>
-              </Heading>
-              <Text mt={3} color="gray.700" fontSize={{ base: "md", md: "lg" }} display="block">
-                Reach us for appointments, health packages, home sample collection or report-related queries.
-              </Text>
+      <section className="brochure-bg py-10 md:py-14">
+        <TwContainer className="grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
+          <div className="rise-in">
+            <Chip>Jade Arcade, Paradise · Secunderabad</Chip>
+            <h1 className="hero-title mt-4 text-slate-800">
+              Contact SDRC Diagnostics
+              <span className="hero-subline text-[var(--sdrc-teal-deep)]">Main Centre and Collection Centres</span>
+            </h1>
+            <p className="mt-4 text-base leading-7 text-slate-700 md:text-lg md:leading-8">
+              Reach us for appointments, health packages, home sample collection or report-related queries.
+            </p>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <ContactCard title="Call" note="Centre timings apply." className="hidden sm:flex">
+                <Link href={`tel:${siteConfig.phoneTel}`}>{siteConfig.phoneDisplay}</Link>
+              </ContactCard>
+              <ContactCard title="WhatsApp" note="Share prescriptions or booking queries.">
+                <Link href={`https://wa.me/${siteConfig.whatsappNumber}`}>{whatsappDisplay}</Link>
+              </ContactCard>
+              <ContactCard title="Email" note="For formal communication.">
+                <Link href="mailto:info@sdrc.in">info@sdrc.in</Link>
+              </ContactCard>
+            </div>
+            <Button as={Link} href="/feedback" variant="outline" size="sm" className="mt-5">
+              Share Feedback
+            </Button>
+          </div>
 
-              <SimpleGrid mt={6} columns={{ base: 1, sm: 2, lg: 3 }} spacing={4} alignItems="stretch">
-                <Box className="soft-card-teal" p={4} display={{ base: "none", sm: "flex" }} flexDirection="column" h="full">
-                  <Text fontWeight="700" mb={1}>
-                    Call
-                  </Text>
-                  <Box as={Link} href={"tel:" + siteConfig.phoneTel} fontWeight="600" whiteSpace="nowrap" display="block" maxW="100%" overflow="hidden" textOverflow="ellipsis">{siteConfig.phoneDisplay}</Box>
-                  <Text fontSize="xs" color="gray.500" mt={1} flex="1">
-                    Centre timings apply.
-                  </Text>
-                </Box>
+          <Card accent="teal" className="hero-side-card hidden p-6 lg:block">
+            <h2 className="text-lg font-bold leading-snug text-slate-800">Quick enquiry</h2>
+            <p className="mb-4 mt-2 text-sm leading-6 text-slate-600">
+              This form opens your mail app with the enquiry details.
+            </p>
+            <form className="flex flex-col gap-3" action="mailto:info@sdrc.in" method="post" encType="text/plain">
+              <Input placeholder="Name" name="Name" required />
+              <Input placeholder="Mobile number" name="Mobile" />
+              <Textarea placeholder="Query / message" name="Message" rows={4} />
+              <Button type="submit">Send via email</Button>
+            </form>
+            <p className="mt-3 text-[11px] leading-5 text-slate-500">
+              For urgent medical issues, please contact your treating doctor or nearest hospital.
+            </p>
+          </Card>
+        </TwContainer>
+      </section>
 
-                <Box className="soft-card" p={4} display="flex" flexDirection="column" h="full">
-                  <Text fontWeight="700" mb={1}>
-                    WhatsApp
-                  </Text>
-                  <Box as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} fontWeight="600" whiteSpace="nowrap" display="block" maxW="100%" overflow="hidden" textOverflow="ellipsis">{whatsappDisplay}</Box>
-                  <Text fontSize="xs" color="gray.500" mt={1} flex="1">
-                    Share prescriptions or booking queries.
-                  </Text>
-                </Box>
-
-                <Box className="soft-card" p={4} display="flex" flexDirection="column" h="full">
-                  <Text fontWeight="700" mb={1}>
-                    Email
-                  </Text>
-                  <Link href="mailto:info@sdrc.in">info@sdrc.in</Link>
-                  <Text fontSize="xs" color="gray.500" mt={1} flex="1">
-                    For formal communication.
-                  </Text>
-                </Box>
-              </SimpleGrid>
-
-              <HStack mt={4} spacing={3} flexWrap="wrap">
-                <Button as={Link} href="/feedback" variant="outline" size="sm">
-                  Share Feedback
-                </Button>
-              </HStack>
-            </Box>
-
-            <Box className="soft-card" p={6} display={{ base: "none", lg: "block" }}>
-              <Heading size="md" mb={2}>
-                Quick enquiry
-              </Heading>
-              <Text fontSize="xs" color="gray.500" mb={4}>
-                This form mirrors the live site behavior and opens your mail app with details.
-              </Text>
-              <VStack as="form" align="stretch" spacing={3} action="mailto:info@sdrc.in" method="post" encType="text/plain">
-                <Input placeholder="Name" name="Name" required />
-                <Input placeholder="Mobile number" name="Mobile" />
-                <Textarea placeholder="Query / message" name="Message" rows={4} />
-                <Button type="submit">
-                  Send via email
-                </Button>
-              </VStack>
-              <Text fontSize="11px" color="gray.500" mt={3}>
-                For urgent medical issues, please contact your treating doctor or nearest hospital.
-              </Text>
-            </Box>
-          </Grid>
-        </Container>
-      </Box>
-
-      <Container maxW="1200px" py={12}>
-        <VStack align="stretch" gap={12}>
+      <main className="py-12">
+        <TwContainer>
           <FadeIn>
-          <Box display="block">
-            <Heading size="xl" mb={4}>
-              Main centre - Jade Arcade, Paradise
-            </Heading>
-            <Grid templateColumns={{ base: "1fr", lg: "1.5fr 1fr" }} gap={6}>
-              <Box className="soft-card-teal" p={6}>
-                <Text fontWeight="700" mb={2}>
-                  Address
-                </Text>
-                <Text color="gray.700" fontSize="sm">
-                  101, Jade Arcade (Corporate Block), Paradise,
-                  <br />
-                  MG Road (Next to Dadus)
-                  <br />
-                  Secunderabad - 500003, Telangana, India
-                </Text>
+            <section>
+              <h2 className="mb-4 text-2xl font-bold text-slate-800">Main centre - Jade Arcade, Paradise</h2>
+              <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
+                <Card accent="teal" className="p-6">
+                  <h3 className="font-bold leading-snug text-slate-800">Address</h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-700">
+                    101, Jade Arcade (Corporate Block), Paradise,<br />
+                    MG Road (Next to Dadus)<br />
+                    Secunderabad - 500003, Telangana, India
+                  </p>
+                  <p className="mt-4 text-sm leading-7 text-slate-700">
+                    <strong>Phone:</strong> <Link className="font-semibold text-[var(--sdrc-teal-deep)]" href={`tel:${siteConfig.phoneTel}`}>{siteConfig.phoneDisplay}</Link><br />
+                    <strong>Email:</strong> <Link className="font-semibold text-[var(--sdrc-teal-deep)]" href="mailto:info@sdrc.in">info@sdrc.in</Link><br />
+                    <strong>WhatsApp:</strong> <Link className="font-semibold text-[var(--sdrc-teal-deep)]" href={`https://wa.me/${siteConfig.whatsappNumber}`}>{whatsappDisplay}</Link>
+                  </p>
+                  <h3 className="mb-2 mt-5 font-bold leading-snug text-slate-800">Centre timings</h3>
+                  <div className="grid gap-1 text-sm leading-6 text-slate-700 sm:max-w-[420px]">
+                    <div className="flex justify-between gap-4"><span>Monday - Saturday</span><span>7:00 AM - 9:00 PM</span></div>
+                    <div className="flex justify-between gap-4"><span>Sunday/Holidays</span><span>7:00 AM - 2:00 PM</span></div>
+                  </div>
+                </Card>
 
-                <Text color="gray.700" fontSize="sm" mt={4}>
-                  <strong>Phone:</strong>{" "}
-                  <Box as={Link} href={"tel:" + siteConfig.phoneTel} fontWeight="600" whiteSpace="nowrap" display="block" maxW="100%" overflow="hidden" textOverflow="ellipsis">{siteConfig.phoneDisplay}</Box>
-                  <br />
-                  <strong>Email:</strong> <Link href="mailto:info@sdrc.in">info@sdrc.in</Link>
-                  <br />
-                  <strong>WhatsApp:</strong>{" "}
-                  <Box as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} fontWeight="600" whiteSpace="nowrap" display="block" maxW="100%" overflow="hidden" textOverflow="ellipsis">{whatsappDisplay}</Box>
-                </Text>
-
-                <Text fontWeight="700" mt={4} mb={1}>
-                  Centre timings
-                </Text>
-                <VStack align="stretch" gap={1} fontSize="sm" color="gray.700">
-                  <HStack justify="space-between">
-                    <Text>Monday - Saturday</Text>
-                    <Text>7:00 AM - 9:00 PM</Text>
-                  </HStack>
-                  <HStack justify="space-between">
-                    <Text>Sunday/Holidays</Text>
-                    <Text>7:00 AM - 2:00 PM</Text>
-                  </HStack>
-                </VStack>
-              </Box>
-
-              <Box className="soft-card" p={6}>
-                <Text fontWeight="700" mb={2}>
-                  Location map
-                </Text>
-                <Box borderRadius="md" overflow="hidden" h={{ base: "200px", md: "220px" }} mb={3}>
-                  <iframe
-                    title="SDRC Main Centre map"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13401.644712873018!2d78.4691960871582!3d17.441311199999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9a10b7ee2ab1%3A0xf08c95962eaf6b5b!2sSDRC%20-%20The%20Secunderabad%20Diagnostic%20and%20Research%20Centre!5e1!3m2!1sen!2sin!4v1764932257326!5m2!1sen!2sin"
-                    style={{ border: 0, width: "100%", height: "100%" }}
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </Box>
-                <Button as={Link} href={siteConfig.locations.main} target="_blank" w="full">
-                  Open in Google Maps
-                </Button>
-              </Box>
-            </Grid>
-          </Box>
+                <Card className="overflow-hidden p-0">
+                  <div className="h-[260px] w-full md:h-[320px]">
+                    <iframe
+                      title="SDRC Main Centre map"
+                      src={mapEmbedSrc}
+                      className="h-full w-full border-0"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <Button as={Link} href={siteConfig.locations.main} target="_blank" className="w-full">
+                      Open in Google Maps
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+            </section>
           </FadeIn>
 
           <FadeIn delay={60}>
-          <Box>
-            <Heading size="xl" mb={4}>Our centres</Heading>
-            <Text fontSize="sm" color="gray.700" mb={4}>
-              You can give samples or enquire about home collection at these SDRC centres.
-            </Text>
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-              {centres.map((centre) => (
-                <Box key={centre.name} className="soft-card" p={6} style={{ borderTop: "3px solid #008f82" }}>
-                  <Text fontWeight="700" mb={2}>{centre.name}</Text>
-                  <Text color="gray.700" fontSize="sm">{centre.address.join("\n")}</Text>
-                  <Link href={centre.map} target="_blank" style={{ display: "inline-flex", marginTop: 12 }}>
-                    <Text fontSize="xs" color="teal.600" fontWeight="600">View on Google Maps</Text>
-                  </Link>
-                </Box>
-              ))}
-            </SimpleGrid>
-            <Text fontSize="xs" color="gray.500" mt={4}>
-              Centre timings and available tests may vary by location. Please call or WhatsApp before visiting.
-            </Text>
-          </Box>
+            <section className="mt-12">
+              <h2 className="mb-6 text-2xl font-bold text-slate-800">Collection centres</h2>
+              <div className="grid gap-6 md:grid-cols-3">
+                {centres.map((centre) => (
+                  <Card key={centre.name} className="p-6">
+                    <h3 className="text-lg font-bold leading-snug text-slate-800">{centre.name}</h3>
+                    <p className="mt-2 text-sm leading-7 text-slate-700">
+                      {centre.address.map((line) => <span key={line} className="block">{line}</span>)}
+                    </p>
+                    <Link href={centre.map} target="_blank" className="mt-4 inline-block text-sm font-bold text-[var(--sdrc-teal-deep)]">
+                      View on Google Maps
+                    </Link>
+                  </Card>
+                ))}
+              </div>
+            </section>
           </FadeIn>
-
-          <FadeIn delay={60}>
-          <Box>
-            <Heading size="xl" mb={4}>WhatsApp and Reports Guide</Heading>
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
-              <Box className="soft-card-teal" p={6}>
-                <Text fontWeight="700" mb={2}>Test booking help (human support)</Text>
-                <Text fontSize="sm" color="gray.700">
-                  For package or test selection help, chat with our team on WhatsApp.
-                </Text>
-                <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} target="_blank" mt={3} leftIcon={<FaWhatsapp />}>
-                  Chat on WhatsApp
-                </Button>
-              </Box>
-              <Box className="soft-card" p={6}>
-                <Text fontWeight="700" mb={2}>Download reports (bot-assisted)</Text>
-                <Text fontSize="sm" color="gray.700">
-                  Use your registered mobile number to retrieve reports through our report flow.
-                </Text>
-                <Button
-                  as={Link}
-                  href={siteConfig.reportsUrl}
-                  leftIcon={<FaWhatsapp />}
-                  target="_blank"
-                  variant="outline"
-                  mt={3}
-                 
-                  title="Get our bot to send your reports. Chat using your registered mobile number."
-                >
-                  Download Reports
-                </Button>
-              </Box>
-            </Grid>
-          </Box>
-          </FadeIn>
-        </VStack>
-      </Container>
+        </TwContainer>
+      </main>
     </>
   );
 }

@@ -2,173 +2,25 @@
 
 export const dynamic = "force-dynamic";
 
-import Link from "next/link";
 import Image from "next/image";
-import { Box, Container, Grid, Heading, SimpleGrid, Text } from "@chakra-ui/react";
+import Link from "next/link";
 import { siteConfig } from "@/data/siteConfig";
 import { FadeIn } from "@/components/site/motionUtils";
+import { Card } from "@/components/ui/card";
+import { Chip, TwContainer } from "@/components/site/tw-layout";
 
-const qualityObjectives = [
-  "Quality control",
-  "Accurate results",
-  "Timely results",
-  "Client satisfaction",
-  "Physician satisfaction",
-  "Trained workforce",
-  "Workflow integration",
-  "Equipment performance"
-];
-
+const qualityObjectives = ["Quality control", "Accurate results", "Timely results", "Client satisfaction", "Physician satisfaction", "Trained workforce", "Workflow integration", "Equipment performance"];
 const systems = [
-  {
-    title: "Internal quality control",
-    text: "Daily internal quality control is run on key analysers with defined rules for accepting, troubleshooting and releasing patient runs."
-  },
-  {
-    title: "External quality assurance",
-    text: "The laboratory participates in proficiency testing and inter-lab comparisons to monitor analytical accuracy."
-  },
-  {
-    title: "Standardised reporting",
-    text: "Reports include biological reference intervals, flags and clinical context so treating doctors can interpret quickly."
-  }
+  { title: "Internal quality control", text: "Daily internal quality control is run on key analysers with defined rules for accepting, troubleshooting and releasing patient runs." },
+  { title: "External quality assurance", text: "The laboratory participates in proficiency testing and inter-lab comparisons to monitor analytical accuracy." },
+  { title: "Standardised reporting", text: "Reports include biological reference intervals, flags and clinical context so treating doctors can interpret quickly." }
 ];
 
 export default function AccreditationPage() {
-  return (
-    <>
-      <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
-        <Container maxW="1200px">
-          <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={10} alignItems="center">
-            <Box>
-              <span className="chip chip-teal" style={{ marginBottom: 16, display: "inline-flex" }}>ISO 15189:2022 · NABL Accredited</span>
-              <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title" mt={2}>
-                Quality and
-                <Box as="span" color="teal.700" className="hero-subline">NABL Accreditation</Box>
-              </Heading>
-
-              <Text mt={4} fontSize={{ base: "md", md: "lg" }} color="gray.700" display={{ base: "none", md: "block" }}>
-                SDRC Diagnostics is committed to reliable, repeatable and clinically meaningful laboratory results for effective patient care.
-              </Text>
-
-              {siteConfig.nabl.enabled ? (
-                <Text
-                  mt={4}
-                  display="inline-flex"
-                  px={4}
-                  py={2}
-                  fontWeight="700"
-                  fontSize="sm"
-                  color="teal.700"
-                  bg="white"
-                  borderRadius="full"
-                  className="shadow-soft"
-                >
-                  NABL accredited medical laboratory (ISO 15189:2022)
-                </Text>
-              ) : null}
-            </Box>
-
-            <Box className="soft-card-teal" p={6}>
-              <Grid templateColumns={{ base: "1fr", sm: "auto 1fr" }} gap={4} alignItems="start">
-                <Image src="/assets/nabl-symbol.png" alt="NABL Accredited" width={68} height={68} />
-                <Box>
-                  <Heading size="md" mb={2}>
-                    What NABL accreditation means
-                  </Heading>
-                  <Text color="gray.700" fontSize="sm">
-                    Accreditation by the National Accreditation Board for Testing and Calibration Laboratories confirms quality and technical standards across pre-analytical, analytical and post-analytical phases.
-                  </Text>
-                  <Text color="gray.500" fontSize="xs" mt={3}>
-                    Certificate no: {siteConfig.nabl.certNo} | Lab code: {siteConfig.nabl.labCode}
-                  </Text>
-                </Box>
-              </Grid>
-            </Box>
-          </Grid>
-        </Container>
-      </Box>
-
-      <Container maxW="1200px" py={12}>
-        <FadeIn>
-          <Box>
-            <Heading size="xl" mb={4}>NABL documents</Heading>
-            <Text color="gray.700" fontSize="sm" mb={4}>
-              You can verify accreditation status and scope through the official documents.
-            </Text>
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-              <Link href={siteConfig.nabl.scopeUrl} target="_blank" rel="noopener noreferrer">
-                <Box className="soft-card-teal" p={4}>
-                  <Text fontWeight="700">Scope of accreditation</Text>
-                  <Text fontSize="xs" color="gray.500" mt={1}>List of accredited parameters and disciplines.</Text>
-                  <Text fontSize="xs" color="teal.600" mt={2} fontWeight="700">View PDF</Text>
-                </Box>
-              </Link>
-              <Link href={siteConfig.nabl.certUrl} target="_blank" rel="noopener noreferrer">
-                <Box className="soft-card-teal" p={4}>
-                  <Text fontWeight="700">Accreditation certificate</Text>
-                  <Text fontSize="xs" color="gray.500" mt={1}>Current NABL certificate issued to SDRC Diagnostics.</Text>
-                  <Text fontSize="xs" color="teal.600" mt={2} fontWeight="700">View PDF</Text>
-                </Box>
-              </Link>
-            </SimpleGrid>
-          </Box>
-        </FadeIn>
-
-        <FadeIn delay={60}>
-          <Box mt={12} display={{ base: "none", md: "block" }}>
-            <Heading size="xl" mb={4}>Laboratory quality systems</Heading>
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-              {systems.map((item) => (
-                <Box key={item.title} className="soft-card" p={6} style={{ borderTop: "3px solid #008f82" }}>
-                  <Text fontWeight="700" mb={2}>{item.title}</Text>
-                  <Text fontSize="sm" color="gray.700">{item.text}</Text>
-                </Box>
-              ))}
-            </SimpleGrid>
-          </Box>
-        </FadeIn>
-
-        <FadeIn delay={80}>
-          <Box mt={12}>
-            <Heading size="xl" mb={4}>SDRC Quality Policy &amp; Objectives</Heading>
-            <Grid templateColumns={{ base: "1fr", md: "1.4fr 1fr" }} gap={6} alignItems="start">
-              <Box className="soft-card" p={6}>
-              <Text fontWeight="700" mb={2}>
-                Quality policy
-              </Text>
-              <Text fontSize="sm" color="gray.700" mb={4}>
-                The quality policy of SDRC is to serve diagnostic medicine with dedication, prioritising quality in delivering reliable, dependable and repeatable results for effective patient care.
-              </Text>
-
-              <Text fontWeight="700" mb={2}>
-                Quality objectives
-              </Text>
-              <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={1}>
-                {qualityObjectives.map((obj) => (
-                  <Text key={obj} fontSize="sm" color="gray.700">
-                    • {obj}
-                  </Text>
-                ))}
-              </SimpleGrid>
-            </Box>
-
-            <Box className="soft-card" p={4}>
-              <Image
-                src="/assets/quality-policy.jpg"
-                alt="SDRC quality policy"
-                width={720}
-                height={900}
-                style={{ width: "100%", height: "auto", borderRadius: 12 }}
-              />
-              <Text fontSize="11px" color="gray.500" textAlign="center" mt={2}>
-                SDRC Quality Policy and Quality Objectives as displayed in-centre.
-              </Text>
-            </Box>
-          </Grid>
-        </Box>
-        </FadeIn>
-      </Container>
-    </>
-  );
+  return <>
+    <section className="brochure-bg py-10 md:py-14"><TwContainer className="grid items-center gap-8 lg:grid-cols-2 lg:gap-10"><div><Chip>ISO 15189:2022 · NABL Accredited</Chip><h1 className="hero-title mt-4 text-slate-800">Quality and<span className="hero-subline text-[var(--sdrc-teal-deep)]">NABL Accreditation</span></h1><p className="mt-4 hidden max-w-2xl text-lg leading-8 text-slate-700 md:block">SDRC Diagnostics is committed to reliable, repeatable and clinically meaningful laboratory results for effective patient care.</p>{siteConfig.nabl.enabled && <span className="mt-4 inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-[var(--sdrc-teal-deep)] shadow-[0_10px_26px_rgba(15,23,42,.08)]">NABL accredited medical laboratory (ISO 15189:2022)</span>}</div><Card accent="teal" className="hero-side-card p-6"><div className="grid items-start gap-5 sm:grid-cols-[auto_1fr]"><Image src="/assets/nabl-symbol.png" alt="NABL Accredited" width={76} height={101} className="h-auto w-[76px] shrink-0" /><div><h2 className="text-lg font-bold leading-snug text-slate-800">What NABL accreditation means</h2><p className="mt-2 text-sm leading-7 text-slate-700">Accreditation by the National Accreditation Board for Testing and Calibration Laboratories confirms quality and technical standards across pre-analytical, analytical and post-analytical phases.</p><p className="mt-3 text-xs leading-5 text-slate-500">Certificate no: {siteConfig.nabl.certNo} | Lab code: {siteConfig.nabl.labCode}</p></div></div></Card></TwContainer></section>
+    <main className="py-12"><TwContainer><FadeIn><section><h2 className="mb-4 text-2xl font-bold text-slate-800">NABL documents</h2><p className="mb-4 text-sm text-slate-700">You can verify accreditation status and scope through the official documents.</p><div className="grid gap-4 md:grid-cols-2"><Link href={siteConfig.nabl.scopeUrl} target="_blank" rel="noopener noreferrer"><Card accent="teal" className="p-4"><h3 className="font-bold text-slate-800">Scope of accreditation</h3><p className="mt-1 text-xs text-slate-500">List of accredited parameters and disciplines.</p><p className="mt-2 text-xs font-bold text-[var(--sdrc-teal-deep)]">View PDF</p></Card></Link><Link href={siteConfig.nabl.certUrl} target="_blank" rel="noopener noreferrer"><Card accent="teal" className="p-4"><h3 className="font-bold text-slate-800">Accreditation certificate</h3><p className="mt-1 text-xs text-slate-500">Current NABL certificate issued to SDRC Diagnostics.</p><p className="mt-2 text-xs font-bold text-[var(--sdrc-teal-deep)]">View PDF</p></Card></Link></div></section></FadeIn>
+    <FadeIn delay={60}><section className="mt-12 hidden md:block"><h2 className="mb-4 text-2xl font-bold text-slate-800">Laboratory quality systems</h2><div className="grid gap-6 md:grid-cols-3">{systems.map((item) => <Card key={item.title} accent="teal" className="p-6"><h3 className="font-bold text-slate-800">{item.title}</h3><p className="mt-2 text-sm leading-7 text-slate-700">{item.text}</p></Card>)}</div></section></FadeIn>
+    <FadeIn delay={80}><section className="mt-12"><h2 className="mb-4 text-2xl font-bold text-slate-800">SDRC Quality Policy &amp; Objectives</h2><div className="grid items-start gap-6 md:grid-cols-[1.4fr_1fr]"><Card className="p-6"><h3 className="font-bold text-slate-800">Quality policy</h3><p className="mt-2 text-sm leading-7 text-slate-700">The quality policy of SDRC is to serve diagnostic medicine with dedication, prioritising quality in delivering reliable, dependable and repeatable results for effective patient care.</p><h3 className="mb-2 mt-5 font-bold text-slate-800">Quality objectives</h3><div className="grid gap-1 sm:grid-cols-2">{qualityObjectives.map((objective) => <p key={objective} className="text-sm text-slate-700">• {objective}</p>)}</div></Card><Card className="p-4"><Image src="/assets/quality-policy.jpg" alt="SDRC quality policy" width={720} height={900} className="h-auto w-full rounded-xl" /><p className="mt-2 text-center text-[11px] text-slate-500">SDRC Quality Policy and Quality Objectives as displayed in-centre.</p></Card></div></section></FadeIn></TwContainer></main>
+  </>;
 }

@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { Box, Container, Heading, Text, VStack } from "@chakra-ui/react";
+import { TwContainer } from "@/components/site/tw-layout";
 
 const terms = [
   "The reported results are for information and interpretation by qualified medical professionals who understand units, reference ranges and technology limitations. SDRC is not responsible for self-interpretation.",
@@ -27,28 +27,22 @@ const terms = [
 export default function ReportingTermsPage() {
   return (
     <>
-      <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
-        <Container maxW="1200px">
-          <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
-            Terms & Conditions
-            <Box as="span" color="teal.700" className="hero-subline">&nbsp;of Reporting</Box>
-          </Heading>
-          <Text mt={3} color="gray.600" fontSize="sm">
+      <section className="brochure-bg py-10 md:py-14"><TwContainer>
+          <h1 className="hero-title text-slate-800">Terms &amp; Conditions<span className="hero-subline text-[var(--sdrc-teal-deep)]">&nbsp;of Reporting</span></h1>
+          <p className="mt-3 text-sm text-slate-600">
             Please review these reporting terms before using any report for medical decisions.
-          </Text>
-        </Container>
-      </Box>
+          </p>
+      </TwContainer></section>
 
-      <Container maxW="1200px" py={10}>
-        <Box className="soft-card" p={{ base: 5, md: 8 }}>
-          <VStack align="stretch" gap={3}>
+      <TwContainer className="py-10"><div className="soft-card p-5 md:p-8">
+          <div className="flex flex-col gap-3">
             {terms.map((line, idx) => (
-              <Text key={line} fontSize="sm" color="gray.700" lineHeight={1.75}>
-                <Box as="span" fontWeight="700" mr={2}>{idx + 1}.</Box>
+              <p key={line} className="text-sm leading-7 text-slate-700">
+                <span className="mr-2 font-bold">{idx + 1}.</span>
                 {idx === 14 ? (
                   <>
                     All information collected and generated in SDRC is stored and distributed based on our privacy policy available at{" "}
-                    <Link href="/privacy-policy" style={{ color: "#00695f", textDecoration: "underline" }}>
+                    <Link href="/privacy-policy" className="text-[var(--sdrc-teal-deep)] underline">
                       www.sdrc.in/privacy-policy
                     </Link>
                     .
@@ -56,11 +50,10 @@ export default function ReportingTermsPage() {
                 ) : (
                   line
                 )}
-              </Text>
+              </p>
             ))}
-          </VStack>
-        </Box>
-      </Container>
+          </div>
+        </div></TwContainer>
     </>
   );
 }

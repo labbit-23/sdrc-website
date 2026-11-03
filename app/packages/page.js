@@ -4,10 +4,11 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { FaWhatsapp } from "react-icons/fa";
-import { Box, Button, Container, Grid, Heading, HStack, Text } from "@chakra-ui/react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Chip, TwContainer } from "@/components/site/tw-layout";
 import PackagesExplorer from "@/components/site/PackagesExplorer";
 import { siteConfig } from "@/data/siteConfig";
-import { FadeIn } from "@/components/site/motionUtils";
 
 const structuredData = [
   {
@@ -72,50 +73,50 @@ export default function PackagesPage() {
       {structuredData.map((schema, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       ))}
-      <Box className="brochure-bg functional-hero-cover" py={{ base: 10, md: 14 }}>
-        <Container maxW="1200px">
-          <Grid templateColumns={{ base: "1fr", lg: "1.05fr .95fr" }} gap={10} alignItems="center">
-            <Box>
-              <span className="chip chip-orange" style={{ marginBottom: 16, display: "inline-flex" }}>Health check packages</span>
-              <Heading color="gray.800" className="hero-title" mt={2}>
+      <section className="brochure-bg functional-hero-cover py-10 md:py-14">
+        <TwContainer>
+          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_.95fr]">
+            <div className="rise-in">
+              <Chip tone="orange" className="mb-4">Health check packages</Chip>
+              <h1 className="hero-title mt-2 text-slate-800">
                 Master Health Check
-                <Box as="span" color="orange.500" className="hero-subline">Packages</Box>
-              </Heading>
-              <Text mt={4} fontSize="lg" color="gray.700">
+                <span className="hero-subline text-[var(--sdrc-orange)]">Packages</span>
+              </h1>
+              <p className="mt-4 text-lg leading-relaxed text-slate-700">
                 From quick screening panels to in-depth cardiac, diabetic, women’s and lifestyle wellness plans — all under one roof.
-              </Text>
-              <Text mt={3} color="gray.600" fontSize="sm" display={{ base: "none", md: "block" }}>
-                Select <Box as="span" fontWeight="700">“Compare”</Box> on two or more variants to see them side-by-side,
-                or <Box as="span" fontWeight="700">“View Included Tests”</Box> to see full details for a single package.
-              </Text>
-              <HStack mt={5} spacing={3} flexWrap="wrap">
+              </p>
+              <p className="mt-3 hidden text-sm leading-relaxed text-slate-600 md:block">
+                Select <span className="font-bold">“Compare”</span> on two or more variants to see them side-by-side,
+                or <span className="font-bold">“View Included Tests”</span> to see full details for a single package.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
                 <Button as={Link} href={siteConfig.bookingUrl}>Book a package online</Button>
                 <Button as={Link} href="/tests" variant="outline">Book A Test</Button>
                 <Button as={Link} href={"https://wa.me/" + siteConfig.internalNotifyNumber} variant="outline" target="_blank" leftIcon={<FaWhatsapp />}>Talk to us on WhatsApp</Button>
-              </HStack>
-              <HStack mt={4} spacing={2} flexWrap="wrap" display={{ base: "none", md: "flex" }}>
-                <Text px={3} py={1} borderRadius="full" bg="white" className="shadow-soft" fontSize="11px" color="teal.700">
+              </div>
+              <div className="mt-4 hidden flex-wrap gap-2 md:flex">
+                <span className="shadow-soft rounded-full bg-white px-3 py-1 text-[11px] text-[var(--sdrc-teal-deep)]">
                   Fasting guidance shared in advance
-                </Text>
-                <Text px={3} py={1} borderRadius="full" bg="white" className="shadow-soft" fontSize="11px" color="teal.700">
+                </span>
+                <span className="shadow-soft rounded-full bg-white px-3 py-1 text-[11px] text-[var(--sdrc-teal-deep)]">
                   Doctor-friendly report formats
-                </Text>
-                <Text px={3} py={1} borderRadius="full" bg="white" className="shadow-soft" fontSize="11px" color="teal.700">
+                </span>
+                <span className="shadow-soft rounded-full bg-white px-3 py-1 text-[11px] text-[var(--sdrc-teal-deep)]">
                   Same-day results for most tests
-                </Text>
-              </HStack>
-            </Box>
+                </span>
+              </div>
+            </div>
 
-            <Box className="soft-card-orange" p={6} display={{ base: "none", lg: "block" }}>
-              <Heading size="md" mb={2}>Not sure which package is right for you?</Heading>
-              <Text color="gray.700" fontSize="sm" mb={3}>
+            <Card accent="orange" className="rise-in hidden p-6 lg:block" style={{ animationDelay: "120ms" }}>
+              <h2 className="mb-2 text-xl font-bold leading-snug text-slate-900">Not sure which package is right for you?</h2>
+              <p className="mb-3 text-sm leading-relaxed text-slate-700">
                 You can compare packages or share your age, concerns and existing conditions on WhatsApp.
-              </Text>
-              <Text color="gray.500" fontSize="xs">Many panels require 10–12 hours of fasting. Please confirm preparation instructions while booking.</Text>
-            </Box>
-          </Grid>
-        </Container>
-      </Box>
+              </p>
+              <p className="text-xs leading-relaxed text-slate-500">Many panels require 10–12 hours of fasting. Please confirm preparation instructions while booking.</p>
+            </Card>
+          </div>
+        </TwContainer>
+      </section>
 
       <PackagesExplorer />
     </>

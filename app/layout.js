@@ -22,10 +22,10 @@ export const metadata = {
     description: "Advanced diagnostic centre at Jade Arcade, Secunderabad, Hyderabad, Telangana.",
     images: [
       {
-        url: "/assets/og-sdrc.jpg",
-        width: 1200,
-        height: 630,
-        alt: "SDRC Diagnostics"
+        url: "/assets/og-sdrc.png",
+        width: 1024,
+        height: 572,
+        alt: "SDRC Diagnostics WhatsApp welcome banner"
       }
     ]
   },
@@ -33,7 +33,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "SDRC Diagnostics",
     description: "Advanced diagnostic centre at Jade Arcade, Secunderabad, Hyderabad, Telangana.",
-    images: ["/assets/og-sdrc.jpg"]
+    images: ["/assets/og-sdrc.png"]
   },
   icons: {
     icon: "/assets/favicon.ico",
@@ -50,7 +50,7 @@ export default function RootLayout({ children }) {
     alternateName: "Secunderabad Diagnostic and Research Centre",
     description: "NABL accredited multi-specialty diagnostic centre in Secunderabad, Hyderabad offering CT, X-ray, mammography, DEXA, ultrasound, ECG, pathology and master health check packages since 1983.",
     url: "https://sdrc.in",
-    image: "https://sdrc.in/assets/og-sdrc.jpg",
+    image: "https://sdrc.in/assets/og-sdrc.png",
     telephone: "+91-40-6600-4200",
     email: "info@sdrc.in",
     priceRange: "₹₹",

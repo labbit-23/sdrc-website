@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { Box, Container, Heading, Text, VStack } from "@chakra-ui/react";
+import { TwContainer } from "@/components/site/tw-layout";
 
 const policySections = [
   {
@@ -168,73 +168,64 @@ const references = [
 export default function PrivacyPolicyPage() {
   return (
     <>
-      <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
-        <Container maxW="1200px">
-          <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
-            SDRC Privacy Policy
-            <Box as="span" color="teal.700" className="hero-subline">Data Protection and Patient Rights</Box>
-          </Heading>
-          <Text mt={3} color="gray.600" fontSize="sm">
+      <section className="brochure-bg py-10 md:py-14"><TwContainer>
+          <h1 className="hero-title text-slate-800">SDRC Privacy Policy<span className="hero-subline text-[var(--sdrc-teal-deep)]">Data Protection and Patient Rights</span></h1>
+          <p className="mt-3 text-sm text-slate-600">
             Last updated: 2026. This Privacy Policy applies to SDRC Diagnostics LLP and all services offered through our main centre and collection centres, websites and digital platforms.
-          </Text>
-        </Container>
-      </Box>
+          </p>
+      </TwContainer></section>
 
-      <Container maxW="1200px" py={10}>
-        <Box className="soft-card" p={{ base: 5, md: 8 }}>
-          <VStack align="stretch" gap={8}>
+      <TwContainer className="py-10"><div className="soft-card p-5 md:p-8">
+          <div className="flex flex-col gap-8">
             {policySections.map((section) => (
-              <Box key={section.title}>
-                <Heading size="md" mb={2}>
+              <section key={section.title}>
+                <h2 className="mb-2 text-base font-bold text-slate-800">
                   {section.title}
-                </Heading>
+                </h2>
 
                 {section.paragraphs?.map((p) => (
-                  <Text key={p} fontSize="sm" color="gray.700" lineHeight={1.8} whiteSpace="pre-line" mb={2}>
+                  <p key={p} className="mb-2 whitespace-pre-line text-sm leading-7 text-slate-700">
                     {p}
-                  </Text>
+                  </p>
                 ))}
 
                 {section.bullets?.length ? (
-                  <VStack align="stretch" gap={1} mb={2}>
+                  <div className="mb-2 flex flex-col gap-1">
                     {section.bullets.map((bullet) => (
-                      <Text key={bullet} fontSize="sm" color="gray.700" lineHeight={1.8}>
+                      <p key={bullet} className="text-sm leading-7 text-slate-700">
                         • {bullet}
-                      </Text>
+                      </p>
                     ))}
-                  </VStack>
+                  </div>
                 ) : null}
 
                 {section.closing ? (
-                  <Text fontSize="sm" color="gray.700" lineHeight={1.8}>
+                  <p className="text-sm leading-7 text-slate-700">
                     {section.closing}
-                  </Text>
+                  </p>
                 ) : null}
-              </Box>
+              </section>
             ))}
 
-            <Box>
-              <Heading size="md" mb={2}>
+            <section>
+              <h2 className="mb-2 text-base font-bold text-slate-800">
                 References
-              </Heading>
-              <Text fontSize="sm" color="gray.700" mb={2}>
+              </h2>
+              <p className="mb-2 text-sm text-slate-700">
                 The following publicly available resources and legal materials have informed SDRC&apos;s data protection approach and this Privacy Policy:
-              </Text>
-              <VStack align="stretch" gap={1}>
+              </p>
+              <div className="flex flex-col gap-1">
                 {references.map((ref) => (
                   <Link key={ref.href} href={ref.href} target="_blank" rel="noopener noreferrer">
-                    <Text fontSize="xs" color="teal.700">• {ref.label}</Text>
+                    <span className="text-xs text-[var(--sdrc-teal-deep)]">• {ref.label}</span>
                   </Link>
                 ))}
-              </VStack>
-            </Box>
+              </div>
+            </section>
 
-            <Box borderTop="1px solid" borderColor="gray.200" pt={4}>
-              <Text fontSize="xs" color="gray.500">Copyright © 2024 SDRC Diagnostics LLP - All rights reserved.</Text>
-            </Box>
-          </VStack>
-        </Box>
-      </Container>
+            <div className="border-t border-slate-200 pt-4"><p className="text-xs text-slate-500">Copyright © 2024 SDRC Diagnostics LLP - All rights reserved.</p></div>
+          </div>
+        </div></TwContainer>
     </>
   );
 }

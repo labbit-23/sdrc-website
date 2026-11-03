@@ -1,14 +1,18 @@
-"use client";
-
-import { Box, Container, Heading, Text } from "@chakra-ui/react";
+import { TwContainer } from "@/components/site/tw-layout";
 
 export default function PageHero({ title, subtitle }) {
   return (
-    <Box className="page-hero" py={{ base: 12, md: 16 }}>
-      <Container maxW="1200px">
-        <Heading size="2xl" color="teal.800" mb={3}>{title}</Heading>
-        {subtitle ? <Text fontSize={{ base: "md", md: "lg" }} color="gray.700" maxW="3xl">{subtitle}</Text> : null}
-      </Container>
-    </Box>
+    <section className="page-hero py-12 md:py-16">
+      <TwContainer>
+        <h1 className="mb-3 text-4xl font-extrabold leading-tight text-[#0a544f]">
+          {title}
+        </h1>
+        {subtitle ? (
+          <p className="max-w-3xl text-base leading-relaxed text-slate-700 md:text-lg">
+            {subtitle}
+          </p>
+        ) : null}
+      </TwContainer>
+    </section>
   );
 }

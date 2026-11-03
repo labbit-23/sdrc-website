@@ -2,510 +2,84 @@
 
 export const dynamic = "force-dynamic";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text } from "@chakra-ui/react";
-import { FiSearch, FiDownload } from "react-icons/fi";
+import { FiDownload, FiSearch } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
-import { siteConfig } from "@/data/siteConfig";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Chip, TwContainer } from "@/components/site/tw-layout";
 import { FadeIn } from "@/components/site/motionUtils";
+import { siteConfig } from "@/data/siteConfig";
 import { getCurrentPromo } from "@/data/featuredPromo";
 import healthPackagesData from "@/data/health-packages.json";
 
-const facilityChips = [
-  "CT",
-  "Digital X-Ray",
-  "Mammography",
-  "DEXA",
-  "Ultrasound & Doppler",
-  "ECG / 2D-Echo",
-  "EEG / ENMG",
-  "TMT",
-  "Spirometry",
-  "Pathology"
-];
-
+const facilityChips = ["CT", "Digital X-Ray", "Mammography", "DEXA", "Ultrasound & Doppler", "ECG / 2D-Echo", "EEG / ENMG", "TMT", "Spirometry", "Pathology"];
 const facilities = [
-  {
-    title: "Imaging",
-    items: ["Multi-slice CT", "Digital X-Ray", "Mammography", "DEXA", "Ultrasound & Colour Doppler"]
-  },
-  {
-    title: "Cardio & Neuro",
-    items: ["ECG & 2D-Echo", "TMT (Stress Test)", "EEG & ENMG", "Spirometry (PFT)"]
-  },
-  {
-    title: "Pathology Lab",
-    items: ["Biochemistry & Endocrinology", "Haematology & Coagulation", "Clinical Pathology", "Microbiology & Serology", "Cytology & Histopathology"]
-  }
+  { title: "Imaging", items: ["Multi-slice CT", "Digital X-Ray", "Mammography", "DEXA", "Ultrasound & Colour Doppler"] },
+  { title: "Cardio & Neuro", items: ["ECG & 2D-Echo", "TMT (Stress Test)", "EEG & ENMG", "Spirometry (PFT)"] },
+  { title: "Pathology Lab", items: ["Biochemistry & Endocrinology", "Haematology & Coagulation", "Clinical Pathology", "Microbiology & Serology", "Cytology & Histopathology"] }
 ];
-
 const reviews = [
-  {
-    name: "Corporate Executive",
-    text: "Quick reporting and very professional staff. Got my full body checkup and reports were easy to understand."
-  },
-  {
-    name: "Consulting Physician",
-    text: "We regularly use SDRC for diabetic and cardiac monitoring. The team is responsive and reports are reliable."
-  },
-  {
-    name: "Resident of Secunderabad",
-    text: "Home collection was convenient and the technician was courteous. Got reports on WhatsApp and email."
-  }
+  { name: "Corporate Executive", text: "Quick reporting and very professional staff. Got my full body checkup and reports were easy to understand." },
+  { name: "Consulting Physician", text: "We regularly use SDRC for diabetic and cardiac monitoring. The team is responsive and reports are reliable." },
+  { name: "Resident of Secunderabad", text: "Home collection was convenient and the technician was courteous. Got reports on WhatsApp and email." }
 ];
+const previewNames = ["Executive Wellness Checkup", "Master Wellness Checkup", "Cardiac Wellness"];
 
-function slugify(value) {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function formatInrFrom(value) {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return "Price on request";
-  return `From INR ${amount.toLocaleString("en-IN")}`;
-}
-
-function getParameterRange(variants) {
-  const params = (variants || [])
-    .map((v) => Number(v.parameters))
-    .filter((v) => Number.isFinite(v));
-  if (params.length === 0) return "Parameters vary";
-  const min = Math.min(...params);
-  const max = Math.max(...params);
+function slugify(value) { return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); }
+function formatPrice(value) { const amount = Number(value); return Number.isFinite(amount) ? `From INR ${amount.toLocaleString("en-IN")}` : "Price on request"; }
+function parameterRange(variants) {
+  const values = (variants || []).map((item) => Number(item.parameters)).filter(Number.isFinite);
+  if (!values.length) return "Parameters vary";
+  const min = Math.min(...values); const max = Math.max(...values);
   return min === max ? `${min} parameters` : `${min}-${max} parameters`;
 }
-
-const homepagePreviewPackageNames = [
-  "Executive Wellness Checkup",
-  "Master Wellness Checkup",
-  "Cardiac Wellness"
-];
-
-// Extracted so it can run again once the live fetch below resolves, not
-// just once at module load against the bundled import.
 function buildPreviewCards(data) {
-  return homepagePreviewPackageNames
-    .map((name) => (data.packages || []).find((pkg) => pkg.name === name))
-    .filter(Boolean)
-    .map((pkg) => {
-      const variants = Array.isArray(pkg.variants) ? pkg.variants : [];
-      const minPrice = Math.min(
-        ...variants.map((v) => Number(v.price)).filter((v) => Number.isFinite(v))
-      );
-      const firstVariant = variants[0] || {};
-      const keyInclusions = Array.isArray(firstVariant.key_inclusions) && firstVariant.key_inclusions.length > 0
-        ? firstVariant.key_inclusions
-        : (firstVariant.tests || []).slice(0, 3);
-
-      return {
-        title: pkg.name,
-        desc: pkg.description || "",
-        params: getParameterRange(variants),
-        price: formatInrFrom(minPrice),
-        points: keyInclusions.slice(0, 3),
-        href: `/packages#${slugify(pkg.name)}`
-      };
-    });
+  return previewNames.map((name) => (data.packages || []).find((pkg) => pkg.name === name)).filter(Boolean).map((pkg) => {
+    const variants = Array.isArray(pkg.variants) ? pkg.variants : [];
+    const prices = variants.map((item) => Number(item.price)).filter(Number.isFinite);
+    const first = variants[0] || {};
+    const points = Array.isArray(first.key_inclusions) && first.key_inclusions.length ? first.key_inclusions : (first.tests || []).slice(0, 3);
+    return { title: pkg.name, desc: pkg.description || "", params: parameterRange(variants), price: formatPrice(prices.length ? Math.min(...prices) : null), points: points.slice(0, 3), href: `/packages#${slugify(pkg.name)}` };
+  });
 }
+const defaultCards = buildPreviewCards(healthPackagesData);
 
-// Instant default from the bundled copy (zero-flicker first paint) --
-// see this file's own fetch-with-fallback effect below for how this gets
-// refreshed from labit-main's live catalog.
-const packagePreviewCardsDefault = buildPreviewCards(healthPackagesData);
+function QuickLink({ href, title, label, children, className = "", dark = false }) {
+  const external = href.startsWith("http");
+  const darkLink = dark || className.includes("bg-[var(--sdrc-teal-deep)]");
+  const toneClass = darkLink
+    ? "border-[var(--sdrc-teal-deep)] bg-[var(--sdrc-teal-deep)] text-white"
+    : "border-slate-200 bg-white text-[var(--sdrc-teal-deep)]";
+  return <Link href={href} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer" : undefined} className={`relative flex min-h-[74px] flex-col justify-center rounded-xl border px-3 py-2.5 shadow-[0_8px_20px_rgba(15,23,42,.06)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_26px_rgba(15,23,42,.1)] ${toneClass} ${className}`}><span className={`text-xs ${darkLink ? "text-white/75" : "text-slate-500"}`}>{title}</span><span className={`mt-1 inline-flex items-center gap-1.5 text-sm font-bold ${darkLink ? "text-white" : "text-[var(--sdrc-teal-deep)]"}`}>{children}{label}</span></Link>;
+}
 
 export default function HomePage() {
   const [reportCount, setReportCount] = useState(0);
-  const [packagePreviewCards, setPackagePreviewCards] = useState(packagePreviewCardsDefault);
+  const [packagePreviewCards, setPackagePreviewCards] = useState(defaultCards);
   const promo = getCurrentPromo();
 
-  // Refresh from /api/health-packages (labit-main first, this repo's own
-  // bundled copy as its fallback -- see that route) once mounted; the
-  // bundled-import default above renders instantly either way, this just
-  // upgrades it if labit-main has newer data. 2026-09-12: the site's own
-  // data file had drifted stale for months with nothing surfacing it --
-  // this makes labit-main authoritative at request time instead of
-  // depending on someone remembering to re-run the sync script.
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/health-packages")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!cancelled && data && Array.isArray(data.packages)) {
-          setPackagePreviewCards(buildPreviewCards(data));
-        }
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
+    fetch("/api/health-packages").then((res) => res.ok ? res.json() : null).then((data) => { if (!cancelled && data && Array.isArray(data.packages)) setPackagePreviewCards(buildPreviewCards(data)); }).catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
-    const target = 1000;
-    const durationMs = 1400;
-    const start = performance.now();
-    let frameId = 0;
-
-    const tick = (now) => {
-      const progress = Math.min((now - start) / durationMs, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setReportCount(Math.round(target * eased));
-      if (progress < 1) frameId = requestAnimationFrame(tick);
-    };
-
-    frameId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frameId);
+    const start = performance.now(); const duration = 1400; let frame = 0;
+    const tick = (now) => { const progress = Math.min((now - start) / duration, 1); setReportCount(Math.round(1000 * (1 - Math.pow(1 - progress, 3)))); if (progress < 1) frame = requestAnimationFrame(tick); };
+    frame = requestAnimationFrame(tick); return () => cancelAnimationFrame(frame);
   }, []);
 
-  return (
-    <>
-      <Box className="brochure-bg home-hero-cover" py={{ base: 10, md: 14 }}>
-        <Container maxW="1200px">
-          <Grid templateColumns={{ base: "1fr", lg: "1.05fr .95fr" }} gap={{ base: 8, lg: 10 }} alignItems="center">
-            <Box className="rise-in">
-              <Text display="inline-flex" bg="teal.50" color="teal.700" fontSize="xs" fontWeight="700" px={3} py={1} borderRadius="full" textTransform="uppercase" letterSpacing="wide">
-                Secunderabad Diagnostic and Research Centre
-              </Text>
-
-              <Heading mt={4} size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
-                Advanced Diagnostic Care
-                <Box as="span" color="orange.500" className="hero-subline">
-                  at{" "}
-                  <Box as="span">
-                    Jade Arcade, Paradise
-                  </Box>
-                </Box>
-              </Heading>
-
-              <Text mt={4} fontSize={{ base: "md", md: "lg" }} color="gray.800" fontWeight="500" maxW="2xl" display={{ base: "none", md: "block" }}>
-                Ultrasound and Doppler, CT, Digital X-Ray, Mammography, DEXA, ECG/2D-Echo,
-                EEG/ENMG, TMT, Spirometry and a full-service pathology lab with preventive health packages.
-              </Text>
-              <Text mt={2} fontSize="sm" color="gray.500" maxW="2xl" display={{ base: "none", md: "block" }}>
-                SDRC (Secunderabad Diagnostic and Research Centre) is a NABL accredited multi-specialty diagnostic centre established in 1983, serving Secunderabad, Hyderabad and Telangana from Jade Arcade, Paradise.
-              </Text>
-
-              <HStack mt={5} spacing={2} flexWrap="wrap" display={{ base: "none", md: "flex" }}>
-                {facilityChips.map((chip) => (
-                  <Link key={chip} href="/services">
-                    <Box px={3} py={1.5} bg="white" border="1px solid" borderColor="teal.100" borderRadius="full" fontSize="xs" fontWeight="500" color="gray.700" className="shadow-soft">
-                      {chip}
-                    </Box>
-                  </Link>
-                ))}
-              </HStack>
-
-              <HStack mt={7} spacing={3} flexWrap="wrap">
-                <Button as={Link} href="/packages" size="lg">
-                  View Health Packages
-                </Button>
-                <Button
-                  as={Link}
-                  href={siteConfig.bookingUrl}
-                  size="lg"
-                  leftIcon={<FiSearch />}
-                  className="book-test-cta"
-                >
-                  <Text>Book a Test</Text>
-                  <Box as="span" className="book-test-ribbon" display={{ base: "inline-block", md: "none" }}>NEW</Box>
-                </Button>
-              </HStack>
-
-              <SimpleGrid mt={4} columns={{ base: 1, sm: 2, lg: 4 }} spacing={3} maxW="960px">
-                <Box as={Link} href={"https://wa.me/" + siteConfig.internalNotifyNumber} target="_blank" className="soft-card no-hover-lift" p={3}>
-                  <Text fontSize="xs" color="gray.500">Need help selecting tests?</Text>
-                  <HStack spacing={1.5}>
-                    <FaWhatsapp />
-                    <Text fontSize="sm" color="teal.700" fontWeight="700">Chat with lab team</Text>
-                  </HStack>
-                </Box>
-                <Box as={Link} href={siteConfig.reportsUrl} target="_blank" className="soft-card no-hover-lift" p={3}>
-                  <Text fontSize="xs" color="gray.500">Already tested with SDRC?</Text>
-                  <HStack spacing={1.5}>
-                    <FaWhatsapp />
-                    <Text
-                      fontSize="sm"
-                      color="teal.700"
-                      fontWeight="700"
-                      title="Get our bot to send your reports. Chat using your registered mobile number."
-                    >
-                      Download Reports
-                    </Text>
-                  </HStack>
-                </Box>
-                <Box as={Link} href={siteConfig.quickBookingUrl} className="soft-card no-hover-lift home-visit-card-cta" p={3} position="relative">
-                  <Text fontSize="xs" color="gray.500">Want to book a home visit?</Text>
-                  <Text fontSize="sm" color="teal.700" fontWeight="700">Request Home Visit</Text>
-                </Box>
-                <Box
-                  as={Link}
-                  href={siteConfig.patientAppUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="no-hover-lift"
-                  p={3}
-                  position="relative"
-                  borderRadius="12px"
-                  style={{ background: "linear-gradient(135deg, #00695f 0%, #008f82 100%)" }}
-                >
-                  <Box
-                    position="absolute"
-                    top="-8px"
-                    right="-6px"
-                    bg="orange.500"
-                    color="white"
-                    fontSize="9px"
-                    fontWeight="800"
-                    px={2}
-                    py="1px"
-                    borderRadius="full"
-                    letterSpacing="0.5px"
-                  >
-                    NEW
-                  </Box>
-                  <Text fontSize="xs" color="whiteAlpha.800">Manage everything in one place</Text>
-                  <HStack spacing={1.5}>
-                    <FiDownload color="white" />
-                    <Text fontSize="sm" color="white" fontWeight="700">SDRC Health App</Text>
-                  </HStack>
-                </Box>
-              </SimpleGrid>
-
-              <Text mt={3} fontSize="xs" color="gray.500">
-                NABL accredited laboratory. Reports available online and on WhatsApp.
-              </Text>
-
-              <SimpleGrid mt={8} columns={{ base: 1, sm: 3 }} spacing={4} maxW="760px" display={{ base: "none", sm: "grid" }}>
-                <Box className="soft-card" p={4} textAlign="center">
-                  <Text fontSize="sm" color="gray.600">Reports/day</Text>
-                  <Heading size="lg" color="teal.700">{reportCount.toLocaleString("en-IN")}+</Heading>
-                </Box>
-                <Box className="soft-card" p={4} textAlign="center">
-                  <Text fontSize="sm" color="gray.600">Experience</Text>
-                  <Image src="/assets/sdrc-40-years.png" alt="40 years" width={72} height={72} style={{ width: 72, height: "auto", margin: "8px auto 0" }} />
-                </Box>
-                <Box className="soft-card" p={4} textAlign="center">
-                  <Text fontSize="sm" color="gray.600">Avg. TAT</Text>
-                  <Heading size="md" color="teal.700">Same-day*</Heading>
-                </Box>
-              </SimpleGrid>
-            </Box>
-
-            <Box position="relative" overflow="hidden" className="hero-visual-reveal" style={{ animationDelay: "220ms" }}>
-              <Box className="float-slow" position="absolute" top="-24px" right="-24px" w="260px" h="260px" bg="teal.200" borderRadius="full" filter="blur(46px)" opacity={0.35} />
-              <Box className="float-slow" position="absolute" bottom="-24px" left="-20px" w="280px" h="280px" bg="orange.200" borderRadius="full" filter="blur(52px)" opacity={0.35} style={{ animationDelay: "1.2s" }} />
-              <Box className="soft-card" p={3} position="relative" zIndex={2}>
-                <Image src="/assets/sdrc-services.png" alt="SDRC Services" width={720} height={920} style={{ width: "100%", height: "auto", borderRadius: 14 }} />
-              </Box>
-            </Box>
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* ── Monthly featured service promo ── */}
-      {promo && (
-        <Box py={{ base: 10, md: 14 }} style={{ background: "linear-gradient(135deg, #0f172a 0%, #0f2a27 55%, #0f172a 100%)", position: "relative", overflow: "hidden" }}>
-          {/* decorative blobs */}
-          <Box style={{ position: "absolute", top: "-60px", right: "-60px", width: 360, height: 360, borderRadius: "50%", background: `radial-gradient(circle, ${promo.accent}26 0%, transparent 70%)`, pointerEvents: "none" }} />
-          <Box style={{ position: "absolute", bottom: "-60px", left: "-40px", width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, rgba(242,105,57,0.1) 0%, transparent 70%)", pointerEvents: "none" }} />
-          <Container maxW="1200px" position="relative" zIndex={1}>
-            <FadeIn>
-              <Grid templateColumns={{ base: "1fr", lg: "1fr auto" }} gap={{ base: 6, lg: 12 }} alignItems="center">
-                <Box>
-                  <HStack spacing={3} mb={4} flexWrap="wrap">
-                    <Box style={{ display: "inline-flex", padding: "4px 12px", borderRadius: 99, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}>
-                      {promo.badge}
-                    </Box>
-                    <Box style={{ display: "inline-flex", padding: "4px 12px", borderRadius: 99, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", background: `${promo.accent}30`, color: "#4dd9cb" }}>
-                      {promo.eyebrow}
-                    </Box>
-                  </HStack>
-
-                  <Heading color="white" fontWeight="900" fontSize={{ base: "2xl", md: "3xl" }} lineHeight="1.15" letterSpacing="-0.02em">
-                    {promo.headline}
-                  </Heading>
-                  <Text mt={1} style={{ fontSize: "clamp(1rem,2vw,1.25rem)", fontWeight: 700, background: "linear-gradient(90deg, #f26939, #f59e0b)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                    {promo.subline}
-                  </Text>
-
-                  <Text mt={3} color="rgba(255,255,255,0.55)" fontSize={{ base: "sm", md: "md" }} maxW="560px" lineHeight="1.7">
-                    {promo.body}
-                  </Text>
-
-                  <SimpleGrid mt={4} columns={1} spacing={2.5} maxW="560px" display={{ base: "none", sm: "grid" }}>
-                    {promo.bullets.map(b => (
-                      <HStack key={b} spacing={2} align="start">
-                        <Box w="5px" h="5px" borderRadius="full" flexShrink={0} style={{ background: promo.accent, marginTop: "5px" }} />
-                        <Text color="rgba(255,255,255,0.5)" fontSize="sm" lineHeight="1.5">{b}</Text>
-                      </HStack>
-                    ))}
-                  </SimpleGrid>
-
-                  <HStack mt={6} spacing={3} flexWrap="wrap">
-                    <Button as={Link} href={promo.bookHref} size={{ base: "md", md: "lg" }}
-                      style={{ background: `linear-gradient(135deg, ${promo.accent}, #00b3a4)`, color: "white", borderRadius: 99, fontWeight: 700 }}>
-                      {promo.bookLabel}
-                    </Button>
-                    <Button as={Link} href={promo.href} size={{ base: "md", md: "lg" }}
-                      style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 99, fontWeight: 600 }}>
-                      {promo.ctaLabel}
-                    </Button>
-                  </HStack>
-                </Box>
-
-                {/* promo image — desktop only */}
-                <Box display={{ base: "none", lg: "flex" }} alignItems="center" justifyContent="center">
-                  <Box style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: "16px", width: 200 }}>
-                    <Image
-                      src={promo.image}
-                      alt={promo.imageAlt}
-                      width={951}
-                      height={2977}
-                      style={{ width: "100%", height: "auto", borderRadius: 12 }}
-                    />
-                    <Text mt={2} style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", textAlign: "center" }}>
-                      {promo.imageAlt}
-                    </Text>
-                  </Box>
-                </Box>
-              </Grid>
-            </FadeIn>
-          </Container>
-        </Box>
-      )}
-
-      <Container maxW="1200px" py={12} display={{ base: "none", md: "block" }}>
-        <FadeIn>
-          <Heading size="xl" mb={6}>All facilities under one roof</Heading>
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-            {facilities.map((group) => (
-              <Box key={group.title} className="soft-card-teal" p={6}>
-                <Heading size="md" mb={3}>{group.title}</Heading>
-                {group.items.map((item) => (
-                  <Text key={item} fontSize="sm" color="gray.700">• {item}</Text>
-                ))}
-              </Box>
-            ))}
-          </SimpleGrid>
-        </FadeIn>
-      </Container>
-
-      <Container maxW="1200px" py={6} display={{ base: "none", md: "block" }}>
-        <FadeIn>
-          <HStack justify="space-between" align="end" mb={6} flexWrap="wrap" gap={3}>
-            <Box>
-              <Heading size="xl">Popular health check packages</Heading>
-              <Text color="gray.700" fontSize="sm">A few of our most commonly chosen panels. View the full list on the packages page.</Text>
-            </Box>
-            <Link href="/packages">
-              <Text color="teal.700" fontWeight="700" fontSize="sm">View all packages</Text>
-            </Link>
-          </HStack>
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-            {packagePreviewCards.map((card, i) => (
-              <FadeIn key={card.title} delay={i * 60}>
-                <Box className="soft-card-orange" p={5} display="flex" flexDirection="column" style={{ height: "100%" }}>
-                  <Heading size="sm" color="teal.700">{card.title}</Heading>
-                  <Text mt={2} fontSize="sm" color="gray.600">{card.desc}</Text>
-                  <Text mt={2} fontSize="xs" color="gray.500">{card.params}</Text>
-                  <Text mt={2} color="orange.500" fontWeight="700">{card.price}</Text>
-                  <Box mt={2} flex="1">
-                    {card.points.map((point) => (
-                      <Text key={point} mt={1} fontSize="xs" color="gray.700">• {point}</Text>
-                    ))}
-                  </Box>
-                  <Button as={Link} href={card.href} mt={4} size="sm" w="full" textAlign="center" display="inline-flex" alignItems="center" justifyContent="center" lineHeight="1">
-                    View details
-                  </Button>
-                </Box>
-              </FadeIn>
-            ))}
-          </SimpleGrid>
-        </FadeIn>
-      </Container>
-
-      <Container maxW="1200px" py={12} display={{ base: "none", md: "block" }}>
-        <FadeIn>
-          <Heading size="xl" mb={6}>What patients say</Heading>
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-            {reviews.map((review, i) => (
-              <FadeIn key={review.name} delay={i * 70}>
-                <Box className="soft-card" p={6}>
-                  <Text mt={2} color="gray.700" fontSize="sm">&ldquo;{review.text}&rdquo;</Text>
-                  <Text mt={3} fontWeight="600" color="teal.700">- {review.name}</Text>
-                </Box>
-              </FadeIn>
-            ))}
-          </SimpleGrid>
-        </FadeIn>
-      </Container>
-
-      <Box bg="teal.700" color="white" py={12}>
-        <Container maxW="1200px" textAlign="center">
-          <Heading size={{ base: "lg", md: "xl" }} mb={3}>Ready to schedule your tests?</Heading>
-          <Text fontSize={{ base: "md", md: "lg" }} mb={6}>
-            Share prescription on WhatsApp or book directly through our online portal.
-          </Text>
-          <HStack justify="center" spacing={4} flexWrap="wrap">
-            <Button
-              as={Link}
-              href={"https://wa.me/" + siteConfig.whatsappNumber}
-              variant="light"
-              leftIcon={<FaWhatsapp />}
-              size="lg"
-              lineHeight="1"
-              alignItems="center"
-              justifyContent="center"
-            >
-              WhatsApp SDRC
-            </Button>
-            <Button
-              as={Link}
-              href={siteConfig.bookingUrl}
-              variant="outlineLight"
-              size="lg"
-              lineHeight="1"
-              alignItems="center"
-              justifyContent="center"
-              className="book-test-cta"
-            >
-              Book tests online
-              <Box as="span" className="book-test-ribbon">NEW</Box>
-            </Button>
-          </HStack>
-        </Container>
-      </Box>
-
-      <Container maxW="1200px" py={12}>
-        <Heading size="xl" mb={6}>NABL Accredited and CGHS Approved</Heading>
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-          <Box className="soft-card" p={6}>
-            <HStack spacing={4} align="start">
-              <Image src="/assets/nabl-symbol.png" alt="NABL" width={74} height={74} style={{ width: 74, height: "auto" }} />
-              <Text mt={1} fontSize="sm" color="gray.700">
-                Laboratory tests included in the accredited scope at SDRC are NABL accredited (ISO 15189:2022). Imaging and other non-laboratory services are not covered.{" "}
-                <Link href="/accreditation">
-                  <Box as="span" color="teal.700" fontWeight="700" textDecoration="underline">
-                    View details
-                  </Box>
-                </Link>
-              </Text>
-            </HStack>
-          </Box>
-          <Box className="soft-card" p={6}>
-            <HStack spacing={4} align="start">
-              <Image src="/assets/cghs-logo.png" alt="CGHS" width={74} height={74} style={{ width: 74, height: "auto" }} />
-              <Text mt={1} fontSize="sm" color="gray.700">
-                SDRC Diagnostics is a CGHS empanelled diagnostic centre for eligible beneficiaries in Hyderabad and Secunderabad.
-              </Text>
-            </HStack>
-          </Box>
-        </SimpleGrid>
-      </Container>
-    </>
-  );
+  return <>
+    <section className="home-hero-cover py-10 md:py-14"><TwContainer className="grid items-center gap-8 lg:grid-cols-[1.05fr_.95fr] lg:gap-10"><div className="rise-in"><Chip>Secunderabad Diagnostic and Research Centre</Chip><h1 className="hero-title mt-4 text-slate-800">Advanced Diagnostic Care <span className="hero-subline text-[var(--sdrc-orange)]">at <span>Jade Arcade, Paradise</span></span></h1><p className="mt-4 hidden max-w-2xl text-lg font-medium text-slate-700 md:block">Ultrasound and Doppler, CT, Digital X-Ray, Mammography, DEXA, ECG/2D-Echo, EEG/ENMG, TMT, Spirometry and a full-service pathology lab with preventive health packages.</p><p className="mt-2 hidden max-w-2xl text-sm text-slate-500 md:block">SDRC is a NABL accredited multi-specialty diagnostic centre established in 1983, serving Secunderabad, Hyderabad and Telangana from Jade Arcade, Paradise.</p><div className="mt-5 hidden flex-wrap gap-2 md:flex">{facilityChips.map((chip) => <Link key={chip} href="/services" className="rounded-full border border-[#bfe7e2] bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-[0_6px_16px_rgba(15,23,42,.06)] hover:text-[var(--sdrc-teal-deep)]">{chip}</Link>)}</div><div className="mt-7 flex flex-wrap gap-3"><Button as={Link} href="/packages" size="lg">View Health Packages</Button><Button as={Link} href={siteConfig.bookingUrl} size="lg" leftIcon={<FiSearch />}>Book a Test</Button></div><div className="mt-4 grid max-w-[960px] gap-3 sm:grid-cols-2 lg:grid-cols-4"><QuickLink href={`https://wa.me/${siteConfig.internalNotifyNumber}`} title="Need help selecting tests?" label="Chat with lab team"><FaWhatsapp /></QuickLink><QuickLink href={siteConfig.reportsUrl} title="Already tested with SDRC?" label="Download Reports"><FaWhatsapp /></QuickLink><QuickLink href={siteConfig.quickBookingUrl} title="Want to book a home visit?" label="Request Home Visit" /><QuickLink href={siteConfig.patientAppUrl} title="Manage everything in one place" label="SDRC Health App" dark><FiDownload color="white" /><span className="absolute -right-1.5 -top-2 rounded-full border border-white bg-[var(--sdrc-orange)] px-2 py-px text-[9px] font-black text-white shadow-[0_4px_10px_rgba(242,105,57,.35)]">NEW</span></QuickLink></div><p className="mt-3 text-xs text-slate-500">NABL accredited laboratory. Reports available online and on WhatsApp.</p><div className="mt-8 hidden max-w-[760px] grid-cols-3 gap-4 sm:grid"><Card className="p-4 text-center"><p className="text-sm text-slate-600">Reports/day</p><p className="mt-1 text-2xl font-bold text-[var(--sdrc-teal-deep)]">{reportCount.toLocaleString("en-IN")}+</p></Card><Card className="p-4 text-center"><p className="text-sm text-slate-600">Experience</p><Image src="/assets/sdrc-40-years.png" alt="40 years" width={72} height={72} className="mx-auto mt-2 h-auto" /></Card><Card className="p-4 text-center"><p className="text-sm text-slate-600">Avg. TAT</p><p className="mt-2 text-lg font-bold text-[var(--sdrc-teal-deep)]">Same-day*</p></Card></div></div><div className="hero-visual-reveal relative" style={{ animationDelay: "220ms" }}><Card className="relative p-3"><Image src="/assets/sdrc-services.png" alt="SDRC Services" width={720} height={920} priority className="h-auto w-full rounded-[14px]" /></Card></div></TwContainer></section>
+    {promo && <section className="overflow-hidden bg-[#0f172a] py-10 text-white md:py-14"><TwContainer><FadeIn><div className="grid items-center gap-6 lg:grid-cols-[1fr_auto] lg:gap-12"><div><div className="mb-4 flex flex-wrap gap-3"><Chip className="bg-white/10 text-white/70">{promo.badge}</Chip><Chip className="bg-[#008f82]/30 text-[#4dd9cb]">{promo.eyebrow}</Chip></div><h2 className="text-2xl font-black leading-tight md:text-3xl">{promo.headline}</h2><p className="mt-1 text-lg font-bold text-[#f59e0b]">{promo.subline}</p><p className="mt-3 max-w-[560px] text-sm leading-7 text-white/60 md:text-base">{promo.body}</p><div className="mt-4 hidden max-w-[560px] gap-2.5 sm:grid">{promo.bullets.map((bullet) => <p key={bullet} className="text-sm leading-6 text-white/50"><span className="mr-2 text-[#4dd9cb]">•</span>{bullet}</p>)}</div><div className="mt-6 flex flex-wrap gap-3"><Button as={Link} href={promo.bookHref} size="lg" className="border-[#008f82] bg-[#008f82] text-white hover:bg-[#007b70]">{promo.bookLabel}</Button><Button as={Link} href={promo.href} size="lg" variant="outlineLight">{promo.ctaLabel}</Button></div></div><div className="hidden w-[200px] rounded-[20px] border border-white/10 bg-white/[.04] p-4 lg:block"><Image src={promo.image} alt={promo.imageAlt} width={951} height={2977} className="h-auto w-full rounded-xl" /><p className="mt-2 text-center text-[10px] text-white/25">{promo.imageAlt}</p></div></div></FadeIn></TwContainer></section>}
+    <section className="hidden py-12 md:block"><TwContainer><FadeIn><h2 className="mb-6 text-2xl font-bold text-slate-800">All facilities under one roof</h2><div className="grid gap-6 md:grid-cols-3">{facilities.map((group) => <Card key={group.title} accent="teal" className="p-6"><h3 className="mb-3 text-lg font-bold text-slate-800">{group.title}</h3>{group.items.map((item) => <p key={item} className="text-sm leading-7 text-slate-700">• {item}</p>)}</Card>)}</div></FadeIn></TwContainer></section>
+    <section className="hidden py-6 md:block"><TwContainer><FadeIn><div className="mb-6 flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-2xl font-bold text-slate-800">Popular health check packages</h2><p className="text-sm text-slate-700">A few commonly chosen panels. View the full list on the packages page.</p></div><Link href="/packages" className="text-sm font-bold text-[var(--sdrc-teal-deep)]">View all packages</Link></div><div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">{packagePreviewCards.map((card, index) => <FadeIn key={card.title} delay={index * 60}><Card accent="orange" className="flex h-full flex-col p-5"><h3 className="text-sm font-bold text-[var(--sdrc-teal-deep)]">{card.title}</h3><p className="mt-2 text-sm text-slate-600">{card.desc}</p><p className="mt-2 text-xs text-slate-500">{card.params}</p><p className="mt-2 font-bold text-[var(--sdrc-orange)]">{card.price}</p><div className="mt-2 flex-1">{card.points.map((point) => <p key={point} className="mt-1 text-xs text-slate-700">• {point}</p>)}</div><Button as={Link} href={card.href} size="sm" className="mt-4 w-full">View details</Button></Card></FadeIn>)}</div></FadeIn></TwContainer></section>
+    <section className="hidden py-12 md:block"><TwContainer><FadeIn><h2 className="mb-6 text-2xl font-bold text-slate-800">What patients say</h2><div className="grid gap-6 md:grid-cols-3">{reviews.map((review, index) => <FadeIn key={review.name} delay={index * 70}><Card className="p-6"><p className="text-sm leading-7 text-slate-700">“{review.text}”</p><p className="mt-3 font-semibold text-[var(--sdrc-teal-deep)]">- {review.name}</p></Card></FadeIn>)}</div></FadeIn></TwContainer></section>
+    <section className="bg-[var(--sdrc-teal-deep)] py-12 text-white"><TwContainer className="text-center"><h2 className="text-xl font-bold md:text-2xl">Ready to schedule your tests?</h2><p className="mt-3 text-base md:text-lg">Share prescription on WhatsApp or book directly through our online portal.</p><div className="mt-6 flex flex-wrap justify-center gap-4"><Button as={Link} href={`https://wa.me/${siteConfig.whatsappNumber}`} variant="light" size="lg" leftIcon={<FaWhatsapp />}>WhatsApp SDRC</Button><Button as={Link} href={siteConfig.bookingUrl} variant="outlineLight" size="lg">Book tests online</Button></div></TwContainer></section>
+    <section className="py-12"><TwContainer><h2 className="mb-6 text-2xl font-bold text-slate-800">NABL Accredited and CGHS Approved</h2><div className="grid gap-6 md:grid-cols-2"><Card className="p-6"><div className="flex items-start gap-4"><Image src="/assets/nabl-symbol.png" alt="NABL" width={74} height={74} className="h-auto w-[74px] shrink-0" /><p className="mt-1 text-sm leading-7 text-slate-700">Laboratory tests included in the accredited scope at SDRC are NABL accredited (ISO 15189:2022). Imaging and other non-laboratory services are not covered. <Link href="/accreditation" className="font-bold text-[var(--sdrc-teal-deep)] underline">View details</Link></p></div></Card><Card className="p-6"><div className="flex items-start gap-4"><Image src="/assets/cghs-logo.png" alt="CGHS" width={74} height={74} className="h-auto w-[74px] shrink-0" /><p className="mt-1 text-sm leading-7 text-slate-700">SDRC Diagnostics is a CGHS empanelled diagnostic centre for eligible beneficiaries in Hyderabad and Secunderabad.</p></div></Card></div></TwContainer></section>
+  </>;
 }

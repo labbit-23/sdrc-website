@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Badge, Box, Button, Grid, HStack, IconButton, Input, Text, VStack } from "@chakra-ui/react";
 import { FiDownload, FiHome, FiTrash2 } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { BsBuilding } from "react-icons/bs";
 import { siteConfig } from "@/data/siteConfig";
 import VisitDateTimeSelector from "@/components/booking/VisitDateTimeSelector";
 import { trackEvent } from "@/lib/analytics";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/form";
+import { cn } from "@/lib/utils";
 
 function normalizePhone(rawPhone) {
   const digits = String(rawPhone || "").replace(/\D/g, "");
@@ -214,83 +216,85 @@ export default function CartRequestPanel({
 
   return (
     <>
-      <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} mt={4}>
-        <Box borderWidth="1px" borderColor="gray.100" borderRadius="lg" p={4} bg="white" display="flex" flexDirection="column">
-          <HStack justify="space-between" mb={3}>
-            <Text fontWeight="700" color="gray.800">Your Cart</Text>
-            <Text fontSize="xs" color="gray.600" fontWeight="700">{cartItems.length} item(s)</Text>
-          </HStack>
+      <div className="mt-4 grid gap-6 lg:grid-cols-2">
+        <div className="flex flex-col rounded-lg border border-slate-100 bg-white p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="font-bold text-slate-800">Your Cart</p>
+            <p className="text-xs font-bold text-slate-600">{cartItems.length} item(s)</p>
+          </div>
           {cartItems.length === 0 ? (
-            <Box borderWidth="1px" borderStyle="dashed" borderColor="gray.300" borderRadius="md" p={3} bg="gray.50">
-              <Text fontSize="sm" color="gray.500">No items selected yet.</Text>
-            </Box>
+            <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 p-3">
+              <p className="text-sm text-slate-500">No items selected yet.</p>
+            </div>
           ) : (
-            <VStack align="stretch" gap={2}>
+            <div className="flex flex-col gap-2">
               {cartItems.map((item) => (
-                <Box key={item.id} borderWidth="1px" borderColor="gray.100" borderRadius="md" p={2.5}>
-                  <HStack justify="space-between" align="start" gap={2}>
-                    <Box flex="1" minW={0}>
-                      <HStack spacing={2} flexWrap="wrap" mb={0.5}>
-                        <Badge colorPalette={item.item_type === "package" ? "orange" : "teal"} variant="subtle">
+                <div key={item.id} className="rounded-md border border-slate-100 p-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 flex flex-wrap items-center gap-2">
+                        <span
+                          className={cn(
+                            "inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold",
+                            item.item_type === "package" ? "bg-orange-50 text-orange-700" : "bg-[var(--sdrc-teal-soft)] text-[var(--sdrc-teal-deep)]"
+                          )}
+                        >
                           {item.item_type === "package" ? "Package" : "Test"}
-                        </Badge>
-                        {item.department ? <Text fontSize="xs" color="gray.500">{item.department}</Text> : null}
+                        </span>
+                        {item.department ? <span className="text-xs text-slate-500">{item.department}</span> : null}
                         {item.home_collection === true ? (
-                          <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="green.50" color="green.700">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-bold text-green-700">
                             <FiHome size={10} />
-                            <Text fontSize="10px" fontWeight="700">Home</Text>
-                          </HStack>
+                            Home
+                          </span>
                         ) : item.home_collection === false ? (
-                          <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="gray.100" color="gray.700">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
                             <BsBuilding size={10} />
-                            <Text fontSize="10px" fontWeight="700">Center</Text>
-                          </HStack>
+                            Center
+                          </span>
                         ) : null}
-                      </HStack>
-                      <Text fontSize="sm" fontWeight="700" color="gray.800" noOfLines={1}>{item.name}</Text>
-                      <HStack justify="space-between" mt={0.5}>
-                        <Text fontSize="xs" color="gray.500">
+                      </div>
+                      <p className="truncate text-sm font-bold text-slate-800">{item.name}</p>
+                      <div className="mt-0.5 flex justify-between gap-2">
+                        <p className="text-xs text-slate-500">
                           {item.internal_code ? item.internal_code : item.tests_count ? `Includes ${item.tests_count} tests` : ""}
-                        </Text>
-                        <Text fontSize="sm" fontWeight="700" color="orange.500">{formatLinePrice(item.price)}</Text>
-                      </HStack>
-                    </Box>
-                    <IconButton
-                      size="xs"
-                      variant="ghost"
-                      color="gray.500"
+                        </p>
+                        <p className="whitespace-nowrap text-sm font-bold text-[var(--sdrc-orange)]">{formatLinePrice(item.price)}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-red-600"
                       aria-label="Remove item"
                       onClick={() => onRemoveItem?.(item.id)}
                     >
                       <FiTrash2 />
-                    </IconButton>
-                  </HStack>
-                </Box>
+                    </button>
+                  </div>
+                </div>
               ))}
-              <Button size="xs" variant="outline" color="gray.700" borderColor="gray.300" alignSelf="flex-end" onClick={() => onClearCart?.()}>
+              <Button size="xs" variant="outline" className="self-end border-slate-300 text-slate-700 hover:bg-slate-50" onClick={() => onClearCart?.()}>
                 Clear cart
               </Button>
-            </VStack>
+            </div>
           )}
-          <Box mt="auto" pt={4}>
-            <HStack justify="space-between" mb={1}>
-              <Text fontSize="sm" color="gray.600">Subtotal</Text>
-              <Text fontSize="sm" color="gray.600">{formatInr(subtotal)}</Text>
-            </HStack>
+          <div className="mt-auto pt-4">
+            <div className="mb-1 flex justify-between gap-3">
+              <p className="text-sm text-slate-600">Subtotal</p>
+              <p className="text-sm text-slate-600">{formatInr(subtotal)}</p>
+            </div>
             {homeVisitRequested ? (
-              <HStack justify="space-between" mb={1}>
-                <Text fontSize="sm" color="gray.600">Collection Fee</Text>
-                <Text fontSize="sm" color="gray.600">TBA</Text>
-              </HStack>
+              <div className="mb-1 flex justify-between gap-3">
+                <p className="text-sm text-slate-600">Collection Fee</p>
+                <p className="text-sm text-slate-600">TBA</p>
+              </div>
             ) : null}
-            <HStack justify="space-between" mt={2}>
-              <Text fontWeight="700">Estimated Total</Text>
-              <Text fontWeight="700" color="teal.700">{homeVisitRequested ? `${formatInr(subtotal)} + TBA` : formatInr(subtotal)}</Text>
-            </HStack>
-            <HStack mt={3} spacing={2} align="stretch">
+            <div className="mt-2 flex justify-between gap-3">
+              <p className="font-bold">Estimated Total</p>
+              <p className="font-bold text-[var(--sdrc-teal-deep)]">{homeVisitRequested ? `${formatInr(subtotal)} + TBA` : formatInr(subtotal)}</p>
+            </div>
+            <div className="mt-3 flex items-stretch gap-2">
               <Input
-                bg="white"
-                size="sm"
                 placeholder="Coupon code (coming soon)"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
@@ -299,11 +303,11 @@ export default function CartRequestPanel({
               <Button size="sm" variant="outline" disabled>
                 Apply
               </Button>
-            </HStack>
-          </Box>
-        </Box>
+            </div>
+          </div>
+        </div>
 
-        <Box borderWidth="1px" borderColor="gray.100" borderRadius="lg" p={4} bg="white">
+        <div className="rounded-lg border border-slate-100 bg-white p-4">
           <VisitDateTimeSelector
             allowVisitTypeToggle
             homeVisitRequested={homeVisitRequested}
@@ -330,15 +334,13 @@ export default function CartRequestPanel({
             onSlotChange={setPreferredSlot}
             formBusy={formBusy}
           />
-        </Box>
-      </Grid>
+        </div>
+      </div>
 
-      <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={6} mt={5}>
-        <Box borderWidth="1px" borderColor="gray.100" borderRadius="lg" p={4} bg="white">
-          <VStack align="stretch" gap={2}>
+      <div className="mt-5 grid gap-6 lg:grid-cols-2">
+        <div className="rounded-lg border border-slate-100 bg-white p-4">
+          <div className="flex flex-col gap-2">
           <Input
-            bg="white"
-            size="sm"
             placeholder="Patient name *"
             name="patient_name"
             autoComplete="name"
@@ -347,8 +349,6 @@ export default function CartRequestPanel({
             onChange={(e) => setPatientName(e.target.value)}
           />
           <Input
-            bg="white"
-            size="sm"
             placeholder="Patient phone number *"
             name="patient_phone"
             type="tel"
@@ -359,8 +359,6 @@ export default function CartRequestPanel({
             onChange={(e) => setPatientPhone(e.target.value)}
           />
           <Input
-            bg="white"
-            size="sm"
             placeholder="Area / locality"
             name="patient_area"
             autoComplete="street-address"
@@ -369,50 +367,45 @@ export default function CartRequestPanel({
             onChange={(e) => setPatientArea(e.target.value)}
           />
           <Input
-            bg="white"
-            size="sm"
             placeholder="Optional note (timing/preferences)"
             disabled={formBusy}
             value={patientNotes}
             onChange={(e) => setPatientNotes(e.target.value)}
           />
-          </VStack>
-        </Box>
-        <Box borderWidth="1px" borderColor="gray.100" borderRadius="lg" p={4} bg="white">
+          </div>
+        </div>
+        <div className="rounded-lg border border-slate-100 bg-white p-4">
           {showCenterVisitAdvisory ? (
-            <Text fontSize="xs" color="orange.600" mt={1}>
+            <p className="mt-1 text-xs text-orange-600">
               Some selected items include center-only imaging. Home collection can be done for eligible tests; center visit is needed to complete imaging items.
-            </Text>
+            </p>
           ) : null}
           {homeVisitRequested && cartItems.length > 0 && !showCenterVisitAdvisory ? (
-            <Text fontSize="xs" color="green.700" mt={1}>
+            <p className="mt-1 text-xs text-green-700">
               Tests can be done at home.
-            </Text>
+            </p>
           ) : null}
 
-          {leadError ? <Text fontSize="xs" color="red.600" mt={2}>{leadError}</Text> : null}
+          {leadError ? <p className="mt-2 text-xs text-red-600">{leadError}</p> : null}
           {preferredDate && preferredSlot ? (
-            <Box mt={2} px={3} py={2} borderRadius="md" bg="teal.50" borderWidth="1px" borderColor="teal.100">
-              <Text fontSize="xs" color="gray.700">
+            <div className="mt-2 rounded-md border border-teal-100 bg-[var(--sdrc-teal-soft)] px-3 py-2">
+              <p className="text-xs text-slate-700">
                 {homeVisitRequested ? "Selected home visit:" : "Tentative center visit:"} <strong>{preferredDateLabel}</strong> • <strong>{preferredSlotLabel}</strong>
-              </Text>
-            </Box>
+              </p>
+            </div>
           ) : null}
-          {isSubmitting ? <Text fontSize="xs" color="teal.700" mt={2}>Submitting request...</Text> : null}
+          {isSubmitting ? <p className="mt-2 text-xs text-[var(--sdrc-teal-deep)]">Submitting request...</p> : null}
           <Button
-            mt={3}
-            w="full"
+            className="mt-3 w-full"
             onClick={sendCartRequest}
-            isLoading={isSubmitting}
-            loadingText="Sending..."
             disabled={formBusy}
           >
-            Send Request to Lab
+            {isSubmitting ? "Sending..." : "Send Request to Lab"}
           </Button>
-          <Text fontSize="xs" color="gray.600" mt={2}>
+          <p className="mt-2 text-xs text-slate-600">
             * Prices shown are indicative. Final pricing and test availability are confirmed by the lab team after request review, including sample requirements and legacy/repeat test mappings.
-          </Text>
-          <HStack align="stretch" spacing={2} flexWrap="wrap" mt={2}>
+          </p>
+          <div className="mt-2 flex flex-wrap items-stretch gap-2">
             <Button
               as={Link}
               href={"https://wa.me/" + siteConfig.internalNotifyNumber}
@@ -420,7 +413,6 @@ export default function CartRequestPanel({
               size="sm"
               variant="outline"
               title="Need help deciding tests?"
-             
               leftIcon={<FaWhatsapp />}
             >
               Chat on WhatsApp
@@ -432,31 +424,17 @@ export default function CartRequestPanel({
               size="sm"
               variant="outline"
               title="Get our bot to send your reports. Chat using your registered mobile number."
-             
-              leftIcon={<FaWhatsapp />}
+              leftIcon={<FiDownload />}
             >
               Download Reports
             </Button>
-          </HStack>
-        </Box>
-      </Grid>
+          </div>
+        </div>
+      </div>
       {toastMessage ? (
-        <Box
-          position="fixed"
-          right={{ base: 4, md: 6 }}
-          bottom={{ base: 4, md: 6 }}
-          bg="teal.600"
-          color="white"
-          px={4}
-          py={2}
-          borderRadius="md"
-          boxShadow="lg"
-          zIndex={30}
-          fontSize="sm"
-          maxW={{ base: "84vw", md: "420px" }}
-        >
+        <div className="fixed bottom-4 right-4 z-30 max-w-[84vw] rounded-md bg-[var(--sdrc-teal-600)] px-4 py-2 text-sm text-white shadow-lg md:bottom-6 md:right-6 md:max-w-[420px]">
           {toastMessage}
-        </Box>
+        </div>
       ) : null}
     </>
   );

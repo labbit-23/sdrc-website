@@ -6,8 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaWhatsapp } from "react-icons/fa";
-import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { siteConfig } from "@/data/siteConfig";
+import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text, VStack } from "@/components/site/layoutPrimitives";
 import { FadeIn } from "@/components/site/motionUtils";
 
 const sections = [
@@ -209,19 +209,16 @@ export default function ServicesPage() {
       {structuredData.map((schema, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       ))}
-      <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
+      <Box className="services-hero-bg" py={{ base: 10, md: 14 }}>
         <Container maxW="1200px">
           <Grid templateColumns={{ base: "1fr", lg: "1.05fr .95fr" }} gap={10} alignItems="start">
             <Box>
               <Text
+                as="span"
+                className="chip chip-teal"
                 display="inline-flex"
-                bg="teal.50"
-                color="teal.700"
                 fontSize="xs"
                 fontWeight="700"
-                px={3}
-                py={1}
-                borderRadius="full"
                 textTransform="uppercase"
                 letterSpacing="wide"
               >
@@ -250,9 +247,9 @@ export default function ServicesPage() {
                       borderColor="teal.100"
                       borderRadius="full"
                       fontSize="xs"
-                      className="shadow-soft"
+                      color="gray.700"
+                      className="shadow-soft hover:border-[var(--sdrc-teal)] hover:text-[var(--sdrc-teal-deep)]"
                       transition="all .15s ease"
-                      _hover={{ borderColor: "teal.400", color: "teal.700" }}
                     >
                       {chip.label}
                     </Box>
@@ -325,15 +322,14 @@ export default function ServicesPage() {
                     as="button"
                     type="button"
                     key={img.src}
-                    borderRadius="md"
-                    overflow="hidden"
+                    className="aspect-[4/3] w-full overflow-hidden rounded-md bg-white transition hover:border-[var(--sdrc-teal)]"
                     borderWidth={idx === activeIndex ? "2px" : "1px"}
                     borderColor={idx === activeIndex ? "teal.500" : "gray.200"}
                     onClick={() => setActiveIndex(idx)}
                     aria-label={"Show " + img.caption}
                   >
-                    <Box position="relative" w="full" h={{ base: "52px", md: "62px" }}>
-                      <Image src={img.src} alt={img.alt} fill style={{ objectFit: "cover" }} sizes="120px" />
+                    <Box position="relative" w="full" h="full" bg="gray.50">
+                      <Image src={img.src} alt={img.alt} fill style={{ objectFit: "contain" }} sizes="120px" />
                     </Box>
                   </Box>
                 ))}
@@ -366,7 +362,7 @@ export default function ServicesPage() {
                       {item.sample_report_url ? (
                         <Box mt={3}>
                           <Link href={item.sample_report_url}>
-                            <Text fontSize="xs" fontWeight="700" color="teal.700" textDecoration="underline">
+                            <Text fontSize="xs" fontWeight="700" color="teal.700" className="hover:text-[var(--sdrc-orange)]" textDecoration="underline">
                               Preview sample DEXA report
                             </Text>
                           </Link>
@@ -464,9 +460,8 @@ export default function ServicesPage() {
                   type="button"
                   minW="88px"
                   w="88px"
-                  h="56px"
-                  borderRadius="md"
-                  overflow="hidden"
+                  h="66px"
+                  className="overflow-hidden rounded-md bg-white transition hover:border-[var(--sdrc-teal)]"
                   borderWidth={idx === activeIndex ? "2px" : "1px"}
                   borderColor={idx === activeIndex ? "teal.500" : "gray.200"}
                   onClick={() => setActiveIndex(idx)}
@@ -476,7 +471,7 @@ export default function ServicesPage() {
                       src={img.src}
                       alt={img.alt}
                       fill
-                      style={{ objectFit: "cover" }}
+                      style={{ objectFit: "contain" }}
                       sizes="88px"
                     />
                   </Box>

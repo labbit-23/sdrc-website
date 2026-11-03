@@ -5,207 +5,29 @@ export const dynamic = "force-dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { FaWhatsapp } from "react-icons/fa";
-import { Box, Button, Container, Grid, Heading, SimpleGrid, Text } from "@chakra-ui/react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Chip, TwContainer } from "@/components/site/tw-layout";
 import { siteConfig } from "@/data/siteConfig";
 
 const services = [
-  {
-    icon: "/assets/recure/icon-ortho.png",
-    title: "Orthopaedic Rehab",
-    desc: "Back pain, neck pain, joint disorders, arthritis"
-  },
-  {
-    icon: "/assets/recure/icon-neuro.png",
-    title: "Neurological Rehab",
-    desc: "Stroke, nerve injuries, neuro-muscular rehab"
-  },
-  {
-    icon: "/assets/recure/icon-sports.png",
-    title: "Sports Injury",
-    desc: "Ligament injuries, muscle tears, return-to-sport"
-  },
-  {
-    icon: "/assets/recure/icon-postop.png",
-    title: "Post-Surgical Rehab",
-    desc: "Joint replacement, spine and trauma recovery"
-  },
-  {
-    icon: "/assets/recure/icon-geriatric.png",
-    title: "Geriatric Care",
-    desc: "Balance, mobility, fall prevention"
-  },
-  {
-    icon: "/assets/recure/icon-womens.png",
-    title: "Women's Health",
-    desc: "Post-partum, pelvic floor, ergonomic care"
-  }
+  ["/assets/recure/icon-ortho.png", "Orthopaedic Rehab", "Back pain, neck pain, joint disorders, arthritis"],
+  ["/assets/recure/icon-neuro.png", "Neurological Rehab", "Stroke, nerve injuries, neuro-muscular rehab"],
+  ["/assets/recure/icon-sports.png", "Sports Injury", "Ligament injuries, muscle tears, return-to-sport"],
+  ["/assets/recure/icon-postop.png", "Post-Surgical Rehab", "Joint replacement, spine and trauma recovery"],
+  ["/assets/recure/icon-geriatric.png", "Geriatric Care", "Balance, mobility, fall prevention"],
+  ["/assets/recure/icon-womens.png", "Women's Health", "Post-partum, pelvic floor, ergonomic care"]
 ];
-
-const highlights = [
-  "Integrated diagnostics + rehab workflow",
-  "Evidence-based treatment protocols",
-  "In-clinic and at-home care options"
-];
-
-const locations = [
-  {
-    name: "Jade Arcade - Paradise",
-    desc: "Physiotherapy consultations (Recure x SDRC)",
-    map: siteConfig.locations.main
-  },
-  {
-    name: "S.D. Road Collection Centre",
-    desc: "Physiotherapy consultations (Recure x SDRC)",
-    map: siteConfig.locations.sdRoad
-  },
-  {
-    name: "Yapral Centre",
-    desc: "Physiotherapy treatment and rehabilitation sessions",
-    map: siteConfig.locations.yapral
-  }
-];
+const highlights = ["Integrated diagnostics + rehab workflow", "Evidence-based treatment protocols", "In-clinic and at-home care options"];
+const locations = [["Jade Arcade - Paradise", "Physiotherapy consultations (Recure x SDRC)", siteConfig.locations.main], ["S.D. Road Collection Centre", "Physiotherapy consultations (Recure x SDRC)", siteConfig.locations.sdRoad], ["Yapral Centre", "Physiotherapy treatment and rehabilitation sessions", siteConfig.locations.yapral]];
 
 export default function PhysiotherapyPage() {
-  return (
-    <>
-      <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
-        <Container maxW="1200px">
-          <Grid templateColumns={{ base: "1fr", lg: "1.05fr .95fr" }} gap={10} alignItems="center">
-            <Box>
-              <Text
-                display="inline-flex"
-                px={3}
-                py={1}
-                borderRadius="full"
-                bg="teal.50"
-                color="teal.700"
-                fontSize="xs"
-                fontWeight="700"
-                textTransform="uppercase"
-                letterSpacing="wide"
-              >
-                Physiotherapy at SDRC
-              </Text>
-
-              <Heading mt={4} size={{ base: "2xl", md: "5xl" }} color="gray.800"  className="hero-title">
-                Evidence-based Physiotherapy
-                <Box as="span" color="orange.500" className="hero-subline">
-                  with Recure
-                </Box>
-              </Heading>
-
-              <Text mt={5} fontSize={{ base: "md", md: "lg" }} color="gray.700">
-                Professional rehabilitation services delivered at SDRC Diagnostics in collaboration with Recure, India&apos;s structured physiotherapy platform.
-              </Text>
-
-              <Grid templateColumns={{ base: "1fr", sm: "repeat(2, minmax(0,1fr))" }} gap={3} mt={7} maxW="560px">
-                <Button as={Link} href={"https://wa.me/919963432132?text=" + encodeURIComponent("I wanted to know more about Recure Physiotherapy at SDRC") } target="_blank" size="lg" leftIcon={<FaWhatsapp />}>
-                  Chat with an Expert
-                </Button>
-                <Button as={Link} href="tel:+919963432132" variant="outline" size="lg">
-                  Call +91 99634 32132
-                </Button>
-              </Grid>
-            </Box>
-
-            <Box className="soft-card" p={6}>
-              <Image
-                src="/assets/recure/logo-recure.png"
-                alt="Recure Physiotherapy"
-                width={220}
-                height={56}
-                style={{ width: "auto", height: 54 }}
-              />
-              <Text fontSize="sm" color="gray.700" mt={4}>
-                Structured care protocols, certified physiotherapists and measurable outcomes.
-              </Text>
-            </Box>
-          </Grid>
-        </Container>
-      </Box>
-
-      <Container maxW="1200px" py={12}>
-        <Heading size="xl" mb={8}>
-          Physiotherapy services offered
-        </Heading>
-
-        <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} spacing={6}>
-          {services.map((service) => (
-            <Box key={service.title} className="soft-card" p={6}>
-              <Image src={service.icon} alt={service.title} width={42} height={42} />
-              <Text fontWeight="700" fontSize="lg" mt={3} mb={2}>
-                {service.title}
-              </Text>
-              <Text fontSize="sm" color="gray.700">
-                {service.desc}
-              </Text>
-            </Box>
-          ))}
-        </SimpleGrid>
-      </Container>
-
-      <Box bg="white" borderTop="1px solid" borderColor="gray.100">
-        <Container maxW="1200px" py={12}>
-          <Heading size="xl" mb={6}>
-            Why Recure at SDRC?
-          </Heading>
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-            {highlights.map((item) => (
-              <Box key={item} className="soft-card" p={5} bg="gray.50">
-                <Text fontSize="sm" color="gray.700">
-                  {item}
-                </Text>
-              </Box>
-            ))}
-          </SimpleGrid>
-        </Container>
-      </Box>
-
-      <Container maxW="1200px" py={12}>
-        <Heading size="xl" mb={6}>
-          Physiotherapy Locations
-        </Heading>
-
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-          {locations.map((location) => (
-            <Box key={location.name} className="soft-card" p={6} border="1px solid" borderColor="teal.100">
-              <Text fontWeight="700" fontSize="lg" mb={1}>
-                {location.name}
-              </Text>
-              <Text fontSize="sm" color="gray.700" mb={3}>
-                {location.desc}
-              </Text>
-              <Link href={location.map} target="_blank">
-                <Text fontSize="sm" fontWeight="700" color="teal.600">
-                  View on Google Maps →
-                </Text>
-              </Link>
-            </Box>
-          ))}
-        </SimpleGrid>
-      </Container>
-
-      <Box bg="orange.50" borderTop="1px solid" borderBottom="1px solid" borderColor="orange.100">
-        <Container maxW="1200px" py={6}>
-          <Grid templateColumns={{ base: "1fr", md: "auto 1fr" }} gap={4} alignItems="center">
-            <Image
-              src="/assets/recure/logo-recure.png"
-              alt="Recure"
-              width={140}
-              height={42}
-              style={{ width: "auto", height: 40 }}
-            />
-            <Text fontSize="sm" color="gray.700">
-              To learn more about Recure&apos;s philosophy and nationwide programs, visit{" "}
-              <Link href="https://recure.in" target="_blank">
-                <Box as="span" color="teal.700" fontWeight="700" textDecoration="underline">
-                  recure.in
-                </Box>
-              </Link>
-            </Text>
-          </Grid>
-        </Container>
-      </Box>
-    </>
-  );
+  const expertUrl = "https://wa.me/919963432132?text=" + encodeURIComponent("I wanted to know more about Recure Physiotherapy at SDRC");
+  return <>
+    <section className="brochure-bg py-10 md:py-14"><TwContainer className="grid items-center gap-8 lg:grid-cols-[1.05fr_.95fr] lg:gap-10"><div><Chip>Physiotherapy at SDRC</Chip><h1 className="hero-title mt-4 text-slate-800">Evidence-based Physiotherapy<span className="hero-subline text-[var(--sdrc-orange)]">with Recure</span></h1><p className="mt-5 text-base text-slate-700 md:text-lg">Professional rehabilitation services delivered at SDRC Diagnostics in collaboration with Recure, India&apos;s structured physiotherapy platform.</p><div className="mt-7 grid max-w-[560px] gap-3 sm:grid-cols-2"><Button as={Link} href={expertUrl} target="_blank" size="lg" leftIcon={<FaWhatsapp />}>Chat with an Expert</Button><Button as={Link} href="tel:+919963432132" variant="outline" size="lg">Call +91 99634 32132</Button></div></div><Card className="p-6"><Image src="/assets/recure/logo-recure.png" alt="Recure Physiotherapy" width={220} height={56} className="h-[54px] w-auto" /><p className="mt-4 text-sm text-slate-700">Structured care protocols, certified physiotherapists and measurable outcomes.</p></Card></TwContainer></section>
+    <section className="py-12"><TwContainer><h2 className="mb-8 text-2xl font-bold text-slate-800">Physiotherapy services offered</h2><div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{services.map(([icon, title, desc]) => <Card key={title} className="p-6"><Image src={icon} alt={title} width={42} height={42} /><h3 className="mt-3 text-lg font-bold text-slate-800">{title}</h3><p className="mt-2 text-sm text-slate-700">{desc}</p></Card>)}</div></TwContainer></section>
+    <section className="border-y border-slate-100 bg-white py-12"><TwContainer><h2 className="mb-6 text-2xl font-bold text-slate-800">Why Recure at SDRC?</h2><div className="grid gap-6 md:grid-cols-3">{highlights.map((item) => <Card key={item} className="bg-slate-50 p-5"><p className="text-sm text-slate-700">{item}</p></Card>)}</div></TwContainer></section>
+    <section className="py-12"><TwContainer><h2 className="mb-6 text-2xl font-bold text-slate-800">Physiotherapy Locations</h2><div className="grid gap-6 md:grid-cols-3">{locations.map(([name, desc, map]) => <Card key={name} accent="teal" className="p-6"><h3 className="text-lg font-bold text-slate-800">{name}</h3><p className="mb-3 mt-1 text-sm text-slate-700">{desc}</p><Link href={map} target="_blank" className="text-sm font-bold text-[var(--sdrc-teal-deep)]">View on Google Maps →</Link></Card>)}</div></TwContainer></section>
+    <section className="border-y border-[#fed7aa] bg-[#fff7ed] py-6"><TwContainer className="grid items-center gap-4 md:grid-cols-[auto_1fr]"><Image src="/assets/recure/logo-recure.png" alt="Recure" width={140} height={42} className="h-10 w-auto" /><p className="text-sm text-slate-700">To learn more about Recure&apos;s philosophy and nationwide programs, visit <Link href="https://recure.in" target="_blank" className="font-bold text-[var(--sdrc-teal-deep)] underline">recure.in</Link></p></TwContainer></section>
+  </>;
 }

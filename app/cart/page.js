@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Box, Button, Container, Heading, HStack, Text, VStack } from "@chakra-ui/react";
 import CartRequestPanel from "@/components/cart/CartRequestPanel";
 import { readCartItems, saveCartItems } from "@/lib/cart";
 import { trackEvent } from "@/lib/analytics";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { TwContainer } from "@/components/site/tw-layout";
 
 export default function CartPage() {
   const [items, setItems] = useState([]);
@@ -38,34 +40,33 @@ export default function CartPage() {
 
   return (
     <>
-      <Box className="brochure-bg" py={{ base: 10, md: 14 }}>
-        <Container maxW="1100px">
-          <Heading size={{ base: "2xl", md: "5xl" }} color="gray.800" className="hero-title">
+      <section className="brochure-bg functional-hero-cover py-10 md:py-14">
+        <TwContainer>
+          <h1 className="hero-title text-slate-800">
             Your Cart
-            <Box as="span" color="teal.700" className="hero-subline">Review Tests and Packages</Box>
-          </Heading>
-          <Text mt={3} color="gray.700" fontSize={{ base: "md", md: "lg" }}>
+            <span className="hero-subline text-[var(--sdrc-teal-deep)]">Review Tests and Packages</span>
+          </h1>
+          <p className="mt-3 text-base text-slate-700 md:text-lg">
             Returning users on this browser will continue to see these selected items.
-          </Text>
-        </Container>
-      </Box>
+          </p>
+        </TwContainer>
+      </section>
 
-      <Container maxW="1100px" py={10}>
+      <TwContainer className="py-10">
         {items.length === 0 ? (
-          <Box className="soft-card" p={6}>
-            <Text color="gray.600" mb={4}>Your cart is empty.</Text>
+          <Card interactive={false} className="p-6">
+            <p className="mb-4 text-slate-600">Your cart is empty.</p>
             <Button as={Link} href="/tests">Browse tests and packages</Button>
-          </Box>
+          </Card>
         ) : (
-          <VStack align="stretch" gap={4}>
-            <Box className="soft-card" p={5}>
-              <HStack mt={5} spacing={2} flexWrap="wrap">
+          <div className="flex flex-col gap-4">
+            <Card interactive={false} className="p-5">
+              <div className="mt-5 flex flex-wrap gap-2">
                 <Button as={Link} href="/tests" size="sm">Continue Adding</Button>
                 <Button as={Link} href="/packages" variant="outline" size="sm">Browse Packages</Button>
                 <Button
                   variant="outline"
-                  color="gray.700"
-                  borderColor="gray.300"
+                  className="border-slate-300 text-slate-700 hover:bg-slate-50"
                   size="sm"
                   onClick={() => {
                     trackEvent("clear_cart", { item_count: items.length }, { pagePath: "/cart" });
@@ -74,7 +75,7 @@ export default function CartPage() {
                 >
                   Clear Cart
                 </Button>
-              </HStack>
+              </div>
 
               <CartRequestPanel
                 cartItems={items}
@@ -85,10 +86,10 @@ export default function CartPage() {
                 onRemoveItem={removeItem}
                 onClearCart={() => setItems([])}
               />
-            </Box>
-          </VStack>
+            </Card>
+          </div>
         )}
-      </Container>
+      </TwContainer>
     </>
   );
 }

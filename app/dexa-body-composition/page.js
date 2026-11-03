@@ -1,11 +1,8 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { FaWhatsapp } from "react-icons/fa";
 import { siteConfig } from "@/data/siteConfig";
+import { Box, Button, Container, Grid, Heading, HStack, SimpleGrid, Text, VStack } from "@/components/site/layoutPrimitives";
 import { FadeIn, Counter } from "@/components/site/motionUtils";
 
 /* ─── data ─── */
@@ -339,47 +336,47 @@ export default function DexaBodyCompositionPage() {
               </Box>
 
               {/* scan image pair */}
-              <Grid templateColumns="1fr 1fr" gap={4}>
-                <Box className="soft-card" p={3} style={{ borderTop: "3px solid #f26939" }}>
+              <div className="grid grid-cols-2 gap-4">
+                <Box className="soft-card" p={3} style={{ borderTop: "3px solid #f26939", height: "100%" }}>
                   <Text style={{ fontSize: 11, fontWeight: 700, color: "#f26939", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
                     Fat distribution
                   </Text>
-                  <Box borderRadius="10px" overflow="hidden" bg="white">
+                  <Box borderRadius="10px" overflow="hidden" bg="white" position="relative" h={{ base: "360px", md: "440px" }}>
                     <Image
                       src="/assets/dexa/fat-heatmap.webp"
                       alt="DEXA fat distribution heatmap — dense fat shown in pink/red, lean areas in blue"
-                      width={951}
-                      height={2977}
-                      style={{ width: "100%", height: "auto" }}
+                      fill
+                      style={{ objectFit: "contain", objectPosition: "center top" }}
+                      sizes="(max-width: 768px) 46vw, 260px"
                     />
                   </Box>
                   <Text style={{ fontSize: 10, color: "#94a3b8", marginTop: 6, textAlign: "center" }}>
                     Pink/red = dense fat · Blue = lean
                   </Text>
                 </Box>
-                <Box className="soft-card" p={3} style={{ borderTop: "3px solid #7c3aed" }}>
+                <Box className="soft-card" p={3} style={{ borderTop: "3px solid #7c3aed", height: "100%" }}>
                   <Text style={{ fontSize: 11, fontWeight: 700, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
                     Bone density scan
                   </Text>
-                  <Box borderRadius="10px" overflow="hidden" bg="white">
+                  <Box borderRadius="10px" overflow="hidden" bg="white" position="relative" h={{ base: "360px", md: "440px" }}>
                     <Image
                       src="/assets/dexa/bone-scan.webp"
                       alt="DEXA bone density skeletal scan showing full skeleton from posterior view"
-                      width={919}
-                      height={2962}
-                      style={{ width: "100%", height: "auto" }}
+                      fill
+                      style={{ objectFit: "contain", objectPosition: "center top" }}
+                      sizes="(max-width: 768px) 46vw, 260px"
                     />
                   </Box>
                   <Text style={{ fontSize: 10, color: "#94a3b8", marginTop: 6, textAlign: "center" }}>
                     Full skeletal posterior view
                   </Text>
                 </Box>
-                <Box gridColumn="span 2">
+                <div className="col-span-2">
                   <Text style={{ fontSize: 11, color: "#94a3b8", textAlign: "center" }}>
                     Actual scans from a SDRC DEXA report · GE Lunar DPX-NT · Individual results vary
                   </Text>
-                </Box>
-              </Grid>
+                </div>
+              </div>
             </Grid>
           </FadeIn>
         </Container>
@@ -614,23 +611,25 @@ export default function DexaBodyCompositionPage() {
                 </Text>
               </Box>
 
-              <Box style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, overflow: "hidden" }}>
-                <Box style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", background: "rgba(255,255,255,0.05)", padding: "10px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <Box className="overflow-x-auto" style={{ border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16 }}>
+                <Box className="min-w-[620px] overflow-hidden rounded-2xl">
+                <Box style={{ display: "grid", gridTemplateColumns: "1.25fr repeat(4, 1fr)", background: "rgba(255,255,255,0.08)", padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
                   {["Method", "Body Fat", "Lean Mass", "Bone Density", "Regional"].map((h, i) => (
-                    <Text key={h} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "rgba(255,255,255,0.35)", textAlign: i > 0 ? "center" : "left" }}>{h}</Text>
+                    <Text key={h} style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em", color: "rgba(255,255,255,0.7)", textAlign: i > 0 ? "center" : "left" }}>{h}</Text>
                   ))}
                 </Box>
                 {comparisons.map((row) => (
-                  <Box key={row.method} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", padding: "13px 16px", borderBottom: "1px solid rgba(255,255,255,0.05)", background: row.highlight ? "rgba(0,143,130,0.12)" : "transparent", alignItems: "center" }}>
-                    <Text style={{ fontSize: 13, fontWeight: row.highlight ? 700 : 500, color: row.highlight ? "#4dd9cb" : "rgba(255,255,255,0.6)" }}>
+                  <Box key={row.method} style={{ display: "grid", gridTemplateColumns: "1.25fr repeat(4, 1fr)", padding: "14px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: row.highlight ? "rgba(0,143,130,0.18)" : "rgba(255,255,255,0.025)", alignItems: "center" }}>
+                    <Text style={{ fontSize: 13, fontWeight: row.highlight ? 800 : 600, color: row.highlight ? "#5eead4" : "rgba(255,255,255,0.72)" }}>
                       {row.method}
-                      {row.highlight && <Box as="span" style={{ marginLeft: 8, background: "rgba(0,143,130,0.3)", color: "#4dd9cb", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 99 }}>SDRC</Box>}
+                      {row.highlight && <span style={{ marginLeft: 8, background: "rgba(94,234,212,0.16)", color: "#99f6e4", fontSize: 10, fontWeight: 800, padding: "2px 7px", borderRadius: 99, border: "1px solid rgba(94,234,212,0.24)" }}>SDRC</span>}
                     </Text>
                     {row.cols.map((c, i) => (
-                      <Text key={i} style={{ fontSize: 12, textAlign: "center", color: c.startsWith("✓") ? "#4dd9cb" : c === "—" ? "rgba(255,255,255,0.15)" : "#f59e0b", fontWeight: c.startsWith("✓") ? 700 : 400 }}>{c}</Text>
+                      <Text key={i} style={{ fontSize: 12, textAlign: "center", color: c.startsWith("✓") ? "#5eead4" : c === "—" ? "rgba(255,255,255,0.28)" : "#fbbf24", fontWeight: c.startsWith("✓") ? 800 : 700 }}>{c}</Text>
                     ))}
                   </Box>
                 ))}
+                </Box>
               </Box>
             </Grid>
           </FadeIn>
@@ -710,26 +709,26 @@ export default function DexaBodyCompositionPage() {
               <Heading fontWeight="900" fontSize={{ base: "2xl", md: "3xl" }} color="gray.900" mt={3}>Reference ranges explained</Heading>
             </Box>
           </FadeIn>
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={5}>
+          <div className="grid gap-5 md:grid-cols-3">
             {ranges.map((r, i) => (
               <FadeIn key={r.title} delay={i * 80}>
                 <Box className="soft-card" p={5} style={{ height: "100%" }}>
                   <Text fontWeight="700" color="gray.800" fontSize="sm" mb={4}>{r.title}</Text>
-                  <HStack spacing={0} borderRadius="full" overflow="hidden" h="10px" mb={2}>
+                  <div className="mb-3 flex h-3 w-full overflow-hidden rounded-full bg-slate-100">
                     {r.segments.map((seg) => (
-                      <Box key={seg.label} style={{ flex: seg.flex, background: seg.color }} />
+                      <div key={seg.label} style={{ flex: seg.flex, background: seg.color }} />
                     ))}
-                  </HStack>
-                  <HStack justify="space-between" spacing={1}>
+                  </div>
+                  <div className="grid gap-1" style={{ gridTemplateColumns: r.segments.map((seg) => `${seg.flex}fr`).join(" ") }}>
                     {r.segments.map((seg) => (
-                      <Text key={seg.label} style={{ fontSize: 10, color: "#94a3b8", flex: seg.flex, textAlign: "center" }}>{seg.label}</Text>
+                      <Text key={seg.label} style={{ fontSize: 10, color: "#64748b", textAlign: "center", lineHeight: 1.25 }}>{seg.label}</Text>
                     ))}
-                  </HStack>
+                  </div>
                   <Text fontSize="xs" color="gray.400" mt={4} lineHeight="1.6">{r.note}</Text>
                 </Box>
               </FadeIn>
             ))}
-          </SimpleGrid>
+          </div>
         </Container>
       </Box>
 
@@ -745,7 +744,7 @@ export default function DexaBodyCompositionPage() {
                   DEXA is useful whenever you need to go beyond a scale — whether you&apos;re training, managing a condition, or simply want an honest baseline.
                 </Text>
               </Box>
-              <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4}>
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {forWho.map((item, i) => (
                   <FadeIn key={item.label} delay={i * 55}>
                     <Box className="soft-card" p={5} style={{ height: "100%" }}>
@@ -755,7 +754,7 @@ export default function DexaBodyCompositionPage() {
                     </Box>
                   </FadeIn>
                 ))}
-              </SimpleGrid>
+              </div>
             </Grid>
           </FadeIn>
         </Container>

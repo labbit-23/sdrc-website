@@ -1,6 +1,11 @@
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";
+
 :root {
   --sdrc-teal: #008f82;
   --sdrc-teal-deep: #00695f;
+  --sdrc-teal-600: #007b70;
+  --sdrc-teal-soft: #e6f6f4;
   --sdrc-orange: #f26939;
   --sdrc-ink: #0f172a;
   --sdrc-bg: #f8fafc;
@@ -111,6 +116,17 @@ a {
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
+.services-hero-bg {
+  background:
+    radial-gradient(circle at 86% 18%, rgba(242, 105, 57, 0.14), transparent 34%),
+    radial-gradient(circle at 12% 92%, rgba(0, 143, 130, 0.13), transparent 42%),
+    linear-gradient(90deg, rgba(0, 143, 130, 0.045) 1px, transparent 1px),
+    linear-gradient(rgba(0, 143, 130, 0.045) 1px, transparent 1px),
+    linear-gradient(180deg, #ffffff 0%, #f5fbfa 100%);
+  background-size: auto, auto, 32px 32px, 32px 32px, auto;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
 .soft-card {
   border: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
@@ -124,6 +140,14 @@ a {
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
 }
 
+.hero-side-card {
+  line-height: 1.65;
+}
+
+.hero-side-card p {
+  text-wrap: pretty;
+}
+
 .no-hover-lift:hover {
   transform: none;
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
@@ -131,38 +155,6 @@ a {
 
 .shadow-soft {
   box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-}
-
-.book-test-cta {
-  position: relative;
-  background:
-    linear-gradient(#ffffff, #ffffff) padding-box,
-    linear-gradient(135deg, #008f82 0%, #f97316 100%) border-box !important;
-  border: 2px solid transparent !important;
-  color: #006f65 !important;
-  overflow: visible !important;
-}
-
-.book-test-cta:hover {
-  background:
-    linear-gradient(#fff7f2, #fff7f2) padding-box,
-    linear-gradient(135deg, #007a6f 0%, #ea580c 100%) border-box !important;
-  color: #00564d !important;
-}
-
-.book-test-ribbon {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: #fff;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  padding: 4px 6px;
-  border-radius: 8px;
-  box-shadow: 0 6px 12px rgba(220, 38, 38, 0.35);
 }
 
 .chakra-button {
@@ -367,4 +359,37 @@ a {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.lp-hidden-md-block,
+.lp-hidden-md-flex,
+.lp-hidden-md-grid {
+  display: none !important;
+}
+
+.lp-block-md-hidden {
+  display: block !important;
+}
+
+.lp-flex-md-hidden {
+  display: flex !important;
+}
+
+@media (min-width: 768px) {
+  .lp-hidden-md-block {
+    display: block !important;
+  }
+
+  .lp-hidden-md-flex {
+    display: flex !important;
+  }
+
+  .lp-hidden-md-grid {
+    display: grid !important;
+  }
+
+  .lp-block-md-hidden,
+  .lp-flex-md-hidden {
+    display: none !important;
+  }
 }
