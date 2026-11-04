@@ -1,4 +1,15 @@
 {
   "_help": "Image banners for the homepage. Drop the image in public/assets/banners/, add an entry here. start/end are optional YYYY-MM-DD (inclusive). Order = display order.",
-  "banners": []
+  "banners": [
+    {
+      "id": "diwali-wellness-2026",
+      "image": "/assets/banners/diwali-wellness-2026.jpg",
+      "width": 1536,
+      "height": 1024,
+      "alt": "Diwali Special Wellness Checkup, Rs 1,999 for 62+ tests, valid on booking till 15 Nov 2026",
+      "href": "https://wa.me/919849110001?text=Hi%20SDRC%2C%20I%27d%20like%20to%20book%20the%20Diwali%20Special%20Wellness%20Checkup%20%28Rs%201%2C999%29.",
+      "start": "2026-11-01",
+      "end": "2026-11-15"
+    }
+  ]
 }

@@ -39,7 +39,7 @@ export default function HomeBanners() {
               />
             );
             return (
-              <div key={b.id} className={cn(single ? "w-full" : "w-[88%] shrink-0 snap-start md:w-[48%]")}>
+              <div key={b.id} className={cn(single ? "mx-auto w-full max-w-[860px]" : "w-[88%] shrink-0 snap-start md:w-[48%]")}>
                 {b.href ? (
                   <Link
                     href={b.href}
