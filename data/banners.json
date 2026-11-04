@@ -1,0 +1,4 @@
+{
+  "_help": "Image banners for the homepage. Drop the image in public/assets/banners/, add an entry here. start/end are optional YYYY-MM-DD (inclusive). Order = display order.",
+  "banners": []
+}
