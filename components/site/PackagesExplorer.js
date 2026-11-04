@@ -992,7 +992,7 @@ export default function PackagesExplorer() {
           <Card
             id="package-detail-capture"
             interactive={false}
-            className="flex max-h-[88vh] w-full max-w-[520px] flex-col overflow-hidden p-0"
+            className="flex max-h-[88vh] w-full max-w-[520px] flex-col overflow-hidden p-0 [&_p]:m-0"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-3.5 py-2">
