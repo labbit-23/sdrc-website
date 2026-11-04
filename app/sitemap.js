@@ -10,7 +10,8 @@ const routes = [
   { path: "/accreditation", priority: 0.7, changeFrequency: "monthly" },
   { path: "/physiotherapy", priority: 0.7, changeFrequency: "weekly" },
   { path: "/privacy-policy", priority: 0.4, changeFrequency: "yearly" },
-  { path: "/tnc", priority: 0.4, changeFrequency: "yearly" }
+  { path: "/tnc", priority: 0.4, changeFrequency: "yearly" },
+  { path: "/refund-policy", priority: 0.4, changeFrequency: "yearly" }
 ];
 
 export default function sitemap() {

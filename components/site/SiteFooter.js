@@ -93,7 +93,9 @@ export default function SiteFooter() {
               <span>•</span>
               <FooterLink href="/privacy-policy">Privacy Policy</FooterLink>
               <span>•</span>
-              <FooterLink href="/tnc">Reporting T&amp;C</FooterLink>
+              <FooterLink href="/tnc">Terms &amp; Conditions</FooterLink>
+              <span>•</span>
+              <FooterLink href="/refund-policy">Refunds &amp; Cancellations</FooterLink>
             </div>
           </div>
 
