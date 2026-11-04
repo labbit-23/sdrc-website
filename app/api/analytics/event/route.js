@@ -16,6 +16,8 @@ function readClientIp(req) {
   return String(fwd.split(",")[0] || "").trim();
 }
 
+const BOT_RE = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|facebookexternalhit|whatsapp|curl|wget|python-requests/i;
+
 export async function POST(req) {
   try {
     if (!supabase) {
@@ -42,7 +44,11 @@ export async function POST(req) {
       utm_source: String(body?.utm_source || "").slice(0, 100) || null,
       gclid: String(body?.gclid || "").slice(0, 500) || null,
       fbclid: String(body?.fbclid || "").slice(0, 500) || null,
-      payload: body?.payload && typeof body.payload === "object" ? body.payload : {}
+      payload: {
+        ...(body?.payload && typeof body.payload === "object" ? body.payload : {}),
+        // Flagged server-side (the client can't be trusted to say it is a bot) so dashboards can leave crawlers out.
+        is_bot: BOT_RE.test(String(req.headers.get("user-agent") || ""))
+      }
     };
 
     const { error } = await supabase.from("website_events").insert(row);
