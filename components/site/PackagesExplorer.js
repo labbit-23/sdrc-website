@@ -412,21 +412,33 @@ export default function PackagesExplorer() {
         .sort((a, b) => a.category.localeCompare(b.category));
     })();
 
-    const width = 1080;
-    const margin = 56;
-    const colGap = 34;
-    const colCount = 2;
+    const width = 760;
+    const margin = 48;
+    const colGap = 0;
+    const colCount = 1;
     const colWidth = (width - (margin * 2) - colGap) / colCount;
-    const rowHeight = 24;
     const groupHeaderHeight = 28;
     const desc = description || variant.description || "";
 
     const probe = document.createElement("canvas").getContext("2d");
     probe.font = "24px Arial";
     const descLines = wrapCanvasText(probe, desc, width - margin * 2).slice(0, 3);
+    probe.font = "19px Arial";
+    const lineHeight = 23;
+    const rowGap = 5;
+    const layoutGroups = grouped.map((group) => {
+      const wrapped = group.tests.map((test) => wrapCanvasText(probe, `• ${test}`, colWidth));
+      const rows = [];
+      for (let i = 0; i < wrapped.length; i += colCount) {
+        const cells = wrapped.slice(i, i + colCount);
+        const lines = Math.max(...cells.map((c) => c.length));
+        rows.push({ cells, height: lines * lineHeight + rowGap });
+      }
+      return { category: group.category, rows, height: rows.reduce((sum, r) => sum + r.height, 0) };
+    });
     let contentHeight = 172 + descLines.length * 24;
-    grouped.forEach((group) => {
-      contentHeight += groupHeaderHeight + Math.ceil(group.tests.length / colCount) * rowHeight + 12;
+    layoutGroups.forEach((group) => {
+      contentHeight += groupHeaderHeight + group.height + 12;
     });
     contentHeight += 70;
 
@@ -475,21 +487,21 @@ export default function PackagesExplorer() {
     });
     y += 20;
 
-    grouped.forEach((group) => {
+    layoutGroups.forEach((group) => {
       ctx.fillStyle = "#00695f";
       ctx.font = "800 19px Arial";
       ctx.fillText(group.category, margin, y);
       y += groupHeaderHeight;
       ctx.fillStyle = "#1e293b";
       ctx.font = "19px Arial";
-      group.tests.forEach((test, index) => {
-        const col = index % colCount;
-        const row = Math.floor(index / colCount);
-        const x = margin + col * (colWidth + colGap);
-        const lineY = y + row * rowHeight;
-        ctx.fillText(`• ${test}`, x, lineY);
+      group.rows.forEach((row) => {
+        row.cells.forEach((lines, col) => {
+          const x = margin + col * (colWidth + colGap);
+          lines.forEach((line, li) => ctx.fillText(line, x, y + li * lineHeight));
+        });
+        y += row.height;
       });
-      y += Math.ceil(group.tests.length / colCount) * rowHeight + 14;
+      y += 14;
     });
 
     ctx.strokeStyle = "#e2e8f0";
@@ -980,7 +992,7 @@ export default function PackagesExplorer() {
           <Card
             id="package-detail-capture"
             interactive={false}
-            className="flex max-h-[88vh] w-full max-w-[680px] flex-col overflow-hidden p-0"
+            className="flex max-h-[88vh] w-full max-w-[520px] flex-col overflow-hidden p-0"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-3.5 py-2">
@@ -1034,10 +1046,10 @@ export default function PackagesExplorer() {
             </div>
 
             <div className="min-h-0 overflow-y-auto">
-              <div className="flex flex-col gap-1 px-3.5 py-1.5" data-export-content="package-tests">
+              <div className="flex flex-col gap-1.5 px-3.5 py-1" data-export-content="package-tests">
                 {activeGrouped.map((group) => (
                   <section key={group.category}>
-                    <div className="mb-0.5 flex items-center gap-1.5">
+                    <div className="mb-px flex items-center gap-1.5">
                       {packagesData.categoryIconMap?.[group.category] ? (
                         <img src={packagesData.categoryIconMap[group.category]} alt="" width={16} height={16} />
                       ) : null}
@@ -1045,7 +1057,7 @@ export default function PackagesExplorer() {
                     </div>
                     <div className="flex flex-col">
                       {group.tests.map((test) => (
-                        <p key={test} className="text-[12px] leading-[1.3] text-slate-800">• {test}</p>
+                        <p key={test} className="text-[12px] leading-[1.15] text-slate-800">• {test}</p>
                       ))}
                     </div>
                   </section>
