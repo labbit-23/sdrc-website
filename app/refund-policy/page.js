@@ -13,6 +13,7 @@ const sections = [
     title: "Cancelling a booking",
     points: [
       "You can cancel or reschedule a test, health package or home-collection visit free of charge any time before the sample is collected (or before you are billed at a centre).",
+      "Imaging and scans (X-ray, ultrasound, CT, mammography, DEXA, echo and similar) and doctor-based services: free cancellation applies only until an appointment or slot is fixed with a doctor or technician, or the procedure has begun.",
       "To cancel, call us on " + siteConfig.phoneDisplay + " or message us on WhatsApp with your name, mobile number and booking details.",
     ],
   },
@@ -29,6 +30,7 @@ const sections = [
     title: "When a refund is not given",
     points: [
       "After the sample has been collected and processing has started, because the test has been performed and the sample cannot be reused.",
+      "Imaging, scans and doctor-based services once a doctor appointment or slot has been fixed, or the procedure or any preparation for it has begun.",
       "For a test result that is simply different from what you expected. If you have a concern about a result, contact us and we will review it with the pathologist.",
       "For an offer or festival package that has been fully availed.",
     ],
