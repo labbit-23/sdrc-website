@@ -183,7 +183,7 @@ export default function SiteHeader() {
               <NewBadge />
             </div>
             <div className="hidden md:block">
-              <Button as={Link} href="/tests" size="sm" variant="outline" className="px-3">
+              <Button as={Link} href="/tests" size="sm" variant="bookTest" className="px-3">
                 Book A Test
               </Button>
             </div>
@@ -235,7 +235,7 @@ export default function SiteHeader() {
                     </span>
                   ) : null}
                 </div>
-                <Button as={Link} href="/tests" size="sm" variant="outline">
+                <Button as={Link} href="/tests" size="sm" variant="bookTest">
                   Book A Test
                 </Button>
                 <Button

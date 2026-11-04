@@ -165,3 +165,29 @@ noting what changed and why.
 - Visual checks captured with headless Chrome:
   - `/tmp/sdrc-dexa-mobile-3.png`
   - `/tmp/sdrc-services-mobile-2.png`
+
+## 2026-11-04 — Parity pass against live sdrc.in
+
+- Root cause of most spacing drift: `globals.css` imported only Tailwind
+  `theme` + `utilities`, so no CSS reset existed after Chakra was removed
+  (browser default 12px `<p>` margins leaked everywhere). Added
+  `tailwindcss/preflight.css` in `layer(base)` so unlayered site CSS still wins.
+- `layoutPrimitives.js` (Chakra compat shim) only honoured the `base` value of
+  responsive props. It now resolves `{ base, sm, md, lg, xl }` for fontSize,
+  margins, padding, gap, w/h/maxW and `Grid templateColumns` via CSS custom
+  properties applied in `globals.css` at Chakra's breakpoints. `SimpleGrid`
+  honours exact column counts. Heading sizes/weight calibrated to live
+  (`lg` 18px, `xl` 20px, weight 600, line-height 1.2).
+- Restored content dropped in the rebuild: `/about` (Clinical & management team,
+  Our journey since 1983) and `/contact` (centres intro + timings note,
+  WhatsApp and Reports Guide).
+- Styling ported from main: Book a Test gradient-border button (`bookTest`
+  variant), DEXA promo gradient background/headline, 20px semibold section
+  headings, 1136px content width.
+- Package modal: single column, 520px max width, compact line spacing.
+- `/book` and `/quick-book` remain redirects to `/home-visit`. `/tests`,
+  `/cart` and `/home-visit` use the same APIs and analytics events as main.
+- Known intentional difference: DEXA scan images keep the designed 440px
+  `contain` box; live renders them at natural ~750px height.
+- Page heights vs live (1437px viewport) are within ~100px on all routes except
+  `/dexa-body-composition` (the image difference above).

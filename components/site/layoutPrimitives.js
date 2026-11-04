@@ -51,10 +51,12 @@ const fontSizes = {
 };
 
 const headingSizes = {
-  lg: "1.5rem",
-  xl: "1.875rem",
-  "2xl": "2.25rem",
-  "3xl": "3rem",
+  md: "1rem",
+  lg: "1.125rem",
+  xl: "1.25rem",
+  "2xl": "1.5rem",
+  "3xl": "1.875rem",
+  "4xl": "2.25rem",
   "5xl": "3rem",
 };
 
@@ -87,6 +89,48 @@ function displayClass(display) {
 
 function joinClassName(...values) {
   return values.filter(Boolean).join(" ") || undefined;
+}
+
+const BREAKPOINTS = ["base", "sm", "md", "lg", "xl"];
+
+// Chakra-style responsive props: { base, sm, md, lg, xl }. Resolved with carry-forward,
+// emitted as CSS custom properties; globals.css applies them at Chakra's breakpoints.
+const RESPONSIVE_PROPS = {
+  fontSize: { name: "fs", css: ["fontSize"], map: (v) => fontSizes[v] || v },
+  mt: { name: "mt", css: ["marginTop"], map: space },
+  mb: { name: "mb", css: ["marginBottom"], map: space },
+  ml: { name: "ml", css: ["marginLeft"], map: space },
+  mr: { name: "mr", css: ["marginRight"], map: space },
+  py: { name: "py", css: ["paddingTop", "paddingBottom"], map: space },
+  px: { name: "px", css: ["paddingLeft", "paddingRight"], map: space },
+  pt: { name: "pt", css: ["paddingTop"], map: space },
+  pb: { name: "pb", css: ["paddingBottom"], map: space },
+  p: { name: "p", css: ["padding"], map: space },
+  gap: { name: "gap", css: ["gap"], map: space },
+  spacing: { name: "gap", css: ["gap"], map: space },
+  maxW: { name: "maxw", css: ["maxWidth"], map: space },
+  w: { name: "w", css: ["width"], map: space },
+  h: { name: "h", css: ["height"], map: space },
+};
+
+function resolveResponsive(value, map) {
+  let last;
+  return BREAKPOINTS.map((bp) => {
+    if (value[bp] != null) last = value[bp];
+    return last == null ? undefined : map(last);
+  });
+}
+
+function applyResponsive(style, props, extra = {}) {
+  const all = { ...RESPONSIVE_PROPS, ...extra };
+  Object.entries(all).forEach(([key, def]) => {
+    const value = props[key];
+    if (!value || typeof value !== "object" || Array.isArray(value)) return;
+    def.css.forEach((cssKey) => delete style[cssKey]);
+    resolveResponsive(value, def.map).forEach((resolved, i) => {
+      if (resolved != null) style[`--lp-${def.name}-${i}`] = resolved;
+    });
+  });
 }
 
 function commonStyle(props) {
@@ -157,6 +201,7 @@ function commonStyle(props) {
   Object.entries(direct).forEach(([key, value]) => {
     if (value != null) style[key] = value;
   });
+  applyResponsive(style, props);
   return style;
 }
 
@@ -238,9 +283,15 @@ export function Text({ as: Comp = "p", children, ...props }) {
 
 export function Heading({ as: Comp = "h2", size, children, ...props }) {
   const style = commonStyle(props);
-  style.fontSize ||= headingSizes[pick(size)] || "2rem";
-  style.fontWeight ||= 800;
-  style.lineHeight ||= 1.15;
+  if (!props.fontSize) {
+    if (size && typeof size === "object") {
+      applyResponsive(style, { fontSize: size }, { fontSize: { name: "fs", css: ["fontSize"], map: (v) => headingSizes[v] || "2rem" } });
+    } else {
+      style.fontSize ||= headingSizes[size] || "2rem";
+    }
+  }
+  style.fontWeight ||= 600;
+  style.lineHeight ||= 1.2;
   return <Comp className={props.className} style={style} {...clean(props)}>{children}</Comp>;
 }
 
@@ -257,13 +308,10 @@ export function Container({ children, ...props }) {
 
 export function Grid({ children, templateColumns, columns, ...props }) {
   const style = commonStyle(props);
-  const pickedTemplate = pick(templateColumns);
-  if (pickedTemplate) {
-    style.gridTemplateColumns = typeof templateColumns === "object" && templateColumns.lg
-      ? "repeat(auto-fit, minmax(min(100%, 420px), 1fr))"
-      : pickedTemplate.includes("1fr 1fr")
-      ? "repeat(auto-fit, minmax(min(100%, 420px), 1fr))"
-      : pickedTemplate;
+  if (templateColumns && typeof templateColumns === "object") {
+    applyResponsive(style, { templateColumns }, { templateColumns: { name: "tc", css: ["gridTemplateColumns"], map: (v) => v } });
+  } else if (templateColumns) {
+    style.gridTemplateColumns = templateColumns;
   } else if (columns) {
     style.gridTemplateColumns = `repeat(${pick(columns)}, minmax(0, 1fr))`;
   }
@@ -271,14 +319,19 @@ export function Grid({ children, templateColumns, columns, ...props }) {
   return <div className={props.className} style={style} {...clean(props)}>{children}</div>;
 }
 
+const GRID_COLS = {
+  base: { 1: "grid-cols-1", 2: "grid-cols-2", 3: "grid-cols-3", 4: "grid-cols-4" },
+  sm: { 1: "sm:grid-cols-1", 2: "sm:grid-cols-2", 3: "sm:grid-cols-3", 4: "sm:grid-cols-4" },
+  md: { 1: "md:grid-cols-1", 2: "md:grid-cols-2", 3: "md:grid-cols-3", 4: "md:grid-cols-4" },
+  lg: { 1: "lg:grid-cols-1", 2: "lg:grid-cols-2", 3: "lg:grid-cols-3", 4: "lg:grid-cols-4" },
+};
+
 export function SimpleGrid({ children, columns = 1, ...props }) {
   const style = commonStyle(props);
-  const count = pick(columns);
-  style.display = "grid";
-  style.gridTemplateColumns = count > 1
-    ? `repeat(auto-fit, minmax(min(100%, ${Math.max(160, 900 / count)}px), 1fr))`
-    : "1fr";
-  return <div className={joinClassName(props.className, displayClass(props.display))} style={style} {...clean(props)}>{children}</div>;
+  const responsive = typeof columns === "object" && columns !== null ? columns : { base: columns };
+  const colClasses = Object.entries(responsive).map(([bp, n]) => GRID_COLS[bp]?.[n]);
+  if (typeof props.display !== "object") style.display = "grid";
+  return <div className={joinClassName(props.className, displayClass(props.display), ...colClasses)} style={style} {...clean(props)}>{children}</div>;
 }
 
 export function HStack({ children, ...props }) {

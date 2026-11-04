@@ -329,7 +329,7 @@ export default function ServicesPage() {
                     aria-label={"Show " + img.caption}
                   >
                     <Box position="relative" w="full" h="full" bg="gray.50">
-                      <Image src={img.src} alt={img.alt} fill style={{ objectFit: "contain" }} sizes="120px" />
+                      <Image src={img.src} alt={img.alt} fill style={{ objectFit: "cover" }} sizes="120px" />
                     </Box>
                   </Box>
                 ))}

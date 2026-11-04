@@ -95,7 +95,7 @@ export default function ContactPage() {
         <TwContainer>
           <FadeIn>
             <section>
-              <h2 className="mb-4 text-2xl font-bold text-slate-800">Main centre - Jade Arcade, Paradise</h2>
+              <h2 className="mb-4 text-xl font-semibold text-slate-800">Main centre - Jade Arcade, Paradise</h2>
               <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
                 <Card accent="teal" className="p-6">
                   <h3 className="font-bold leading-snug text-slate-800">Address</h3>
@@ -138,7 +138,8 @@ export default function ContactPage() {
 
           <FadeIn delay={60}>
             <section className="mt-12">
-              <h2 className="mb-6 text-2xl font-bold text-slate-800">Collection centres</h2>
+              <h2 className="mb-4 text-xl font-semibold text-slate-800">Our centres</h2>
+              <p className="mb-4 text-sm text-slate-700">You can give samples or enquire about home collection at these SDRC centres.</p>
               <div className="grid gap-6 md:grid-cols-3">
                 {centres.map((centre) => (
                   <Card key={centre.name} className="p-6">
@@ -151,6 +152,25 @@ export default function ContactPage() {
                     </Link>
                   </Card>
                 ))}
+              </div>
+              <p className="mt-4 text-xs text-slate-500">Centre timings and available tests may vary by location. Please call or WhatsApp before visiting.</p>
+            </section>
+          </FadeIn>
+
+          <FadeIn delay={60}>
+            <section className="mt-12">
+              <h2 className="mb-4 text-xl font-semibold text-slate-800">WhatsApp and Reports Guide</h2>
+              <div className="grid gap-6 md:grid-cols-2">
+                <Card accent="teal" className="p-6">
+                  <p className="mb-2 font-bold">Test booking help (human support)</p>
+                  <p className="text-sm text-slate-700">For package or test selection help, chat with our team on WhatsApp.</p>
+                  <Button as={Link} href={"https://wa.me/" + siteConfig.whatsappNumber} target="_blank" className="mt-3" leftIcon={<FaWhatsapp />}>Chat on WhatsApp</Button>
+                </Card>
+                <Card className="p-6">
+                  <p className="mb-2 font-bold">Download reports (bot-assisted)</p>
+                  <p className="text-sm text-slate-700">Use your registered mobile number to retrieve reports through our report flow.</p>
+                  <Button as={Link} href={siteConfig.reportsUrl} target="_blank" variant="outline" className="mt-3" leftIcon={<FaWhatsapp />} title="Get our bot to send your reports. Chat using your registered mobile number.">Download Reports</Button>
+                </Card>
               </div>
             </section>
           </FadeIn>

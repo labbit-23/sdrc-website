@@ -6,6 +6,7 @@ const variants = {
   outline: "border-[var(--sdrc-teal)] bg-transparent text-[var(--sdrc-teal-deep)] hover:bg-[var(--sdrc-teal-soft)]",
   light: "border-white bg-white text-[var(--sdrc-teal-deep)] hover:bg-slate-100",
   outlineLight: "border-white bg-transparent text-white hover:bg-white hover:text-[var(--sdrc-teal-deep)]",
+  bookTest: "border-transparent text-[#006f65] hover:text-[#00564d] [background:linear-gradient(#fff,#fff)_padding-box,linear-gradient(135deg,#008f82_0%,#f97316_100%)_border-box] hover:[background:linear-gradient(#fff7f2,#fff7f2)_padding-box,linear-gradient(135deg,#007a6f_0%,#ea580c_100%)_border-box]",
   ghost: "border-transparent bg-transparent text-[var(--sdrc-teal-deep)] hover:bg-[var(--sdrc-teal-soft)]",
 };
 

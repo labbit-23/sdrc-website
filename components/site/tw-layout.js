@@ -4,7 +4,7 @@ export function TwContainer({ className, children, size = "default", ...props })
   return (
     <div
       className={cn(
-        "mx-auto w-full px-4",
+        "mx-auto w-full px-4 md:px-8",
         size === "narrow" ? "max-w-[1100px]" : "max-w-[1200px]",
         className
       )}
