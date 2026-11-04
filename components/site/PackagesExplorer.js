@@ -1046,7 +1046,7 @@ export default function PackagesExplorer() {
             </div>
 
             <div className="min-h-0 overflow-y-auto">
-              <div className="flex flex-col gap-1.5 px-3.5 py-1" data-export-content="package-tests">
+              <div className="flex flex-col gap-2.5 px-3.5 py-2" data-export-content="package-tests">
                 {activeGrouped.map((group) => (
                   <section key={group.category}>
                     <div className="mb-px flex items-center gap-1.5">
@@ -1055,9 +1055,9 @@ export default function PackagesExplorer() {
                       ) : null}
                       <p className="text-xs font-extrabold text-[var(--sdrc-teal-deep)]">{group.category}</p>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col gap-[3px]">
                       {group.tests.map((test) => (
-                        <p key={test} className="text-[12px] leading-[1.15] text-slate-800">• {test}</p>
+                        <p key={test} className="text-[12px] leading-[1.3] text-slate-800">• {test}</p>
                       ))}
                     </div>
                   </section>
