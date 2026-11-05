@@ -12,7 +12,8 @@ const sections = [
   {
     title: "Cancelling a booking",
     points: [
-      "You can cancel or reschedule a test, health package or home-collection visit free of charge any time before the sample is collected (or before you are billed at a centre).",
+      "Tests and health packages at our centre: you can cancel or reschedule free of charge any time before you are billed.",
+      "Home sample collection: you can cancel free of charge until a collector is assigned to your visit. Once a collector is assigned, the visit is no longer free to cancel. Please call us and we will see what can be done.",
       "Imaging and scans (X-ray, ultrasound, CT, mammography, DEXA, echo and similar) and doctor-based services: free cancellation applies only until an appointment or slot is fixed with a doctor or technician, or the procedure has begun.",
       "To cancel, call us on " + siteConfig.phoneDisplay + " or message us on WhatsApp with your name, mobile number and booking details.",
     ],
@@ -20,7 +21,7 @@ const sections = [
   {
     title: "When a refund is given",
     points: [
-      "Booking cancelled before sample collection: full refund of the amount paid.",
+      "Booking cancelled within the free-cancellation window above (before billing at a centre, or before a collector is assigned for home collection): full refund of the amount paid.",
       "SDRC cancels or cannot complete the visit or test (for example a technician is unavailable, or the test cannot be performed): full refund of the affected amount, or free rescheduling if you prefer.",
       "Sample is rejected (for example insufficient, haemolysed or leaked sample) and a fresh sample cannot be collected: refund for the affected test(s).",
       "Payment debited but the booking was not confirmed, or the same booking was paid twice: the extra or unconfirmed amount is refunded in full.",
@@ -47,6 +48,7 @@ const sections = [
     title: "Pricing and payment",
     points: [
       "All prices are in Indian Rupees (INR) and include applicable taxes unless stated otherwise.",
+      "Home sample collection charges are always additional to the test or package price: Rs 200 minimum, up to Rs 400 depending on the distance. The exact charge is shown before you pay.",
       "Online payments are processed by Cashfree Payments. SDRC does not store your card or bank details.",
     ],
   },
