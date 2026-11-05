@@ -1,4 +1,5 @@
 import "./globals.css";
+import { siteConfig } from "@/data/siteConfig";
 import Providers from "./providers";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
@@ -51,7 +52,7 @@ export default function RootLayout({ children }) {
     description: "NABL accredited multi-specialty diagnostic centre in Secunderabad, Hyderabad offering CT, X-ray, mammography, DEXA, ultrasound, ECG, pathology and master health check packages since 1983.",
     url: "https://sdrc.in",
     image: "https://sdrc.in/assets/og-sdrc.png",
-    telephone: "+91-80-6545-3111",
+    telephone: siteConfig.phoneSchema,
     email: "info@sdrc.in",
     priceRange: "₹₹",
     currenciesAccepted: "INR",

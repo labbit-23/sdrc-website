@@ -9,6 +9,7 @@ export const siteConfig = {
   brand: "SDRC Diagnostics",
   phoneDisplay: "+91 80 6545 3111",
   phoneTel: "+918065453111",
+  phoneSchema: "+91-80-6545-3111", // same number, in the format used for search-engine business data
   // Previous number, kept as a fallback line
   phoneAltDisplay: "040 6600 4200",
   phoneAltTel: "+914066004200",

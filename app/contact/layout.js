@@ -1,10 +1,11 @@
+import { siteConfig } from "@/data/siteConfig";
 const branchSchemas = [
   {
     "@context": "https://schema.org",
     "@type": "MedicalBusiness",
     name: "SDRC Diagnostics — SD Road Collection Centre",
     medicalSpecialty: "DiagnosticLab",
-    telephone: "+91-80-6545-3111",
+    telephone: siteConfig.phoneSchema,
     address: {
       "@type": "PostalAddress",
       streetAddress: "1-1-58/7/3, Srinath Complex, SD Road, Opp. Taj Mahal Hotel",
@@ -20,7 +21,7 @@ const branchSchemas = [
     "@type": "MedicalBusiness",
     name: "SDRC Diagnostics — West Marredpally Collection Centre",
     medicalSpecialty: "DiagnosticLab",
-    telephone: "+91-80-6545-3111",
+    telephone: siteConfig.phoneSchema,
     address: {
       "@type": "PostalAddress",
       streetAddress: "Plot No. 35 & 36, Santhoshima Colony, West Marredpally, Next to Happy Women's Clinic",
@@ -36,7 +37,7 @@ const branchSchemas = [
     "@type": "MedicalBusiness",
     name: "SDRC Diagnostics — Yapral Collection Centre",
     medicalSpecialty: "DiagnosticLab",
-    telephone: "+91-80-6545-3111",
+    telephone: siteConfig.phoneSchema,
     address: {
       "@type": "PostalAddress",
       streetAddress: "Ambey Nilayam, Ground Floor, Bhanu Enclave, Yapral",
