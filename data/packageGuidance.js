@@ -53,6 +53,17 @@ export const packageGuidance = {
   },
 };
 
+// Featured centre-visit package (DEXA scan needs the machine, so no home collection). Keyed "<package name>|centre".
+packageGuidance["Fitness Profile|centre"] = {
+  tagline: "Fitness blood panel + DEXA body scan",
+  age: "18 – 60 yrs",
+  audience: ["young", "adult", "senior"],
+  forWho: "The Fitness Profile plus a whole-body DEXA scan: body fat, lean muscle, bone density and where your fat sits. Done at our Paradise centre in one visit.",
+  history: ["Training for fat loss or muscle gain", "Weight steady but clothes size changing", "Bone health worry or family history of osteoporosis"],
+  detailsHref: "/dexa-body-composition",
+  detailsLabel: "See the DEXA report",
+};
+
 export const audienceFilters = [
   { id: "all", label: "All packages" },
   { id: "young", label: "Under 30" },

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { BsCartCheck, BsCartPlus } from "react-icons/bs";
-import { FiHome, FiUser } from "react-icons/fi";
+import { FiHome, FiMapPin, FiUser } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip, TwContainer } from "@/components/site/tw-layout";
@@ -34,8 +34,8 @@ function groupByCategory(tests, data) {
   }));
 }
 
-function PackageCard({ pkg, guide, data, inCart, onAdd }) {
-  const homeVariants = pkg.variants.filter((v) => v.home_collection);
+function PackageCard({ pkg, guide, data, inCart, onAdd, centre = false }) {
+  const homeVariants = pkg.variants.filter((v) => (centre ? !v.home_collection : v.home_collection));
   const [vIndex, setVIndex] = useState(0);
   const [openCategory, setOpenCategory] = useState(null);
   const variant = homeVariants[Math.min(vIndex, homeVariants.length - 1)];
@@ -52,7 +52,7 @@ function PackageCard({ pkg, guide, data, inCart, onAdd }) {
           <h3 className="mt-1 text-lg font-bold leading-tight text-slate-800">{pkg.name}</h3>
         </div>
         <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--sdrc-teal-soft)] px-2.5 py-1 text-[11px] font-bold text-[var(--sdrc-teal-deep)]">
-          <FiHome /> Home
+          {centre ? <FiMapPin /> : <FiHome />} {centre ? "Centre visit" : "Home"}
         </span>
       </div>
 
@@ -138,19 +138,19 @@ function PackageCard({ pkg, guide, data, inCart, onAdd }) {
       <div className="mt-auto pt-4">
         <div className="flex items-end justify-between gap-2">
           <p className="text-2xl font-black text-[var(--sdrc-teal-deep)]">{inr(variant.price)}</p>
-          <Link href={`/packages#${slugify(pkg.name)}`} className="text-xs font-bold text-[var(--sdrc-teal-deep)] underline">
-            Full details
+          <Link href={guide.detailsHref || `/packages#${slugify(pkg.name)}`} className="text-xs font-bold text-[var(--sdrc-teal-deep)] underline">
+            {guide.detailsLabel || "Full details"}
           </Link>
         </div>
-        <Button
-          size="md"
-          variant={added ? "outline" : "solid"}
-          className="mt-3 w-full"
-          leftIcon={added ? <BsCartCheck /> : <BsCartPlus />}
-          onClick={() => onAdd(pkg, variant)}
-        >
-          {added ? "In cart" : "Add to cart"}
-        </Button>
+        {added ? (
+          <Button as={Link} href="/cart" size="md" variant="outline" className="mt-3 w-full" leftIcon={<BsCartCheck />}>
+            In cart · View cart
+          </Button>
+        ) : (
+          <Button size="md" variant="solid" className="mt-3 w-full" leftIcon={<BsCartPlus />} onClick={() => onAdd(pkg, variant, centre)}>
+            Add to cart
+          </Button>
+        )}
       </div>
     </Card>
   );
@@ -177,13 +177,18 @@ export default function HomePackages() {
   const cards = useMemo(
     () =>
       (data.packages || [])
-        .filter((p) => packageGuidance[p.name] && (p.variants || []).some((v) => v.home_collection))
-        .map((p) => ({ pkg: p, guide: packageGuidance[p.name] })),
+        .flatMap((p) => {
+          const out = [];
+          if (packageGuidance[p.name] && (p.variants || []).some((v) => v.home_collection)) out.push({ pkg: p, guide: packageGuidance[p.name], centre: false });
+          const cg = packageGuidance[`${p.name}|centre`];
+          if (cg && (p.variants || []).some((v) => !v.home_collection)) out.push({ pkg: p, guide: cg, centre: true });
+          return out;
+        }),
     [data]
   );
   const visible = cards.filter((c) => filter === "all" || c.guide.audience.includes(filter));
 
-  function addToCart(pkg, variant) {
+  function addToCart(pkg, variant, centre = false) {
     const id = `pkg_${slugify(pkg.name)}_${slugify(variant.name)}`;
     const items = readCartItems();
     if (items.some((i) => i.id === id)) return;
@@ -198,7 +203,7 @@ export default function HomePackages() {
         department: null,
         package_name: pkg.name,
         price: variant.price,
-        home_collection: true,
+        home_collection: !centre,
         tests_count: Array.isArray(variant.tests) ? variant.tests.length : null,
       },
     ];
@@ -243,8 +248,8 @@ export default function HomePackages() {
         </div>
 
         <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {visible.map(({ pkg, guide }) => (
-            <PackageCard key={pkg.name} pkg={pkg} guide={guide} data={data} inCart={inCart} onAdd={addToCart} />
+          {visible.map(({ pkg, guide, centre }) => (
+            <PackageCard key={`${pkg.name}|${centre ? "c" : "h"}`} pkg={pkg} guide={guide} data={data} inCart={inCart} onAdd={addToCart} centre={centre} />
           ))}
         </div>
         {!visible.length ? <p className="mt-6 text-sm text-slate-500">No home-collection package for this filter yet. See all packages.</p> : null}
