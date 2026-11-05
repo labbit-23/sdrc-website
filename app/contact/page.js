@@ -105,7 +105,7 @@ export default function ContactPage() {
                     Secunderabad - 500003, Telangana, India
                   </p>
                   <p className="mt-4 text-sm leading-7 text-slate-700">
-                    <strong>Phone:</strong> <Link className="font-semibold text-[var(--sdrc-teal-deep)]" href={`tel:${siteConfig.phoneTel}`}>{siteConfig.phoneDisplay}</Link><br />
+                    <strong>Phone:</strong> <Link className="font-semibold text-[var(--sdrc-teal-deep)]" href={`tel:${siteConfig.phoneTel}`}>{siteConfig.phoneDisplay}</Link> or <Link className="font-semibold text-[var(--sdrc-teal-deep)]" href={`tel:${siteConfig.phoneAltTel}`}>{siteConfig.phoneAltDisplay}</Link><br />
                     <strong>Email:</strong> <Link className="font-semibold text-[var(--sdrc-teal-deep)]" href="mailto:info@sdrc.in">info@sdrc.in</Link><br />
                     <strong>WhatsApp:</strong> <Link className="font-semibold text-[var(--sdrc-teal-deep)]" href={`https://wa.me/${siteConfig.whatsappNumber}`}>{whatsappDisplay}</Link>
                   </p>

@@ -4,7 +4,7 @@ const branchSchemas = [
     "@type": "MedicalBusiness",
     name: "SDRC Diagnostics — SD Road Collection Centre",
     medicalSpecialty: "DiagnosticLab",
-    telephone: "+91-40-6600-4200",
+    telephone: "+91-80-6545-3111",
     address: {
       "@type": "PostalAddress",
       streetAddress: "1-1-58/7/3, Srinath Complex, SD Road, Opp. Taj Mahal Hotel",
@@ -20,7 +20,7 @@ const branchSchemas = [
     "@type": "MedicalBusiness",
     name: "SDRC Diagnostics — West Marredpally Collection Centre",
     medicalSpecialty: "DiagnosticLab",
-    telephone: "+91-40-6600-4200",
+    telephone: "+91-80-6545-3111",
     address: {
       "@type": "PostalAddress",
       streetAddress: "Plot No. 35 & 36, Santhoshima Colony, West Marredpally, Next to Happy Women's Clinic",
@@ -36,7 +36,7 @@ const branchSchemas = [
     "@type": "MedicalBusiness",
     name: "SDRC Diagnostics — Yapral Collection Centre",
     medicalSpecialty: "DiagnosticLab",
-    telephone: "+91-40-6600-4200",
+    telephone: "+91-80-6545-3111",
     address: {
       "@type": "PostalAddress",
       streetAddress: "Ambey Nilayam, Ground Floor, Bhanu Enclave, Yapral",
@@ -51,7 +51,7 @@ const branchSchemas = [
 
 export const metadata = {
   title: "Contact & Locations",
-  description: "Contact SDRC Diagnostics at Jade Arcade, Paradise, Secunderabad, Hyderabad, Telangana — 040 6600 4200. Collection centres at SD Road, West Marredpally and Yapral. Book appointments, request home collection or download reports via WhatsApp.",
+  description: "Contact SDRC Diagnostics at Jade Arcade, Paradise, Secunderabad, Hyderabad, Telangana — +91 80 6545 3111 (or 040 6600 4200). Collection centres at SD Road, West Marredpally and Yapral. Book appointments, request home collection or download reports via WhatsApp.",
   alternates: { canonical: "/contact" },
   openGraph: {
     title: "Contact SDRC Diagnostics | Secunderabad",

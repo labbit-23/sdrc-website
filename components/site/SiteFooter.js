@@ -102,6 +102,7 @@ export default function SiteFooter() {
           <div className="flex flex-col items-start gap-2 md:items-end">
             <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300 md:justify-end">
               <FooterLink href={"tel:" + siteConfig.phoneTel}>Call: {siteConfig.phoneDisplay}</FooterLink>
+              <FooterLink href={"tel:" + siteConfig.phoneAltTel}>Alt: {siteConfig.phoneAltDisplay}</FooterLink>
               <span>•</span>
               <FooterLink href={"https://wa.me/" + siteConfig.whatsappNumber} className="inline-flex items-center gap-1">
                 <FaWhatsapp />

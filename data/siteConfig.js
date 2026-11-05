@@ -7,8 +7,11 @@ const env = {
 
 export const siteConfig = {
   brand: "SDRC Diagnostics",
-  phoneDisplay: "040 6600 4200",
-  phoneTel: "+914066004200",
+  phoneDisplay: "+91 80 6545 3111",
+  phoneTel: "+918065453111",
+  // Previous number, kept as a fallback line
+  phoneAltDisplay: "040 6600 4200",
+  phoneAltTel: "+914066004200",
   whatsappNumber: env.whatsappNumber || "919849110001",
   internalNotifyNumber: env.internalNotifyNumber || env.whatsappNumber || "919849110001",
   bookingUrl: "/tests",

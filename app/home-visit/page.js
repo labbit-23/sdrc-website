@@ -86,7 +86,7 @@ const structuredData = [
         postalCode: "500003",
         addressCountry: "IN"
       },
-      telephone: "+91-40-6600-4200"
+      telephone: "+91-80-6545-3111"
     },
     areaServed: [
       { "@type": "City", name: "Secunderabad" },

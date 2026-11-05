@@ -15,7 +15,7 @@ const sections = [
       "Tests and health packages at our centre: you can cancel or reschedule free of charge any time before you are billed.",
       "Home sample collection: you can cancel free of charge until a collector is assigned to your visit. Once a collector is assigned, the visit is no longer free to cancel. Please call us and we will see what can be done.",
       "Imaging and scans (X-ray, ultrasound, CT, mammography, DEXA, echo and similar) and doctor-based services: free cancellation applies only until an appointment or slot is fixed with a doctor or technician, or the procedure has begun.",
-      "To cancel, call us on " + siteConfig.phoneDisplay + " or message us on WhatsApp with your name, mobile number and booking details.",
+      "To cancel, call us on " + siteConfig.phoneDisplay + " (or " + siteConfig.phoneAltDisplay + ") or message us on WhatsApp with your name, mobile number and booking details.",
     ],
   },
   {

@@ -73,6 +73,9 @@ export default function SiteHeader() {
             <Link href={"tel:" + siteConfig.phoneTel} className="font-medium text-white hover:text-white">
               {siteConfig.phoneDisplay}
             </Link>
+            <Link href={"tel:" + siteConfig.phoneAltTel} className="hidden text-white/80 hover:text-white lg:inline">
+              or {siteConfig.phoneAltDisplay}
+            </Link>
             <span className="hidden md:inline">•</span>
             <span className="hidden md:inline">Jade Arcade, Paradise, Secunderabad</span>
             <span className="hidden items-center rounded-full bg-white/20 px-2.5 py-1 text-[11px] font-bold sm:inline-flex">

@@ -168,7 +168,7 @@ const structuredData = [
         name: "Where can I get a DEXA scan in Hyderabad or Secunderabad?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "SDRC Diagnostics at 101, Jade Arcade (Corporate Block), Paradise, MG Road, Secunderabad, Telangana offers DEXA body composition scans using a GE Lunar DPX-NT Densitometer. Contact: 040 6600 4200. You can book online at sdrc.in or via WhatsApp."
+          text: "SDRC Diagnostics at 101, Jade Arcade (Corporate Block), Paradise, MG Road, Secunderabad, Telangana offers DEXA body composition scans using a GE Lunar DPX-NT Densitometer. Contact: +91 80 6545 3111 (or 040 6600 4200). You can book online at sdrc.in or via WhatsApp."
         }
       }
     ]
@@ -833,7 +833,7 @@ export default function DexaBodyCompositionPage() {
               </Button>
             </HStack>
             <Text mt={5} style={{ fontSize: 12, color: "rgba(255,255,255,0.2)" }}>
-              SDRC Diagnostics · 040 6600 4200 · 101 Jade Arcade, Paradise, Secunderabad
+              SDRC Diagnostics · +91 80 6545 3111 · 040 6600 4200 · 101 Jade Arcade, Paradise, Secunderabad
             </Text>
           </FadeIn>
         </Container>
