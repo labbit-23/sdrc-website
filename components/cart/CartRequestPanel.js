@@ -8,6 +8,7 @@ import { BsBuilding } from "react-icons/bs";
 import { siteConfig } from "@/data/siteConfig";
 import VisitDateTimeSelector from "@/components/booking/VisitDateTimeSelector";
 import { trackEvent } from "@/lib/analytics";
+import { buildAppHandoffUrl } from "@/lib/appHandoff";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
@@ -396,7 +397,18 @@ export default function CartRequestPanel({
           ) : null}
           {isSubmitting ? <p className="mt-2 text-xs text-[var(--sdrc-teal-deep)]">Submitting request...</p> : null}
           <Button
+            as={Link}
+            href={buildAppHandoffUrl(cartItems)}
             className="mt-3 w-full"
+            onClick={() => trackEvent("app_checkout_click", { source, item_count: cartItems.length }, { pagePath: source })}
+          >
+            Sign in to pay and continue
+          </Button>
+          <p className="mt-1 text-center text-xs text-slate-500">Opens the SDRC Health app. Sign in with an OTP, pick your slot and pay online.</p>
+          <p className="mt-3 text-center text-xs font-semibold text-slate-500">or send us a request and we will call you</p>
+          <Button
+            variant="outline"
+            className="mt-2 w-full"
             onClick={sendCartRequest}
             disabled={formBusy}
           >
