@@ -13,6 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 
+// Home-visit charge is owned by labit-core; the site only displays what the relay returns.
+// Off until NEXT_PUBLIC_HOME_CHARGE_ENABLED=1 (set once the relay is live).
+const HOME_CHARGE_ENABLED = process.env.NEXT_PUBLIC_HOME_CHARGE_ENABLED === "1";
+const HOME_CHARGE_URL = process.env.NEXT_PUBLIC_HOME_CHARGE_URL || "https://labit.sdrc.in/api/public/home-visit-charge";
+
 function normalizePhone(rawPhone) {
   const digits = String(rawPhone || "").replace(/\D/g, "");
   if (digits.length === 10) return `91${digits}`;
@@ -68,6 +73,9 @@ export default function CartRequestPanel({
   const [patientNotes, setPatientNotes] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [homeVisitRequested, setHomeVisitRequested] = useState(false);
+  const [pincode, setPincode] = useState("");
+  const [homeCharge, setHomeCharge] = useState(null); // { pincode, charge, basis } | null
+  const [chargeState, setChargeState] = useState("idle"); // idle | loading | ok | failed
   const [leadError, setLeadError] = useState("");
   const [toastMessage, setToastMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -136,6 +144,30 @@ export default function CartRequestPanel({
       setShowDateTimeSelection(true);
     }
   }, [hasCenterOnlyPackages, hasCenterOnlyTests, homeVisitRequested]);
+
+  async function lookupCharge() {
+    if (!HOME_CHARGE_ENABLED) return;
+    const pin = pincode.trim();
+    setHomeCharge(null);
+    if (!/^\d{6}$/.test(pin)) {
+      setChargeState("idle");
+      return;
+    }
+    setChargeState("loading");
+    try {
+      const res = await fetch(`${HOME_CHARGE_URL}?pincode=${pin}`, { cache: "no-store" });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data || typeof data.charge !== "number" || data.pincode !== pin) throw new Error("no charge");
+      setHomeCharge({ pincode: pin, charge: data.charge, basis: data.basis });
+      setChargeState("ok");
+    } catch {
+      setChargeState("failed");
+    }
+  }
+
+  const chargeShown = HOME_CHARGE_ENABLED && homeVisitRequested && chargeState === "ok" && homeCharge && homeCharge.pincode === pincode.trim();
+  const estimated = chargeShown && homeCharge.basis !== "exact";
+  const total = chargeShown ? Number(subtotal || 0) + homeCharge.charge : subtotal;
 
   async function sendCartRequest() {
     trackEvent("submit_request_click", { source, item_count: cartItems.length }, { pagePath: source, phone: patientPhone });
@@ -286,13 +318,20 @@ export default function CartRequestPanel({
             </div>
             {homeVisitRequested ? (
               <div className="mb-1 flex justify-between gap-3">
-                <p className="text-sm text-slate-600">Collection Fee</p>
-                <p className="text-sm text-slate-600">TBA</p>
+                <p className="text-sm text-slate-600">Home collection charge{estimated ? " (estimated)" : ""}</p>
+                <p className="text-sm text-slate-600">
+                  {chargeShown ? formatInr(homeCharge.charge) : HOME_CHARGE_ENABLED && chargeState === "loading" ? "Checking..." : "TBA"}
+                </p>
               </div>
+            ) : null}
+            {HOME_CHARGE_ENABLED && homeVisitRequested && chargeState === "failed" ? (
+              <p className="mb-1 text-xs text-slate-500">Home collection charge confirmed at booking.</p>
             ) : null}
             <div className="mt-2 flex justify-between gap-3">
               <p className="font-bold">Estimated Total</p>
-              <p className="font-bold text-[var(--sdrc-teal-deep)]">{homeVisitRequested ? `${formatInr(subtotal)} + TBA` : formatInr(subtotal)}</p>
+              <p className="font-bold text-[var(--sdrc-teal-deep)]">
+                {chargeShown ? formatInr(total) : homeVisitRequested ? `${formatInr(subtotal)} + TBA` : formatInr(subtotal)}
+              </p>
             </div>
             <div className="mt-3 flex items-stretch gap-2">
               <Input
@@ -359,6 +398,19 @@ export default function CartRequestPanel({
             value={patientPhone}
             onChange={(e) => setPatientPhone(e.target.value)}
           />
+          {HOME_CHARGE_ENABLED && homeVisitRequested ? (
+            <Input
+              placeholder="Pincode (6 digits) for home collection charge"
+              name="postal_code"
+              inputMode="numeric"
+              autoComplete="postal-code"
+              maxLength={6}
+              disabled={formBusy}
+              value={pincode}
+              onChange={(e) => { setPincode(e.target.value.replace(/\D/g, "").slice(0, 6)); setHomeCharge(null); setChargeState("idle"); }}
+              onBlur={lookupCharge}
+            />
+          ) : null}
           <Input
             placeholder="Area / locality"
             name="patient_area"
@@ -398,7 +450,7 @@ export default function CartRequestPanel({
           {isSubmitting ? <p className="mt-2 text-xs text-[var(--sdrc-teal-deep)]">Submitting request...</p> : null}
           <Button
             as={Link}
-            href={buildAppHandoffUrl(cartItems)}
+            href={buildAppHandoffUrl(cartItems, { home: homeVisitRequested, pin: chargeShown ? homeCharge.pincode : undefined })}
             className="mt-3 w-full"
             onClick={() => trackEvent("app_checkout_click", { source, item_count: cartItems.length }, { pagePath: source })}
           >
