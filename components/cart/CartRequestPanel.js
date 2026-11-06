@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 // Home-visit charge is owned by labit-core; the site only displays what the relay returns.
 // Off until NEXT_PUBLIC_HOME_CHARGE_ENABLED=1 (set once the relay is live).
 const HOME_CHARGE_ENABLED = process.env.NEXT_PUBLIC_HOME_CHARGE_ENABLED === "1";
-const HOME_CHARGE_URL = process.env.NEXT_PUBLIC_HOME_CHARGE_URL || "https://labit.sdrc.in/api/public/home-visit-charge";
+const HOME_CHARGE_URL = process.env.NEXT_PUBLIC_HOME_CHARGE_URL || "https://lab.sdrc.in/api/public/home-visit-charge";
 
 function normalizePhone(rawPhone) {
   const digits = String(rawPhone || "").replace(/\D/g, "");
